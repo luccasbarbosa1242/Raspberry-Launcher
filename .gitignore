@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual env
+venv/
+.venv/
+env/
+
+# PyInstaller
+build/
+dist/
+*.spec
+
+# VSCode
+.vscode/
+
+# Installed games
+installed/
+
+# Logs
+*.log
+
+#downloads
+downloads/
+*.zip

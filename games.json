@@ -1,0 +1,24 @@
+[
+  {
+    "name": "Daggerfall",
+    "file": "daggerfall.zip",
+    "url": "https://drive.google.com/uc?export=download&id=11c5IZjgEUgC_f2uGbePBhrRl_KtyImnG"
+  },
+
+  {
+        "name": "Daggerfall",
+        "file": "daggerfall-linux.zip",
+        "url": "https://drive.google.com/uc?export=download&id=1I5SuMuJbu38Hu968Z7J7g-32-sJyybGX"
+    }, 
+    {
+        "name":"Snake",
+        "file":"snake-linux.zip",
+        "url":"https://drive.google.com/uc?export=download&id=1u6Uj5ro5HLFOXxsgIwWBnmmEyrnfq8H4"
+    },
+    {
+        "name":"Tetris",
+        "file":"tetris-linux.zip",
+        "url":"https://drive.google.com/uc?export=download&id=1dLxA6W4CcSFErKDlROgjlRvTs-F3URCM"
+    }
+]
+
