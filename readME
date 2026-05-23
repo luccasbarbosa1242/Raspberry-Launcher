@@ -5,6 +5,7 @@ Launcher de jogos feito em Python + CustomTkinter.
 ## Recursos
 
 - Instalação automática
+- Instalação feita por recursos externos
 - Suporte a ZIP
 - Sistema de score
 - Navegador interno
