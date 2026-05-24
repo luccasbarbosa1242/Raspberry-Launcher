@@ -6,12 +6,13 @@ import subprocess
 import threading
 import platform
 import gdown
-from downloader import install_from_url
+import traceback
+import requests
 
 
 import customtkinter as ctk
 
-from PIL import Image
+from PIL import Image, ImageTk
 
 from tkinterweb import HtmlFrame
 
@@ -78,8 +79,17 @@ def installedPath():
 
 def iconsPath():
 
+    if getattr(sys, 'frozen', False):
+
+        return os.path.join(
+            sys._MEIPASS,
+            "icons"
+        )
+
     return os.path.join(
-        basePath(),
+        os.path.dirname(
+            os.path.abspath(__file__)
+        ),
         "icons"
     )
 
@@ -97,11 +107,6 @@ os.makedirs(
     exist_ok=True
 )
 
-os.makedirs(
-    iconsPath(),
-    exist_ok=True
-)
-
 
 # =========================================================
 # SYSTEM
@@ -110,6 +115,18 @@ def currentSystem():
 
     return platform.system()
 
+def download_file(url, output):
+    temp = output + ".part"
+
+    r = requests.get(url, stream=True)
+    r.raise_for_status()
+
+    with open(temp, "wb") as f:
+        for chunk in r.iter_content(chunk_size=8192):
+            if chunk:
+                f.write(chunk)
+
+    os.replace(temp, output)
 
 # =========================================================
 # GAMES DATABASE
@@ -144,7 +161,7 @@ games = [
 
             "Windows": {
                 "zip": "daggerfall.zip",
-                "url": "https://drive.google.com/uc?export=download&id=11c5IZjgEUgC_f2uGbePBhrRl_KtyImnG",
+                "url": "https://github.com/luccasbarbosa1242/game-launcher-files/releases/download/v1.0/daggerfall.zip",
                 "file": "DaggerfallUnity.exe",
                 "type": "exe"
             },
@@ -212,7 +229,10 @@ def getGameVersion(game):
 # =========================================================
 def loadImage(path, size=(70, 70)):
 
-    if not os.path.exists(path):
+    if not os.path.isfile(path):
+
+        print("Imagem não encontrada:")
+        print(path)
 
         return None
 
@@ -420,13 +440,16 @@ def abrirJogo(game):
 
         return
 
-    gamePath = os.path.join(
-        installedPath(),
-        game["folder"],
-        version["file"]
-    )
+    base = os.path.join(installedPath(), game["folder"])
 
-    if not os.path.exists(gamePath):
+    gamePath = None
+
+    for root, dirs, files in os.walk(base):
+        if version["file"] in files:
+            gamePath = os.path.join(root, version["file"])
+            break
+
+    if not gamePath or not os.path.exists(gamePath):
 
         print("Executável não encontrado:")
 
@@ -547,11 +570,19 @@ def instalarJogo(game, button):
             # ============================================
             # DOWNLOAD
             # ============================================
-            gdown.download(
-    url,
-    zipPath,
-    quiet=False
-)
+            system = platform.system()
+
+            if system == "Linux":
+                gdown.download(url, zipPath, quiet=False)
+
+            elif system == "Windows":
+                download_file(url, zipPath)
+
+            else:
+                # fallback seguro
+                download_file(url, zipPath)
+            if not zipfile.is_zipfile(zipPath):
+                raise Exception("Download inválido (Google Drive bloqueou ou retornou HTML).")
 
             app.after(
                 0,
@@ -581,37 +612,41 @@ def instalarJogo(game, button):
 
                 zip_ref.extractall(gameFolder)
 
-            # ============================================
+                    # ============================================
             # REMOVE NESTED FOLDER
             # ============================================
             if game.get("strip_root_folder", False):
 
-                contents = os.listdir(gameFolder)
+                while True:
 
-                if len(contents) == 1:
+                    contents = os.listdir(gameFolder)
+
+                    if len(contents) != 1:
+                        break
 
                     nestedPath = os.path.join(
                         gameFolder,
                         contents[0]
                     )
 
-                    if os.path.isdir(nestedPath):
+                    if not os.path.isdir(nestedPath):
+                        break
 
-                        for item in os.listdir(nestedPath):
+                    for item in os.listdir(nestedPath):
 
-                            src = os.path.join(
-                                nestedPath,
-                                item
-                            )
+                        src = os.path.join(
+                            nestedPath,
+                            item
+                        )
 
-                            dst = os.path.join(
-                                gameFolder,
-                                item
-                            )
+                        dst = os.path.join(
+                            gameFolder,
+                            item
+                        )
 
-                            shutil.move(src, dst)
+                        shutil.move(src, dst)
 
-                        os.rmdir(nestedPath)
+                    os.rmdir(nestedPath)
 
             # ============================================
             # DELETE ZIP
@@ -628,9 +663,9 @@ def instalarJogo(game, button):
             )
 
         except Exception as e:
-
             print("Erro instalação:")
             print(e)
+            traceback.print_exc()
 
             app.after(
                 0,
