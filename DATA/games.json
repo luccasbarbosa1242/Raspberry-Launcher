@@ -1,0 +1,28 @@
+[
+  {
+    "name": "Daggerfall",
+    "file": "daggerfall.zip",
+    "url": "https://github.com/luccasbarbosa1242/game-launcher-files/releases/download/v1.0/daggerfall.zip",
+    "windows_executable": "DaggerfallUnity.exe"
+  },
+
+  {
+        "name": "Daggerfall",
+        "file": "daggerfall-linux.zip",
+        "url": "https://drive.google.com/uc?export=download&id=1I5SuMuJbu38Hu968Z7J7g-32-sJyybGX",
+        "linux_executable": "DaggerfallUnity.x86_64"
+    }, 
+    {
+        "name":"Snake",
+        "file":"snake-linux.zip",
+        "url":"https://drive.google.com/uc?export=download&id=1u6Uj5ro5HLFOXxsgIwWBnmmEyrnfq8H4",
+        "executable":"snake"
+    },
+    {
+        "name":"Tetris",
+        "file":"tetris-linux.zip",
+        "url":"https://drive.google.com/uc?export=download&id=1dLxA6W4CcSFErKDlROgjlRvTs-F3URCM",
+        "executable":"tetris"
+    }
+]
+
