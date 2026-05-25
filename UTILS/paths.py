@@ -2,7 +2,7 @@ import os
 import sys
 
 
-def basePath():
+def rootPath():
 
     if getattr(sys, 'frozen', False):
 
@@ -13,10 +13,26 @@ def basePath():
     )
 
 
+def assetsPath():
+
+    return os.path.join(
+        rootPath(),
+        "assets"
+    )
+
+
+def iconsPath():
+
+    return os.path.join(
+        assetsPath(),
+        "icons"
+    )
+
+
 def downloadsPath():
 
     return os.path.join(
-        basePath(),
+        rootPath(),
         "downloads"
     )
 
@@ -24,33 +40,26 @@ def downloadsPath():
 def installedPath():
 
     return os.path.join(
-        basePath(),
+        rootPath(),
         "installed"
     )
 
 
-def iconsPath():
-
-    if getattr(sys, 'frozen', False):
-
-        return os.path.join(
-            sys._MEIPASS,
-            "icons"
-        )
+def dataPath():
 
     return os.path.join(
-        basePath(),
-        "assets",
-        "icons"
+        rootPath(),
+        "DATA"
     )
+
 
 def scoresPath():
 
     return os.path.join(
-        basePath(),
-        "DATA",
+        dataPath(),
         "scores"
     )
+
 
 os.makedirs(
     downloadsPath(),
