@@ -3,7 +3,7 @@ from UI.components import (
     createSidebar
 )
 
-from UI.views.home import renderHome
+from UI.views.colecoes.home import renderHome
 from UI.views.settings import renderSettings
 
 from UI.views.biblioteca import renderBiblioteca
