@@ -378,7 +378,7 @@ def createSidebar(callback):
         fill="x"
     )
 
-    genderBtn = ctk.CTkButton(
+    genreBtn = ctk.CTkButton(
         filtersFrame,
         text="Gênero",
         anchor="w",
@@ -386,10 +386,10 @@ def createSidebar(callback):
         fg_color="transparent",
         hover_color="#2b3150",
         border_width=0,
-        command=lambda: callback("gender")
+        command=lambda: callback("genre")
     )
 
-    genderBtn.pack(fill="x", padx=10, pady=5)
+    genreBtn.pack(fill="x", padx=10, pady=5)
 
     yearBtn = ctk.CTkButton(
         filtersFrame,
