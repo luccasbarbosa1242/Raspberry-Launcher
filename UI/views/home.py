@@ -14,21 +14,33 @@ def renderHome(parent):
         font=("Arial", 30, "bold")
     )
 
-    title.pack(anchor="w", padx=20, pady=20)
+    title.pack(
+        anchor="w",
+        padx=20,
+        pady=20
+    )
 
-    scroll = ctk.CTkScrollableFrame(parent)
+    scroll = ctk.CTkScrollableFrame(
+        parent,
+        fg_color="transparent"
+    )
 
     scroll.pack(
         fill="both",
         expand=True,
         padx=20,
-        pady=20
+        pady=(0, 20)
     )
 
-    for game in games:
+    for index, game in enumerate(games):
+
+        row = index // 4
+        col = index % 4
 
         criarCardJogo(
             scroll,
             game,
-            jogoInstalado(game)
+            jogoInstalado(game),
+            row,
+            col
         )

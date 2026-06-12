@@ -16,21 +16,32 @@ def renderJogos(parent):
 
     title.pack(anchor="w", padx=20, pady=20)
 
-    scroll = ctk.CTkScrollableFrame(parent)
+    scroll = ctk.CTkScrollableFrame(
+        parent,
+        fg_color="transparent"
+    )
 
     scroll.pack(
         fill="both",
         expand=True,
         padx=20,
-        pady=20
+        pady=(0, 20)
     )
 
-    for game in games:
+    naoInstalados = [
+        game for game in games
+        if not jogoInstalado(game)
+    ]
 
-        if not jogoInstalado(game):
+    for index, game in enumerate(naoInstalados):
 
-            criarCardJogo(
-                scroll,
-                game,
-                False
-            )
+        row = index // 4
+        col = index % 4
+
+        criarCardJogo(
+        scroll,
+        game,
+        True,
+        row,
+        col
+        )

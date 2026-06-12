@@ -16,21 +16,32 @@ def renderBiblioteca(parent):
 
     title.pack(anchor="w", padx=20, pady=20)
 
-    scroll = ctk.CTkScrollableFrame(parent)
+    scroll = ctk.CTkScrollableFrame(
+        parent,
+        fg_color="transparent"
+    )
 
     scroll.pack(
         fill="both",
         expand=True,
         padx=20,
-        pady=20
+        pady=(0, 20)
     )
 
-    for game in games:
+    instalados = [
+        game for game in games
+        if jogoInstalado(game)
+    ]
 
-        if jogoInstalado(game):
+    for index, game in enumerate(instalados):
 
-            criarCardJogo(
-                scroll,
-                game,
-                True
-            )
+        row = index // 4
+        col = index % 4
+
+        criarCardJogo(
+        scroll,
+        game,
+        True,
+        row,
+        col
+        )
