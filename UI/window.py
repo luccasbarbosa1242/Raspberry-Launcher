@@ -8,7 +8,7 @@ ctk.set_default_color_theme("green")
 
 app = ctk.CTk()
 
-app.title("Game Launcher")
+app.title("RaspberryLC")
 
 app.geometry("1100x700")
 
