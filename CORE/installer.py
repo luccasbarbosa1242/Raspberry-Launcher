@@ -17,8 +17,6 @@ from UI.window import app
 
 def instalarJogo(game, button):
 
-    from UI.pages import render
-    from UI.pages import showPage
 
     from CORE.games import getGameVersion
 
@@ -155,7 +153,7 @@ def instalarJogo(game, button):
 
     def afterInstall():
 
-        render()
+        from UI.pages import showPage
 
         showPage("biblioteca")
 
@@ -163,3 +161,14 @@ def instalarJogo(game, button):
         target=process,
         daemon=True
     ).start()
+
+
+
+def jogoInstalado(game):
+
+    gameFolder = os.path.join(
+        installedPath(),
+        game["folder"]
+    )
+
+    return os.path.exists(gameFolder)

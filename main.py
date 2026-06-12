@@ -7,7 +7,7 @@ from CORE.score import atualizarScores
 
 render()
 
-showPage("biblioteca")
+showPage("home")
 
 atualizarScores()
 

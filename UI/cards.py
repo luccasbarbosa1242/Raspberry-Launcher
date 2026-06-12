@@ -244,16 +244,13 @@ def criarCardJogo(parent, game, installed):
 
         def uninstallGame():
 
-            from UI.pages import render
             from UI.pages import showPage
 
             menuFrame.place_forget()
 
             desinstalarJogo(game)
 
-            render()
-
-            showPage("jogos")
+            showPage("home")
 
         menuButton.configure(
             command=toggleMenu

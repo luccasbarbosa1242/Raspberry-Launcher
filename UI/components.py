@@ -1,69 +1,90 @@
 import customtkinter as ctk
-
 from UI.window import app
 
+rootFrame = ctk.CTkFrame(app)
+rootFrame.pack(fill="both", expand=True)
 
-header = ctk.CTkFrame(
-    app,
-    height=70,
+sidebar = ctk.CTkFrame(
+    rootFrame,
+    width=240,
+    fg_color="#141726",
     corner_radius=0
 )
 
-header.pack(fill="x")
+sidebar.pack_propagate(False)
 
+sidebar.pack(
+    side="left",
+    fill="y"
+)
 
-contentFrame = ctk.CTkFrame(
-    app,
+def createSidebar(callback):
+
+    titulo = ctk.CTkLabel(
+        sidebar,
+        text="RASPBERRYLC",
+        font=("Arial", 22, "bold")
+    )
+
+    titulo.pack(pady=(20, 30))
+
+    homeBtn = ctk.CTkButton(
+        sidebar,
+        text="Home",
+        command=lambda: callback("home")
+    )
+
+    homeBtn.pack(fill="x", padx=10, pady=5)
+
+    bibliotecaBtn = ctk.CTkButton(
+        sidebar,
+        text="Biblioteca",
+        command=lambda: callback("biblioteca")
+    )
+
+    bibliotecaBtn.pack(fill="x", padx=10, pady=5)
+
+    jogosBtn = ctk.CTkButton(
+        sidebar,
+        text="Jogos",
+        command=lambda: callback("jogos")
+    )
+
+    jogosBtn.pack(fill="x", padx=10, pady=5)
+
+    configBtn = ctk.CTkButton(
+        sidebar,
+        text="Configurações",
+        command=lambda: callback("settings")
+    )
+
+    configBtn.pack(fill="x", padx=10, pady=5)
+
+mainFrame = ctk.CTkFrame(
+    rootFrame,
+    fg_color="#0d111c"
+)
+
+mainFrame.pack(
+    side="right",
+    fill="both",
+    expand=True
+)
+
+pageContainer = ctk.CTkFrame(
+    mainFrame,
     fg_color="transparent"
 )
 
-contentFrame.pack(
+pageContainer.pack(
     fill="both",
     expand=True
 )
 
 
-bibliotecaFrame = ctk.CTkScrollableFrame(
-    contentFrame,
-    fg_color="transparent"
-)
-
-jogosFrame = ctk.CTkScrollableFrame(
-    contentFrame,
-    fg_color="transparent"
-)
-
-
-def createNavbar(showPage):
-
-    bibliotecaBtn = ctk.CTkButton(
-        header,
-        text="Biblioteca",
-        width=160,
-        height=45,
-        command=lambda: showPage(
-            "biblioteca"
-        )
-    )
-
-    bibliotecaBtn.pack(
-        side="left",
-        padx=10,
-        pady=10
-    )
-
-    jogosBtn = ctk.CTkButton(
-        header,
-        text="Jogos",
-        width=160,
-        height=45,
-        command=lambda: showPage(
-            "jogos"
-        )
-    )
-
-    jogosBtn.pack(
-        side="left",
-        padx=10,
-        pady=10
-    )
+__all__ = [
+    "sidebar",
+    "mainFrame",
+    "pageContainer",
+    "createSidebar"
+]
