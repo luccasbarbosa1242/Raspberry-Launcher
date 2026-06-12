@@ -1,6 +1,11 @@
 import customtkinter as ctk
 from UI.window import app
 
+import os
+
+from UTILS.images import loadImage
+from UTILS.paths import iconsPath
+
 rootFrame = ctk.CTkFrame(app)
 rootFrame.pack(fill="both", expand=True)
 
@@ -19,15 +24,6 @@ sidebar.pack(
 )
 
 def createSidebar(callback):
-
-    titulo = ctk.CTkLabel(
-        sidebar,
-        text="RASPBERRYLC",
-        font=("Arial", 24, "bold"),
-        text_color="#ffffff"
-    )
-
-    titulo.pack(pady=(20, 30))
 
     contentFrame = ctk.CTkScrollableFrame(
         sidebar,
@@ -406,15 +402,73 @@ def createSidebar(callback):
 
     footerFrame = ctk.CTkFrame(
         sidebar,
-        fg_color="#1a1d2b",
-        corner_radius=12
+        fg_color="#1b2033"
     )
 
     footerFrame.pack(
         side="bottom",
+        fill="x"
+    )
+
+    logoInfoFrame = ctk.CTkFrame(
+        footerFrame,
+        fg_color="transparent"
+    )
+
+    logoInfoFrame.pack(
         fill="x",
-        padx=10,
-        pady=15
+        pady=(0, 10)
+    )
+
+    logoImage = loadImage(
+        os.path.join(
+            iconsPath(),
+            "logo.png"
+        ),
+        size=(50, 50)
+    )
+
+    logoLabel = ctk.CTkLabel(
+        logoInfoFrame,
+        text="",
+        image=logoImage
+    )
+
+    logoLabel.pack(
+        side="left",
+        padx=(0, 10)
+    )
+
+    textFrame = ctk.CTkFrame(
+        logoInfoFrame,
+        fg_color="transparent"
+    )
+
+    textFrame.pack(
+        side="left",
+        pady = (10,0)
+    )
+
+    nameLabel = ctk.CTkLabel(
+        textFrame,
+        text="RASPBERRYLC",
+        font=("Arial", 13, "bold")
+    )
+
+    nameLabel.pack(
+        anchor="w"
+    )
+
+    versionLabel = ctk.CTkLabel(
+        textFrame,
+        text="v1.0.0",
+        font=("Arial", 11),
+        text_color="#7b8198"
+    )
+
+    versionLabel.pack(
+        anchor="w",
+        pady = (0,0)
     )
 
     configBtn = ctk.CTkButton(
@@ -427,15 +481,6 @@ def createSidebar(callback):
     )
 
     configBtn.pack(fill="x", padx=10, pady=5)
-
-    versionLabel = ctk.CTkLabel(
-        footerFrame,
-        text="v1.0.0",
-        font=("Arial", 12),
-        text_color="gray"
-    )
-
-    versionLabel.pack(pady=(5, 0))
 
 mainFrame = ctk.CTkFrame(
     rootFrame,
