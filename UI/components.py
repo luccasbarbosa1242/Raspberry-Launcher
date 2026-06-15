@@ -5,6 +5,7 @@ import os
 
 from UTILS.images import loadImage
 from UTILS.paths import iconsPath
+from PIL import Image
 
 rootFrame = ctk.CTkFrame(app)
 rootFrame.pack(fill="both", expand=True)
@@ -234,9 +235,18 @@ def createSidebar(callback):
         fill="x"
     )
 
+    pcIcon = ctk.CTkImage(
+        light_image=Image.open("assets/icons/PC - Dark.png"),
+        dark_image=Image.open("assets/icons/PC - Light.png"),
+        size=(18, 18)
+    )
+
+
     PCBtn = ctk.CTkButton(
         platformsFrame,
         text="PC (DOS)",
+        image=pcIcon,
+        compound="left",
         anchor="w",
         height=32,
         fg_color="transparent",
