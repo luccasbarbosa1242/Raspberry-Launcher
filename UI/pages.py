@@ -1,132 +1,50 @@
-from UI.components import header
-from tkinterweb import HtmlFrame # type: ignore
+import webbrowser
+from UI.components import (
+    pageContainer,
+    createSidebar
+)
 
-import customtkinter as ctk # type: ignore
+from UI.views.colecoes.home import renderHome
+from UI.views.settings import renderSettings
 
-from UI.window import app
-
-from UI.components import bibliotecaFrame
-from UI.components import jogosFrame
-
-from UI.cards import criarCardVelha
-from UI.cards import criarCardJogo
+from UI.views.biblioteca import renderBiblioteca
+from UI.views.jogos import renderJogos
 
 from UTILS.helpers import clearFrame
-
-from CORE.games import games
-from CORE.games import getGameVersion
-
-from CORE.launcher import jogoInstalado
-from UI.components import createNavbar
-
-
-def abrirPaginaInterna(title, url):
-
-    window = ctk.CTkToplevel(app)
-
-    window.title(title)
-
-    window.geometry("1000x700")
-
-    browser = HtmlFrame(window)
-
-    if url.startswith("http://") or url.startswith("https://"):
-
-        browser.load_website(url)
-
-    else:
-
-        browser.load_file(url)
-
-    browser.pack(
-        fill="both",
-        expand=True
-    )
-
-
-def abrirJogoVelha():
-
-    abrirPaginaInterna(
-        "Jogo da Velha",
-        "https://poki.com/br/g/tictactoe"
-    )
+from UI.views.plataformas.ps2 import renderPS2
 
 
 def showPage(page):
 
-    bibliotecaFrame.pack_forget()
+    clearFrame(pageContainer)
 
-    jogosFrame.pack_forget()
+    if page == "home":
 
-    if page == "biblioteca":
+        renderHome(pageContainer)
 
-        bibliotecaFrame.pack(
-            fill="both",
-            expand=True,
-            padx=10,
-            pady=10
-        )
+    elif page == "biblioteca":
+
+        renderBiblioteca(pageContainer)
 
     elif page == "jogos":
 
-        jogosFrame.pack(
-            fill="both",
-            expand=True,
-            padx=10,
-            pady=10
-        )
+        renderJogos(pageContainer)
+
+    elif page == "ps2":
+        renderPS2(pageContainer)
+
+    elif page == "settings":
+
+        renderSettings(pageContainer)
 
 
 def render():
 
-    from CORE.score import scoreLabels
+    createSidebar(showPage)
 
-    scoreLabels.clear()
+    showPage("home")
 
-    clearFrame(header)
 
-    createNavbar(showPage)
+def abrirPaginaInterna(title, url):
 
-    clearFrame(
-        bibliotecaFrame
-    )
-
-    clearFrame(
-        jogosFrame
-    )
-
-    criarCardVelha(
-        bibliotecaFrame
-    )
-
-    for game in games:
-
-        if not getGameVersion(game):
-
-            continue
-
-        if game.get("internal_browser"):
-
-            criarCardJogo(
-                bibliotecaFrame,
-                game,
-                True
-            )
-
-            continue
-
-        if jogoInstalado(game):
-
-            criarCardJogo(
-                bibliotecaFrame,
-                game,
-                True
-            )
-
-        else:
-
-            criarCardJogo(
-                jogosFrame,
-                game,
-                False
-            )
+    webbrowser.open(url)
