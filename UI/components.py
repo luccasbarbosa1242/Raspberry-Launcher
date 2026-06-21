@@ -24,6 +24,7 @@ sidebar.pack(
     fill="y"
 )
 
+
 def createSidebar(callback):
 
     contentFrame = ctk.CTkScrollableFrame(
@@ -63,8 +64,8 @@ def createSidebar(callback):
     colecoesExpanded = True
 
     colecoesContainer = ctk.CTkFrame(
-    contentFrame,
-    fg_color="transparent"
+        contentFrame,
+        fg_color="transparent"
     )
 
     colecoesContainer.pack(
@@ -92,7 +93,7 @@ def createSidebar(callback):
         else:
 
             colecoesFrame.pack(
-                fill="x",        
+                fill="x",
             )
 
             colecoesBtn.configure(
@@ -102,14 +103,14 @@ def createSidebar(callback):
         colecoesExpanded = not colecoesExpanded
 
     colecoesBtn = ctk.CTkButton(
-    colecoesContainer,
-    text="▼ Coleções",
-    fg_color="transparent",
-    hover_color="#1d2233",
-    anchor="w",
-    height=34,
-    font=("Arial", 14, "bold"),
-    command=toggleColecoes
+        colecoesContainer,
+        text="▼ Coleções",
+        fg_color="transparent",
+        hover_color="#1d2233",
+        anchor="w",
+        height=34,
+        font=("Arial", 14, "bold"),
+        command=toggleColecoes
     )
 
     colecoesBtn.pack(
@@ -176,8 +177,8 @@ def createSidebar(callback):
     platformsExpanded = True
 
     platformsContainer = ctk.CTkFrame(
-    contentFrame,
-    fg_color="transparent"
+        contentFrame,
+        fg_color="transparent"
     )
 
     platformsContainer.pack(
@@ -214,16 +215,15 @@ def createSidebar(callback):
 
         platformsExpanded = not platformsExpanded
 
-
     platformsBtn = ctk.CTkButton(
-    platformsContainer,
-    text="▼ Plataformas",
-    fg_color="transparent",
-    hover_color="#1d2233",
-    anchor="w",
-    height=34,
-    font=("Arial", 14, "bold"),
-    command=togglePlatforms
+        platformsContainer,
+        text="▼ Plataformas",
+        fg_color="transparent",
+        hover_color="#1d2233",
+        anchor="w",
+        height=34,
+        font=("Arial", 14, "bold"),
+        command=togglePlatforms
     )
 
     platformsBtn.pack(
@@ -240,7 +240,6 @@ def createSidebar(callback):
         dark_image=Image.open("assets/icons/PC - Light.png"),
         size=(18, 18)
     )
-
 
     PCBtn = ctk.CTkButton(
         platformsFrame,
@@ -295,6 +294,19 @@ def createSidebar(callback):
     )
 
     ps1Btn.pack(fill="x", padx=10, pady=5)
+
+    ps2Btn = ctk.CTkButton(
+        platformsFrame,
+        text="PlayStation 2",
+        anchor="w",
+        height=32,
+        fg_color="transparent",
+        hover_color="#2b3150",
+        border_width=0,
+        command=lambda: callback("ps2")
+    )
+
+    ps2Btn.pack(fill="x", padx=10, pady=5)
 
     gameboyBtn = ctk.CTkButton(
         platformsFrame,
@@ -363,16 +375,15 @@ def createSidebar(callback):
 
         filtersExpanded = not filtersExpanded
 
-
     filtersBtn = ctk.CTkButton(
-    filtersContainer,
-    text="▼ Filtros",
-    fg_color="transparent",
-    hover_color="#1d2233",
-    anchor="w",
-    height=34,
-    font=("Arial", 14, "bold"),
-    command=toggleFilters
+        filtersContainer,
+        text="▼ Filtros",
+        fg_color="transparent",
+        hover_color="#1d2233",
+        anchor="w",
+        height=34,
+        font=("Arial", 14, "bold"),
+        command=toggleFilters
     )
 
     filtersBtn.pack(
@@ -456,7 +467,7 @@ def createSidebar(callback):
 
     textFrame.pack(
         side="left",
-        pady = (10,0)
+        pady=(10, 0)
     )
 
     nameLabel = ctk.CTkLabel(
@@ -478,7 +489,7 @@ def createSidebar(callback):
 
     versionLabel.pack(
         anchor="w",
-        pady = (0,0)
+        pady=(0, 0)
     )
 
     configBtn = ctk.CTkButton(
@@ -491,6 +502,7 @@ def createSidebar(callback):
     )
 
     configBtn.pack(fill="x", padx=10, pady=5)
+
 
 mainFrame = ctk.CTkFrame(
     rootFrame,

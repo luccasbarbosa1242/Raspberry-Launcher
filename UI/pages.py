@@ -1,3 +1,4 @@
+import webbrowser
 from UI.components import (
     pageContainer,
     createSidebar
@@ -10,6 +11,8 @@ from UI.views.biblioteca import renderBiblioteca
 from UI.views.jogos import renderJogos
 
 from UTILS.helpers import clearFrame
+from UI.views.plataformas.ps2 import renderPS2
+
 
 def showPage(page):
 
@@ -27,6 +30,9 @@ def showPage(page):
 
         renderJogos(pageContainer)
 
+    elif page == "ps2":
+        renderPS2(pageContainer)
+
     elif page == "settings":
 
         renderSettings(pageContainer)
@@ -38,10 +44,7 @@ def render():
 
     showPage("home")
 
-import webbrowser
-
 
 def abrirPaginaInterna(title, url):
 
     webbrowser.open(url)
-
