@@ -15,7 +15,7 @@ O que falta no launcher? (Caso lembrem de algo que falta podem adicionar aqui)
 - Adicionar função de usuário adicionar jogos/instaladores/emuladores
 - Banco de dados
 - Perfil de usuário
-- Adicionar a página de jogos com suas especificações (Emulador que está rodando; descrição; genêro; etc)
+- Adicionar a página de jogos com suas especificações (Emulador que está rodando; descrição; genêro; ano de lançamento; etc)
 - Instalador interno (Fazer o launcher rodar instaladores silenciosos para os jogos adicionados)
 - Mais alguns jogos
 - Terminar a aparência
