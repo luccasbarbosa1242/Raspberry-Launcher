@@ -11,5 +11,6 @@ for game in games:
 
     print(
         game["title"],
+        game["installed"],
         game["path"]
     )
