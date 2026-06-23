@@ -1,6 +1,6 @@
 # FAVOR NÃO MEXER POR ENQUANTO! ANDAMENTO DO BANCO DE DADOS É EXTREMAMENTE SENSÍVEL.
 
-# Launcher de jogos feito em Python + CustomTkinter com banco de dados SQLite3.
+## Launcher de jogos feito em Python + CustomTkinter com banco de dados SQLite3.
  
  - Instalação automática
  - Instalação feita por recursos externos
@@ -8,13 +8,13 @@
  - Suporte a ZIP
  - Sistema de score
 
-# Em andamento
+## Em andamento
 
 - Banco de dados 
 - Adicionar emuladores
 - Terminar a aparência
 
-# O que falta no launcher? (Caso lembrem de algo que falta podem adicionar aqui)
+## O que falta no launcher? (Caso lembrem de algo que falta podem adicionar aqui)
 
 - Adicionar função de usuário adicionar jogos/instaladores/emuladores
 - Perfil de usuário
