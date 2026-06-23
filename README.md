@@ -2,13 +2,18 @@
 
 # 🚀 Launcher PI
 
+🌎 Language:
+
+- 🇧🇷 Português (Atual)
+- 🇺🇸 [English Version](README_EN.md)
+
 ### Launcher de Jogos desenvolvido com Python, CustomTkinter e SQLite
 
 Centralize jogos nativos, jogos web e ROMs em uma única biblioteca.
 
 ### 📈 Desenvolvimento Geral
 
-████████░░  81%
+>>fase 1 Completa / Fase 2 em Progresso<<
 
 <img src="https://img.shields.io/badge/Python-3.x-blue?style=for-the-badge" />
 <img src="https://img.shields.io/badge/CustomTkinter-UI-green?style=for-the-badge" />
