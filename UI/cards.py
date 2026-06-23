@@ -82,6 +82,29 @@ def is_rom_game(game):
         get_game_type(game) == "rom"
     )
 
+def get_primary_button_text(
+    game,
+    installed
+):
+
+    if is_web_game(game):
+
+        return "Abrir"
+
+    if is_rom_game(game):
+
+        if installed:
+
+            return "Jogar"
+
+        return "Configurar"
+
+    if installed:
+
+        return "Jogar"
+
+    return "Instalar"
+
 def get_platform_text(game):
 
     if is_web_game(game):

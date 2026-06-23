@@ -4,13 +4,11 @@ from CORE.library.library_manager import (
 
 games = (
     LibraryManager()
-    .installed_games()
+    .all_games()
 )
 
 for game in games:
 
-    print(
-        game["title"],
-        game["installed"],
-        game["path"]
-    )
+    if game["id"] == "tictactoe":
+
+        print(dict(game))
