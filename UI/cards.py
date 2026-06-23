@@ -1,103 +1,75 @@
-import os
+import customtkinter as ctk
 
-import customtkinter as ctk # type: ignore
+from UTILS.images import (
+    loadCover
+)
 
-from UTILS.images import loadImage
+from CORE.assets.asset_manager import (
+    AssetManager
+)
 
-from UTILS.paths import iconsPath
+from CORE.launcher import (
+    abrirJogo
+)
 
-from CORE.launcher import abrirJogo
-from CORE.download.installer import instalarJogo
 
-from CORE.score import lerBestScore
-from CORE.score import scoreLabels
+CARD_WIDTH = 230
+CARD_HEIGHT = 420
 
-from CORE.uninstaller import desinstalarJogo
-from UI.window import app
+COVER_WIDTH = 180
+COVER_HEIGHT = 270
 
-def createCard(parent):
 
-    card = ctk.CTkFrame(
-        parent,
-        width=220,
-        height=300,
-        corner_radius=18,
-        fg_color="#181c2b"
+def get_game_title(game):
+
+    return (
+        game["title"]
+        if "title" in game.keys()
+        else game["name"]
     )
 
-    card.pack_propagate(False)
 
-    return card
+def get_game_id(game):
 
-
-def criarCardVelha(parent):
-
-    card = createCard(parent)
-
-    layout = ctk.CTkFrame(
-        card,
-        fg_color="transparent"
+    return (
+        game["id"]
+        if "id" in game.keys()
+        else game["folder"]
     )
 
-    layout.pack(
-        fill="both",
-        expand=True,
-        padx=15,
-        pady=15
-    )
 
-    iconImage = loadImage(
-        os.path.join(
-            iconsPath(),
-            "tictactoe.png"
+def carregarImagemJogo(game):
+
+    asset_manager = AssetManager()
+
+    cover_path = (
+        asset_manager
+        .get_cover(
+            get_game_id(game)
         )
     )
 
-    icon = ctk.CTkLabel(
-        layout,
-        text="",
-        image=iconImage
-    )
-
-    icon.pack(
-        side="left",
-        padx=(0, 15)
-    )
-
-    title = ctk.CTkLabel(
-        layout,
-        text="Jogo da Velha",
-        font=("Arial", 22, "bold")
-    )
-
-    title.pack(side="left")
-
-    button = ctk.CTkButton(
-    layout,
-    text="Jogar",
-    width=120,
-    height=45,
-    command=lambda: __import__(
-        "UI.pages",
-        fromlist=["abrirJogoVelha"]
-    ).abrirJogoVelha()
-)
-
-    button.pack(
-        side="bottom",
-        pady=(15, 0)
+    return loadCover(
+        cover_path,
+        size=(180, 180)
     )
 
 
-def criarCardJogo(parent, game, installed, row, col):
+def criarCardJogo(
+    parent,
+    game,
+    installed,
+    row,
+    col
+):
 
     card = ctk.CTkFrame(
-        parent,
-        width=240,
-        height=320,
-        corner_radius=20,
-        fg_color="#181c2b"
-    )
+    parent,
+    width=230,
+    height=300,
+    corner_radius=20,
+    fg_color="#181c2b"
+)
 
     card.grid(
         row=row,
@@ -116,15 +88,12 @@ def criarCardJogo(parent, game, installed, row, col):
     layout.pack(
         fill="both",
         expand=True,
-        padx=12,
-        pady=12
+        padx=14,
+        pady=14
     )
 
-    iconImage = loadImage(
-        os.path.join(
-            iconsPath(),
-            game["icon"]
-        )
+    iconImage = carregarImagemJogo(
+        game
     )
 
     icon = ctk.CTkLabel(
@@ -133,47 +102,60 @@ def criarCardJogo(parent, game, installed, row, col):
         image=iconImage
     )
 
+    icon.image = iconImage
+
     icon.pack(
-        pady=(5, 10)
+        pady=(0, 12)
     )
 
     title = ctk.CTkLabel(
         layout,
-        text=game["name"],
-        font=("Arial", 18, "bold")
+        text=get_game_title(game),
+        font=("Arial", 16, "bold"),
+        wraplength=190,
+        justify="center"
     )
 
-    title.pack()
+    title.pack(
+        pady=(0, 4)
+    )
 
-    platformText = "Instalado" if installed else "Disponível"
+    platform = (
+        game["platform"]
+        if "platform" in game.keys()
+        and game["platform"]
+        else "PC"
+    )
 
     platformLabel = ctk.CTkLabel(
         layout,
-        text=platformText,
+        text=platform.upper(),
         text_color="#8a90aa",
         font=("Arial", 12)
     )
 
     platformLabel.pack(
-        pady=(0, 10)
+        pady=(0, 2)
     )
 
-    if game["score"] and installed:
+    statusLabel = ctk.CTkLabel(
+        layout,
+        text=(
+            "Instalado"
+            if installed
+            else "Não instalado"
+        ),
+        text_color=(
+            "#5bc77b"
+            if installed
+            else "#d6a84f"
+        ),
+        font=("Arial", 12)
+    )
 
-        score = ctk.CTkLabel(
-            layout,
-            text=f"Best Score: {lerBestScore(game)}",
-            font=("Arial", 12),
-            text_color="#a5adc8"
-        )
-
-        score.pack(
-            pady=(0, 10)
-        )
-
-        scoreLabels[
-            game["name"]
-        ] = score
+    statusLabel.pack(
+        pady=(0, 8)
+    )
 
     spacer = ctk.CTkFrame(
         layout,
@@ -187,127 +169,25 @@ def criarCardJogo(parent, game, installed, row, col):
 
     if installed:
 
-        buttonFrame = ctk.CTkFrame(
-            layout,
-            fg_color="transparent"
-        )
-
-        buttonFrame.pack(
-            pady=(10, 0)
-        )
-
         button = ctk.CTkButton(
-            buttonFrame,
+            layout,
             text="Jogar",
-            width=130,
-            height=40,
+            width=180,
+            height=42,
             command=lambda: abrirJogo(game)
-        )
-
-        button.pack(
-            side="left",
-            padx=(0, 5)
-        )
-
-        menuButton = ctk.CTkButton(
-            buttonFrame,
-            text="⋮",
-            width=35,
-            height=40
-        )
-
-        menuButton.pack(
-            side="left"
-        )
-
-        menuFrame = ctk.CTkFrame(
-        app,
-        corner_radius=18,
-        border_width=1,
-        border_color="#444444",
-        fg_color="#2b2b2b"
-    )
-
-        uninstallButton = ctk.CTkButton(
-        menuFrame,
-        text="Desinstalar",
-        width=170,
-        height=48,
-        corner_radius=14,
-        fg_color="#aa3333",
-        hover_color="#882222",
-        font=("Arial", 15, "bold"),
-        command=lambda: uninstallGame()
-    )
-
-        uninstallButton.pack(
-        padx=12,
-        pady=12
-    )
-
-        menuVisible = False
-
-        def toggleMenu():
-
-            nonlocal menuVisible
-
-            if menuVisible:
-
-                menuFrame.place_forget()
-
-                menuVisible = False
-
-            else:
-
-                x = menuButton.winfo_rootx()
-                y = menuButton.winfo_rooty()
-
-                appX = app.winfo_rootx()
-                appY = app.winfo_rooty()
-
-                relativeX = x - appX
-                relativeY = y - appY
-
-                menuFrame.place(
-                    x=relativeX - 130,
-                    y=relativeY + 55
-                )
-
-                menuFrame.lift()
-
-                menuVisible = True
-
-        def uninstallGame():
-
-            from UI.pages import showPage
-
-            menuFrame.place_forget()
-
-            desinstalarJogo(game)
-
-            showPage("home")
-
-        menuButton.configure(
-            command=toggleMenu
         )
 
     else:
 
         button = ctk.CTkButton(
-            layout,
-            text="Instalar",
-            width=170,
-            height=40
-        )
+        layout,
+        text="Instalar em breve",
+        width=170,
+        height=36,
+        state="disabled"
+    )
 
-        button.configure(
-            command=lambda: instalarJogo(
-                game,
-                button
-            )
-        )
-
-        button.pack(
-            side="bottom",
-            pady=(10, 0)
-        )
+    button.pack(
+        side="bottom",
+        pady=(10, 0)
+    )

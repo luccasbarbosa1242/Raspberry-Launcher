@@ -3,7 +3,7 @@ from UI.window import app
 
 import os
 
-from UTILS.images import loadImage
+from UTILS.images import (loadCover)
 from UTILS.paths import iconsPath
 from PIL import Image
 
@@ -441,7 +441,7 @@ def createSidebar(callback):
         pady=(0, 10)
     )
 
-    logoImage = loadImage(
+    logoImage = loadCover(
         os.path.join(
             iconsPath(),
             "logo.png"

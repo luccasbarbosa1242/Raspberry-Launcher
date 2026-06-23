@@ -1,9 +1,14 @@
+from operator import index
+
 import customtkinter as ctk
 
-from CORE.games import games
-from CORE.launcher import jogoInstalado
+from CORE.library.library_manager import (
+    LibraryManager
+)
 
-from UI.cards import criarCardJogo
+from UI.cards import (
+    criarCardJogo
+)
 
 
 def renderBiblioteca(parent):
@@ -14,7 +19,11 @@ def renderBiblioteca(parent):
         font=("Arial", 30, "bold")
     )
 
-    title.pack(anchor="w", padx=20, pady=20)
+    title.pack(
+        anchor="w",
+        padx=20,
+        pady=20
+    )
 
     scroll = ctk.CTkScrollableFrame(
         parent,
@@ -28,20 +37,22 @@ def renderBiblioteca(parent):
         pady=(0, 20)
     )
 
-    instalados = [
-        game for game in games
-        if jogoInstalado(game)
-    ]
+    games = (
+        LibraryManager()
+        .installed_games()
+    )
 
-    for index, game in enumerate(instalados):
+    for index, game in enumerate(games):
 
-        row = index // 4
-        col = index % 4
+        cards_por_linha = 4
+
+        row = index // cards_por_linha
+        col = index % cards_por_linha
 
         criarCardJogo(
-        scroll,
-        game,
-        True,
-        row,
-        col
+            scroll,
+            game,
+            True,
+            row,
+            col
         )

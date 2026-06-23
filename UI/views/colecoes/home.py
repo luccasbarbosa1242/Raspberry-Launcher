@@ -1,9 +1,19 @@
+from operator import index
+
 import customtkinter as ctk
 
-from CORE.games import games
-from CORE.launcher import jogoInstalado
+from CORE.library.library_manager import (
+    LibraryManager
+)
 
-from UI.cards import criarCardJogo
+from CORE.launcher import (
+    jogoInstalado
+)
+
+from UI.cards import (
+    criarCardJogo
+)
+
 
 def renderHome(parent):
 
@@ -31,10 +41,17 @@ def renderHome(parent):
         pady=(0, 20)
     )
 
+    games = (
+        LibraryManager()
+        .all_games()
+    )
+
     for index, game in enumerate(games):
 
-        row = index // 4
-        col = index % 4
+        cards_por_linha = 4
+
+        row = index // cards_por_linha
+        col = index % cards_por_linha
 
         criarCardJogo(
             scroll,

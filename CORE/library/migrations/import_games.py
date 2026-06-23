@@ -20,27 +20,17 @@ def migrate_games():
     for item in games:
 
         game = Game(
-
             id=item["folder"],
-
             title=item["name"],
-
             type="native",
-
             platform="linux",
-
             path=item["folder"],
-
+            launch_type=None,
             installed=False,
-
             favorite=False,
-
             play_time=0,
-
             cover_url=item.get("cover_url"),
-
             banner_url=item.get("banner_url"),
-
             logo_url=item.get("logo_url")
         )
 
