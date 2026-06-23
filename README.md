@@ -2,148 +2,306 @@
 
 # 🚀 Launcher PI
 
-### Launcher de jogos desenvolvido em Python + CustomTkinter + SQLite3
+### Launcher de Jogos desenvolvido com Python, CustomTkinter e SQLite
+
+Centralize jogos nativos, jogos web e ROMs em uma única biblioteca.
+
+<img src="https://img.shields.io/badge/Python-3.x-blue?style=for-the-badge" />
+<img src="https://img.shields.io/badge/CustomTkinter-UI-green?style=for-the-badge" />
+<img src="https://img.shields.io/badge/SQLite-Database-blue?style=for-the-badge" />
+<img src="https://img.shields.io/badge/Status-Em%20Desenvolvimento-orange?style=for-the-badge" />
 
 </div>
+
+---
+
+# 📖 Sobre o Projeto
+
+O Launcher PI é um launcher de jogos desenvolvido em Python com foco em simplicidade, organização e automação.
+
+O objetivo do projeto é permitir que o usuário gerencie:
+
+- 🎮 Jogos nativos
+- 🌐 Jogos web
+- 🕹️ ROMs
+- ⚙️ Emuladores
+
+Tudo através de uma única interface.
+
+Além disso, o launcher está sendo desenvolvido para realizar downloads, instalações e configurações automaticamente, reduzindo ao máximo a necessidade de intervenção manual do usuário.
 
 ---
 
 # ⚠️ Aviso Importante
 
 > [!CAUTION]
-> **NÃO MEXER NO BANCO DE DADOS POR ENQUANTO!**
 >
-> O sistema de banco de dados está em uma fase extremamente sensível de desenvolvimento e qualquer alteração pode impactar funcionalidades já implementadas.
+> ## 🔴 FAVOR NÃO MEXER NO BANCO DE DADOS POR ENQUANTO
+>
+> O sistema de banco de dados encontra-se em uma etapa extremamente sensível de desenvolvimento.
+>
+> Alterações nessa área podem causar incompatibilidades com funcionalidades já implementadas.
+>
+> Caso vá contribuir com o projeto, consulte primeiro a documentação interna da estrutura de banco de dados.
 
 ---
 
-# ✅ Funcionalidades Implementadas
+# ✨ Funcionalidades
 
-### 📦 Instalação e Downloads
+## 🎮 Jogos Nativos
 
-- Instalação automática de jogos
-- Download através de recursos externos
-- Suporte a arquivos `.zip`
+- Instalação automática
+- Download automático
+- Execução integrada
+- Suporte a Linux
+- Suporte a Windows
+
+## 🌐 Jogos Web
+
+- Navegador interno
+- Integração direta ao launcher
+
+## 🕹️ ROMs e Emuladores
+
+- Estrutura preparada para integração com ROMs
+- Sistema de plugins para emuladores
+- Download automático de emuladores (em desenvolvimento)
+
+## 📊 Biblioteca
+
+- Biblioteca centralizada
 - Sistema de score
+- Gerenciamento de jogos instalados
 
-### 🖥️ Compatibilidade
+---
 
-- Linux utilizando Google Drive
-- Windows utilizando GitHub Releases
-- Planejamento futuro para centralizar todos os downloads em GitHub Releases
+# 🏗️ Arquitetura do Projeto
 
-### 🎮 Launcher
+```text
+launcher-pi/
+
+CORE/
+├── assets/
+├── database/
+├── download/
+├── emulators/
+├── games/
+├── launchers/
+├── library/
+├── plugins/
+
+UI/
+├── views/
+├── cards/
+├── pages/
+
+UTILS/
+
+main.py
+```
+
+## CORE/database
+
+Responsável por:
+
+- SQLite
+- Migrações
+- Persistência de dados
+
+## CORE/library
+
+Responsável por:
 
 - Biblioteca de jogos
-- Sistema de execução de jogos
-- Navegador interno
-- Estrutura inicial para integração com banco de dados
+- Repositórios
+- Consulta e gerenciamento dos dados
+
+## CORE/launchers
+
+Responsável por:
+
+- NativeLauncher
+- RomLauncher
+- LauncherFactory
+
+## CORE/emulators
+
+Responsável por:
+
+- Download de emuladores
+- Instalação automática
+- Gerenciamento de versões
+
+## CORE/plugins
+
+Responsável por:
+
+- Registro de plugins
+- Adaptadores de emuladores
+- Expansão do sistema
 
 ---
 
-# 🚧 Em Desenvolvimento
+# 🔄 Fluxo do Sistema
 
-### 🗄️ Banco de Dados
+```text
+Usuário
+    │
+    ▼
+Biblioteca
+    │
+    ▼
+LauncherFactory
+    │
+    ├──────────────► NativeLauncher
+    │                    │
+    │                    ▼
+    │               Executável
+    │
+    └──────────────► RomLauncher
+                         │
+                         ▼
+                   EmulatorManager
+                         │
+                         ▼
+                       ROM
+```
 
-- Migração completa para SQLite
-- Integração entre launcher e banco de dados
-- Sistema de persistência de informações dos jogos
+---
 
-### 🎮 Emuladores
+# 🛠️ Tecnologias Utilizadas
 
-- Sistema de download automático
-- Instalação automática
-- Integração com ROMs
-- Gerenciamento por plugins
+| Tecnologia | Utilização |
+|------------|------------|
+| Python | Backend |
+| CustomTkinter | Interface |
+| SQLite3 | Banco de Dados |
+| Git | Versionamento |
+| GitHub Releases | Distribuição |
+| Google Drive | Distribuição temporária |
 
-### 🎨 Interface
+---
 
-- Ajustes visuais
-- Melhorias de usabilidade
-- Padronização dos componentes
+# 📊 Status Atual
+
+| Área | Status |
+|--------|--------|
+| Biblioteca | ✅ |
+| Downloads | ✅ |
+| Sistema de Score | ✅ |
+| LauncherFactory | ✅ |
+| NativeLauncher | ✅ |
+| Navegador Interno | ✅ |
+| Banco de Dados | 🚧 |
+| Emuladores | 🚧 |
+| Sistema de Plugins | 🚧 |
+| Interface | 🚧 |
 
 ---
 
 # 📋 Roadmap
 
-## 🔴 Prioridade Alta
+## ✅ Concluído
 
-### 👤 Sistema de Usuário
+### Launcher
 
-- Perfil de usuário
-- Gerenciamento de dados do usuário
+- [x] Sistema de downloads
+- [x] Instalação automática
+- [x] Suporte a arquivos ZIP
+- [x] Sistema de score
+- [x] Biblioteca de jogos
+- [x] Navegador interno
+- [x] NativeLauncher
+- [x] LauncherFactory
 
-### 🎮 Gerenciamento de Jogos
+### Estrutura
 
-- Permitir que usuários adicionem:
-  - Jogos
-  - Instaladores
-  - Emuladores
-
-### 📄 Página Individual dos Jogos
-
-Informações como:
-
-- Descrição
-- Gênero
-- Ano de lançamento
-- Emulador utilizado
-- Tempo jogado
-- Estatísticas
-
-### 📦 Instalador Interno
-
-- Execução de instaladores silenciosos
-- Instalação automatizada de jogos adicionados ao launcher
+- [x] Modularização do projeto
+- [x] Separação por responsabilidades
+- [x] Migração inicial para SQLite
 
 ---
 
-## 🟠 Prioridade Média
+## 🚧 Em Desenvolvimento
+
+### Banco de Dados
+
+- [ ] Migração completa para SQLite
+- [ ] Integração total da biblioteca
+- [ ] Sistema de assets
+
+### Emuladores
+
+- [ ] Download automático
+- [ ] Instalação automática
+- [ ] Integração com ROMs
+- [ ] Sistema de plugins
+
+### Interface
+
+- [ ] Melhorias visuais
+- [ ] Padronização dos componentes
+- [ ] Ajustes de layout
+
+---
+
+## ⏳ Planejado
+
+### 👤 Usuários
+
+- [ ] Perfil de usuário
+- [ ] Estatísticas individuais
+
+### 🎮 Biblioteca
+
+- [ ] Página individual dos jogos
+- [ ] Descrição dos jogos
+- [ ] Gênero
+- [ ] Ano de lançamento
+- [ ] Informações do emulador utilizado
+
+### 📦 Instalação
+
+- [ ] Instaladores silenciosos
+- [ ] Adição manual de jogos
+- [ ] Adição manual de instaladores
+- [ ] Adição manual de emuladores
 
 ### ⚙️ Configurações
 
-- Tema claro/escuro
-- Música de fundo
-- Controle de volume
-- Ajuste de brilho
-- Configurações gerais
+- [ ] Tema claro/escuro
+- [ ] Música de fundo
+- [ ] Controle de volume
+- [ ] Controle de brilho
+- [ ] Configurações avançadas
 
-### 🌐 Navegador Interno
+### 🕹️ Conteúdo
 
-- Correções de estabilidade
-- Melhor integração com o launcher
-
-### 🕹️ Biblioteca
-
-- Adição de novos jogos
-- Organização por categorias
-
----
-
-## 🟢 Prioridade Baixa
+- [ ] Adicionar novos jogos
+- [ ] Adicionar novos emuladores
 
 ### 📦 Distribuição
 
-- Correção dos executáveis
-- Permitir execução externa novamente
-- Criar instalador oficial do Launcher PI
+- [ ] Corrigir executáveis externos
+- [ ] Criar instalador oficial do Launcher PI
+
+### 🌐 Navegador
+
+- [ ] Melhorar integração
+- [ ] Corrigir problemas atuais
 
 ---
 
-# 📊 Status Geral
+# 🎯 Objetivo Final
 
-| Área | Status |
-|--------|--------|
-| Launcher Base | ✅ |
-| Biblioteca de Jogos | ✅ |
-| Sistema de Downloads | ✅ |
-| Sistema de Score | ✅ |
-| Banco de Dados | 🚧 |
-| Emuladores | 🚧 |
-| Interface | 🚧 |
-| Perfis de Usuário | ⏳ |
-| Instalador Interno | ⏳ |
-| Configurações | ⏳ |
+O objetivo do Launcher PI é se tornar uma plataforma única para gerenciamento de jogos, permitindo que o usuário tenha acesso a:
+
+- Jogos nativos
+- Jogos web
+- ROMs
+- Emuladores
+
+Tudo através de uma única interface moderna, simples e automatizada.
 
 ---
 
