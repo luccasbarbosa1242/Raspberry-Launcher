@@ -1,6 +1,6 @@
 # FAVOR NÃO MEXER POR ENQUANTO! ANDAMENTO DO BANCO DE DADOS É EXTREMAMENTE SENSÍVEL.
 
-# Launcher de jogos feito em Python + CustomTkinter.
+# Launcher de jogos feito em Python + CustomTkinter com banco de dados SQLite3.
  
  - Instalação automática
  - Instalação feita por recursos externos
