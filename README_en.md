@@ -13,7 +13,7 @@ Centralize native games, web games and ROMs into a single library.
 
 ### 📈 Overall Development Progress
 
-████████░░  81%
+>>Phase 1 Complete / Phase 2 In Progress<<
 
 <img src="https://img.shields.io/badge/Python-3.x-blue?style=for-the-badge" />
 <img src="https://img.shields.io/badge/CustomTkinter-UI-green?style=for-the-badge" />
