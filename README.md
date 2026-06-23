@@ -13,7 +13,7 @@ Centralize jogos nativos, jogos web e ROMs em uma única biblioteca.
 
 ### 📈 Desenvolvimento Geral
 
->>fase 1 Completa / Fase 2 em Progresso<<
+>fase 1 Completa / Fase 2 em Progresso
 
 <img src="https://img.shields.io/badge/Python-3.x-blue?style=for-the-badge" />
 <img src="https://img.shields.io/badge/CustomTkinter-UI-green?style=for-the-badge" />
