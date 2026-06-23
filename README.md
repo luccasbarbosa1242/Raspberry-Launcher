@@ -5,7 +5,7 @@
 🌎 Language:
 
 - 🇧🇷 Português (Atual)
-- 🇺🇸 [English Version](README_EN.md)
+- 🇺🇸 [English Version](README_en.md)
 
 ### Launcher de Jogos desenvolvido com Python, CustomTkinter e SQLite
 
