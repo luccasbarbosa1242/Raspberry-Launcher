@@ -7,7 +7,7 @@ import platform
 
 import gdown
 
-from CORE.downloader import download_file
+from CORE.download.downloader import download_file
 
 from UTILS.paths import downloadsPath
 from UTILS.paths import installedPath

@@ -5,7 +5,6 @@ from CORE.launcher import jogoInstalado
 
 from UI.cards import criarCardJogo
 
-
 def renderHome(parent):
 
     title = ctk.CTkLabel(

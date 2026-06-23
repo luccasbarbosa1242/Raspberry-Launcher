@@ -7,7 +7,7 @@ from UTILS.images import loadImage
 from UTILS.paths import iconsPath
 
 from CORE.launcher import abrirJogo
-from CORE.installer import instalarJogo
+from CORE.download.installer import instalarJogo
 
 from CORE.score import lerBestScore
 from CORE.score import scoreLabels
