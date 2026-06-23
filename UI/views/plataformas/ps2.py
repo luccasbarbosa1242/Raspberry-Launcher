@@ -28,7 +28,7 @@ def renderPS2(parent):
     banner.pack_propagate(False)
 
     bannerImage = ctk.CTkImage(
-        Image.open("assets/icons/ps2_banner.png"),
+        Image.open("ASSETS/icons/ps2_banner.png"),
         size=(1100, 250)
 
     )

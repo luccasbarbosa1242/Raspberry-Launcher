@@ -17,7 +17,7 @@ def assetsPath():
 
     return os.path.join(
         rootPath(),
-        "assets"
+        "ASSETS"
     )
 
 

@@ -236,8 +236,8 @@ def createSidebar(callback):
     )
 
     pcIcon = ctk.CTkImage(
-        light_image=Image.open("assets/icons/PC - Dark.png"),
-        dark_image=Image.open("assets/icons/PC - Light.png"),
+        light_image=Image.open("ASSETS/icons/PC - Dark.png"),
+        dark_image=Image.open("ASSETS/icons/PC - Light.png"),
         size=(18, 18)
     )
 
