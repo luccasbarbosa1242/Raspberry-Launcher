@@ -14,7 +14,19 @@ class Game:
 
     path: str
 
-    launch_type: str
+    launch_type: str | None
+
+    download_url: str | None
+
+    archive_name: str | None
+
+    archive_type: str | None
+
+    executable: str | None
+
+    strip_root_folder: bool
+
+    score_enabled: bool
 
     installed: bool
 

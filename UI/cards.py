@@ -1,5 +1,9 @@
 import customtkinter as ctk
 
+from CORE.download.native_game_installer import (
+    NativeGameInstaller
+)
+
 from UTILS.images import (
     loadCover
 )
@@ -191,12 +195,15 @@ def criarCardJogo(
     else:
 
         button = ctk.CTkButton(
-        layout,
-        text="Instalar em breve",
-        width=170,
-        height=36,
-        state="disabled"
-    )
+            layout,
+            text="Instalar",
+            width=170,
+            height=36,
+            command=lambda: NativeGameInstaller().install(
+                game,
+                button
+            )
+        )
 
     button.pack(
         side="bottom",

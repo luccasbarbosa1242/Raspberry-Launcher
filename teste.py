@@ -1,11 +1,15 @@
-from CORE.database.database import Database
+from CORE.library.library_manager import (
+    LibraryManager
+)
 
-db = Database()
-cursor = db.cursor()
+games = (
+    LibraryManager()
+    .installed_games()
+)
 
-cursor.execute("SELECT * FROM assets")
+for game in games:
 
-for row in cursor.fetchall():
-    print(dict(row))
-
-db.close()
+    print(
+        game["title"],
+        game["path"]
+    )
