@@ -38,6 +38,8 @@ def get_game_id(game):
     )
 
 
+from PIL import Image
+
 def carregarImagemJogo(game):
 
     asset_manager = AssetManager()
@@ -49,9 +51,18 @@ def carregarImagemJogo(game):
         )
     )
 
-    return loadCover(
-        cover_path,
-        size=(180, 180)
+    image = Image.open(
+        cover_path
+    )
+
+    image = image.resize(
+        (160, 220)
+    )
+
+    return ctk.CTkImage(
+        light_image=image,
+        dark_image=image,
+        size=(160, 220)
     )
 
 
