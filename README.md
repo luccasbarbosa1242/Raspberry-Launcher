@@ -46,6 +46,88 @@ Além disso, o launcher está sendo desenvolvido para realizar downloads, instal
 
 ---
 
+# 🎯 Prioridades Atuais
+
+> Esta seção representa o foco atual do desenvolvimento.
+
+## 🔴 Prioridade Máxima
+
+### Banco de Dados
+
+- [ ] Finalizar migração para SQLite
+- [ ] Integrar completamente a biblioteca ao banco
+- [ ] Finalizar persistência dos jogos
+- [ ] Finalizar sistema de assets
+
+### Emuladores
+
+- [ ] Download automático
+- [ ] Instalação automática
+- [ ] Integração completa com ROMs
+- [ ] Sistema de plugins
+
+---
+
+## 🟠 Prioridade Alta
+
+### Interface
+
+- [ ] Finalizar aparência do launcher
+- [ ] Padronizar componentes visuais
+- [ ] Melhorar organização das páginas
+
+### Navegador Interno
+
+- [ ] Corrigir problemas atuais
+- [ ] Melhorar integração com o launcher
+
+---
+
+## 🟡 Prioridade Média
+
+### Biblioteca
+
+- [ ] Página individual dos jogos
+- [ ] Descrição dos jogos
+- [ ] Gênero
+- [ ] Ano de lançamento
+- [ ] Informações do emulador utilizado
+
+### Conteúdo
+
+- [ ] Adicionar mais jogos
+- [ ] Adicionar mais emuladores
+
+---
+
+## 🟢 Prioridade Baixa
+
+### Configurações
+
+- [ ] Tema claro/escuro
+- [ ] Música de fundo
+- [ ] Controle de volume
+- [ ] Controle de brilho
+
+### Usuários
+
+- [ ] Perfil de usuário
+- [ ] Estatísticas individuais
+
+### Distribuição
+
+- [ ] Corrigir executáveis externos
+- [ ] Criar instalador oficial do Launcher PI
+
+---
+
+## 🔵 Ideias Futuras
+
+- [ ] Sistema de conquistas
+- [ ] Backup em nuvem
+- [ ] Sincronização entre dispositivos
+- [ ] Loja de temas
+
 # ✨ Funcionalidades
 
 ## 🎮 Jogos Nativos
