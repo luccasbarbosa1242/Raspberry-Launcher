@@ -8,7 +8,7 @@ Centralize jogos nativos, jogos web e ROMs em uma única biblioteca.
 
 ### 📈 Desenvolvimento Geral
 
-▓▓▓▓▓▓▓▓░░ 80%
+██████░░░░  64%
 
 <img src="https://img.shields.io/badge/Python-3.x-blue?style=for-the-badge" />
 <img src="https://img.shields.io/badge/CustomTkinter-UI-green?style=for-the-badge" />
