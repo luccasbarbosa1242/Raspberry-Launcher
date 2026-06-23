@@ -6,6 +6,10 @@
 
 Centralize jogos nativos, jogos web e ROMs em uma única biblioteca.
 
+### 📈 Desenvolvimento Geral
+
+▓▓▓▓▓▓▓▓░░ 80%
+
 <img src="https://img.shields.io/badge/Python-3.x-blue?style=for-the-badge" />
 <img src="https://img.shields.io/badge/CustomTkinter-UI-green?style=for-the-badge" />
 <img src="https://img.shields.io/badge/SQLite-Database-blue?style=for-the-badge" />
@@ -278,6 +282,18 @@ LauncherFactory
 | Emuladores | 🚧 |
 | Sistema de Plugins | 🚧 |
 | Interface | 🚧 |
+
+---
+
+# 🚀 Progresso Geral
+
+```text
+Launcher Base      ██████████ 100%
+Biblioteca         ████████░░  80%
+Banco de Dados     █████░░░░░  50%
+Emuladores         ███░░░░░░░  30%
+Interface          ██████░░░░  60%
+```
 
 ---
 
