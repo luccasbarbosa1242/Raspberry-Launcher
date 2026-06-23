@@ -1,4 +1,4 @@
-from operator import index
+
 
 import customtkinter as ctk
 

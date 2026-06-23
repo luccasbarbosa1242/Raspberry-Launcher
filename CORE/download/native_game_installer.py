@@ -206,7 +206,7 @@ class NativeGameInstaller:
                 app.after(
                     0,
                     lambda: button.configure(
-                        text="Erro",
+                        text="Tentar novamente",
                         state="normal"
                     )
                 )

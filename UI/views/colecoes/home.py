@@ -1,5 +1,3 @@
-from operator import index
-
 import customtkinter as ctk
 
 from CORE.library.library_manager import (

@@ -42,6 +42,112 @@ def get_game_id(game):
         else game["folder"]
     )
 
+def get_game_type(game):
+
+    return (
+        game["type"]
+        if "type" in game.keys()
+        else "native"
+    )
+
+
+def get_launch_type(game):
+
+    return (
+        game["launch_type"]
+        if "launch_type" in game.keys()
+        else None
+    )
+
+
+def get_platform(game):
+
+    return (
+        game["platform"]
+        if "platform" in game.keys()
+        else None
+    )
+
+
+def is_web_game(game):
+
+    return (
+        get_launch_type(game) == "html"
+    )
+
+
+def is_rom_game(game):
+
+    return (
+        get_game_type(game) == "rom"
+    )
+
+def get_platform_text(game):
+
+    if is_web_game(game):
+
+        return "WEB"
+
+    if is_rom_game(game):
+
+        platform = get_platform(
+            game
+        )
+
+        if platform:
+
+            return platform.upper()
+
+        return "ROM"
+
+    platform = get_platform(
+        game
+    )
+
+    if platform:
+
+        return platform.upper()
+
+    return "PC"
+
+def get_status_text(
+    game,
+    installed
+):
+
+    if is_web_game(game):
+
+        return "Online"
+
+    if is_rom_game(game):
+
+        return "ROM"
+
+    if installed:
+
+        return "Instalado"
+
+    return "Não instalado"
+
+def get_status_color(
+    game,
+    installed
+):
+
+    if is_web_game(game):
+
+        return "#4fa3ff"
+
+    if is_rom_game(game):
+
+        return "#9b7cff"
+
+    if installed:
+
+        return "#5bc77b"
+
+    return "#d6a84f"
+
 
 def carregarImagemJogo(game):
 
@@ -131,17 +237,30 @@ def criarCardJogo(
         pady=(0, 2)
     )
 
+    platformLabel = ctk.CTkLabel(
+    card,
+    text=get_platform_text(
+        game
+    ),
+    text_color="#8a90aa",
+    font=("Arial", 11, "bold"),
+    width=200,
+    height=18
+    )
+
+    platformLabel.pack(
+        pady=(0, 0)
+    )
+
     statusLabel = ctk.CTkLabel(
         card,
-        text=(
-            "Instalado"
-            if installed
-            else "Não instalado"
+        text=get_status_text(
+            game,
+            installed
         ),
-        text_color=(
-            "#5bc77b"
-            if installed
-            else "#d6a84f"
+        text_color=get_status_color(
+            game,
+            installed
         ),
         font=("Arial", 12),
         width=200,
@@ -177,7 +296,13 @@ def criarCardJogo(
 
     buttonsFrame.pack_propagate(False)
 
-    if installed:
+    can_play = (
+        installed
+        or
+        is_web_game(game)
+    )
+
+    if can_play:
 
         actionsFrame = ctk.CTkFrame(
             buttonsFrame,
@@ -195,7 +320,11 @@ def criarCardJogo(
         playButton = ctk.CTkButton(
             actionsFrame,
             text="Jogar",
-            width=126,
+            width=(
+                170
+                if is_web_game(game)
+                else 126
+            ),
             height=34,
             corner_radius=10,
             command=lambda: abrirJogo(game)
@@ -304,32 +433,47 @@ def criarCardJogo(
                 close_popup
             )
 
-        menuButton = ctk.CTkButton(
-            actionsFrame,
-            text="⋮",
-            width=38,
-            height=34,
-            corner_radius=10,
-            command=open_context_menu
-        )
+        if not is_web_game(game):
 
-        menuButton.pack(
-            side="left"
-        )
+            menuButton = ctk.CTkButton(
+                actionsFrame,
+                text="⋮",
+                width=38,
+                height=34,
+                corner_radius=10,
+                command=open_context_menu
+            )
+
+            menuButton.pack(
+                side="left"
+            )
 
     else:
 
-        installButton = ctk.CTkButton(
-            buttonsFrame,
-            text="Instalar",
-            width=170,
-            height=34,
-            corner_radius=10,
-            command=lambda: NativeGameInstaller().install(
-                game,
-                installButton
+        if is_rom_game(game):
+
+            installButton = ctk.CTkButton(
+                buttonsFrame,
+                text="Configurar emulador",
+                width=170,
+                height=34,
+                corner_radius=10,
+                command=lambda: abrirJogo(game)
             )
-        )
+
+        else:
+
+            installButton = ctk.CTkButton(
+                buttonsFrame,
+                text="Instalar",
+                width=170,
+                height=34,
+                corner_radius=10,
+                command=lambda: NativeGameInstaller().install(
+                    game,
+                    installButton
+                )
+            )
 
         installButton.pack(
             pady=(16, 0)
