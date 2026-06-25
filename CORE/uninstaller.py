@@ -6,6 +6,10 @@ from CORE.library.library_manager import (
     LibraryManager
 )
 
+from CORE.library.game_version_manager import (
+    GameVersionManager
+)
+
 from UI.window import app
 
 from UTILS.paths import (
@@ -41,6 +45,10 @@ def desinstalarJogo(
             )
 
         LibraryManager().mark_uninstalled(
+            game["id"]
+        )
+
+        GameVersionManager().mark_uninstalled_by_game(
             game["id"]
         )
 

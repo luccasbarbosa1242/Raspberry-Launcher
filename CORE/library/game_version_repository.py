@@ -7,47 +7,33 @@ class GameVersionRepository:
 
         self.db = Database()
 
-    def add(self, version):
+    def by_game_and_platform(
+        self,
+        game_id,
+        platform
+    ):
 
         cursor = self.db.cursor()
 
         cursor.execute(
             """
-            INSERT OR REPLACE INTO game_versions(
-                id,
-                game_id,
-                platform,
-                path,
-                launch_type,
-                download_url,
-                archive_name,
-                archive_type,
-                executable,
-                strip_root_folder,
-                score_enabled,
-                installed
-            )
-            VALUES(?,?,?,?,?,?,?,?,?,?,?,?)
+            SELECT *
+            FROM game_versions
+            WHERE game_id = ?
+            AND platform = ?
             """,
             (
-                version["id"],
-                version["game_id"],
-                version["platform"],
-                version["path"],
-                version["launch_type"],
-                version["download_url"],
-                version["archive_name"],
-                version["archive_type"],
-                version["executable"],
-                int(version["strip_root_folder"]),
-                int(version["score_enabled"]),
-                int(version["installed"])
+                game_id,
+                platform
             )
         )
 
-        self.db.commit()
+        return cursor.fetchone()
 
-    def by_game(self, game_id):
+    def by_game(
+        self,
+        game_id
+    ):
 
         cursor = self.db.cursor()
 
@@ -58,21 +44,55 @@ class GameVersionRepository:
             WHERE game_id = ?
             ORDER BY platform ASC
             """,
-            (game_id,)
+            (
+                game_id,
+            )
         )
 
         return cursor.fetchall()
 
-    def all(self):
+    def mark_installed(
+        self,
+        version_id,
+        executable_path
+    ):
 
         cursor = self.db.cursor()
 
         cursor.execute(
             """
-            SELECT *
-            FROM game_versions
-            ORDER BY game_id ASC, platform ASC
-            """
+            UPDATE game_versions
+            SET
+                installed = 1,
+                path = ?
+            WHERE id = ?
+            """,
+            (
+                executable_path,
+                version_id
+            )
         )
 
-        return cursor.fetchall()
+        self.db.commit()
+
+    def mark_uninstalled_by_game(
+        self,
+        game_id
+    ):
+
+        cursor = self.db.cursor()
+
+        cursor.execute(
+            """
+            UPDATE game_versions
+            SET
+                installed = 0,
+                path = game_id
+            WHERE game_id = ?
+            """,
+            (
+                game_id,
+            )
+        )
+
+        self.db.commit()

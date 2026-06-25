@@ -11,6 +11,13 @@ from CORE.library.game_repository import (
     GameRepository
 )
 
+print(
+    "AVISO: import_games.py é legado e ainda depende de CORE/games.py."
+)
+
+print(
+    "Use tools/add_game.py ou tools/import_games_from_json.py para jogos novos."
+)
 
 def migrate_games():
 

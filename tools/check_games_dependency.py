@@ -7,18 +7,19 @@ ROOT = (
     .parents[1]
 )
 
+
 IGNORED_FILES = {
+    "CORE/games.py",
     "CORE/library/migrations/import_games.py",
-    "CORE/games.py"
+    "tools/migrate_versions_from_games.py",
+    "tools/check_games_dependency.py"
 }
 
 
 PATTERNS = [
-    "CORE.games",
     "from CORE.games",
     "import CORE.games",
-    "getGameVersion",
-    "games ="
+    "getGameVersion"
 ]
 
 
@@ -48,7 +49,7 @@ def main():
 
     print()
     print(
-        "Verificando dependências do games.py..."
+        "Verificando dependências reais do games.py..."
     )
 
     found = []

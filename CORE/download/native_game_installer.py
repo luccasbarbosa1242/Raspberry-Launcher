@@ -14,6 +14,10 @@ from CORE.library.library_manager import (
     LibraryManager
 )
 
+from CORE.library.game_version_manager import (
+    GameVersionManager
+)
+
 from UI.window import app
 
 from UTILS.paths import (
@@ -29,6 +33,19 @@ class NativeGameInstaller:
         game,
         button=None
     ):
+        
+        version = (
+            GameVersionManager()
+            .current_version(
+                game
+            )
+        )
+  
+        if not version:
+
+            raise RuntimeError(
+                f"Nenhuma versão encontrada para: {game['title']}"
+            )
 
         if game["type"] != "native":
 
@@ -56,6 +73,7 @@ class NativeGameInstaller:
         thread = threading.Thread(
             target=lambda: self._process(
                 game,
+                version,
                 button
             ),
             daemon=True
@@ -66,6 +84,7 @@ class NativeGameInstaller:
     def _process(
         self,
         game,
+        version,
         button
     ):
 
@@ -73,10 +92,10 @@ class NativeGameInstaller:
 
             zip_path = os.path.join(
                 downloadsPath(),
-                game["archive_name"]
+                version["archive_name"]
             )
 
-            url = game["download_url"]
+            url = version["download_url"]
 
             if "drive.google.com" in url:
 
@@ -138,7 +157,7 @@ class NativeGameInstaller:
                 )
 
             if bool(
-                game["strip_root_folder"]
+                version["strip_root_folder"]
             ):
 
                 self._strip_root_folder(
@@ -156,7 +175,7 @@ class NativeGameInstaller:
             executable_path = (
                 self._find_executable(
                     game_folder,
-                    game["executable"]
+                    version["executable"]
                 )
             )
 
@@ -166,7 +185,7 @@ class NativeGameInstaller:
                     f"Executável não encontrado: {game['executable']}"
                 )
 
-            if game["launch_type"] in [
+            if version["launch_type"] in [
                 "linux",
                 "appimage",
                 "sh"
@@ -176,6 +195,11 @@ class NativeGameInstaller:
                     executable_path,
                     0o755
                 )
+
+            GameVersionManager().mark_installed(
+                version["id"],
+                executable_path
+            )
 
             LibraryManager().mark_installed(
                 game["id"],
