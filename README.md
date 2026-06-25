@@ -23,8 +23,6 @@ Centralize jogos nativos, jogos web e ROMs em uma única biblioteca.
 <img src="https://img.shields.io/badge/Linux-Supported-success?style=for-the-badge" />
 <img src="https://img.shields.io/badge/Windows-Supported-success?style=for-the-badge" />
 <img src="https://img.shields.io/badge/Open%20Source-Yes-blue?style=for-the-badge" />
-<img src="https://img.shields.io/github/last-commit/SEU_USUARIO/launcher-pi?style=for-the-badge" />
-<img src="https://img.shields.io/github/license/SEU_USUARIO/launcher-pi?style=for-the-badge" />
 
 </div>
 
