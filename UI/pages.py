@@ -4,6 +4,7 @@ from UI.views.plataformas.supernintendo import renderSuperNintendo
 from UI.views.plataformas.arcade import renderarcade
 from UI.views.plataformas.gameboy import renderGameBoy
 from UI.views.plataformas.megadrive import renderMegaDrive
+from UI.views.plataformas.PC import renderPC
 from UI.components import (
     pageContainer,
     createSidebar
@@ -60,6 +61,9 @@ def showPage(page):
 
     elif page == "megadrive":
         renderMegaDrive(pageContainer)
+    elif page == "pc":
+        from UI.views.plataformas.PC import renderPC
+        renderPC(pageContainer)
 
 
 def render():
