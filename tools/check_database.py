@@ -66,4 +66,20 @@ for row in cursor.fetchall():
         row["name"]
     )
 
+cursor = connection.execute(
+    "PRAGMA table_info(platforms)"
+)
+
+print(
+    "Colunas da tabela platforms:"
+)
+
+for row in cursor.fetchall():
+
+    print(
+        "-",
+        row["name"]
+    )
+
+
 connection.close()

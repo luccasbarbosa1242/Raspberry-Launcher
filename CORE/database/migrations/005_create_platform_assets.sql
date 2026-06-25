@@ -12,3 +12,4 @@ CREATE TABLE  IF NOT EXISTS platform_assets (
 
     downloaded INTEGER DEFAULT 0
 );
+
