@@ -1,4 +1,9 @@
 import webbrowser
+from UI.views.plataformas.ps1 import renderPS1
+from UI.views.plataformas.supernintendo import renderSuperNintendo
+from UI.views.plataformas.arcade import renderarcade
+from UI.views.plataformas.gameboy import renderGameBoy
+from UI.views.plataformas.megadrive import renderMegaDrive
 from UI.components import (
     pageContainer,
     createSidebar
@@ -30,12 +35,31 @@ def showPage(page):
 
         renderJogos(pageContainer)
 
+    elif page == "ps1":
+
+        renderPS1(pageContainer)
+
     elif page == "ps2":
         renderPS2(pageContainer)
+
+    elif page == "supernintendo":
+
+        renderSuperNintendo(pageContainer)
+
+    elif page == "arcade":
+
+        renderarcade(pageContainer)
+
+    elif page == "gameboy":
+
+        renderGameBoy(pageContainer)
 
     elif page == "settings":
 
         renderSettings(pageContainer)
+
+    elif page == "megadrive":
+        renderMegaDrive(pageContainer)
 
 
 def render():

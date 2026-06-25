@@ -71,7 +71,7 @@ def renderPS2(parent):
 
     biosBtn = ctk.CTkButton(
         buttonsFrame,
-        text="Iniciar",
+        text="Download",
         width=180,  # tamanho do botão
         height=50,  # tamanho do botão
         corner_radius=10,  # deixar o botão redondo
