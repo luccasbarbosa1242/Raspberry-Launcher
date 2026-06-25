@@ -104,16 +104,6 @@ class AssetManager:
             "logos"
         )
 
-    def get_screenshot(
-        self,
-        game_id
-    ):
-
-        return self.get_asset(
-            game_id,
-            "screenshots"
-        )
-
     def register_game_assets(
         self,
         game_id,

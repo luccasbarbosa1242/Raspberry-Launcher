@@ -74,6 +74,7 @@ class AssetRepository:
             FROM assets
             WHERE game_id = ?
             AND type = ?
+            LIMIT 1
             """,
             (
                 game_id,
@@ -102,6 +103,28 @@ class AssetRepository:
             (
                 str(local_path),
                 asset_id
+            )
+        )
+
+        self.db.commit()
+
+    def clear_cache(
+        self,
+        asset_id
+    ):
+
+        cursor = self.db.cursor()
+
+        cursor.execute(
+            """
+            UPDATE assets
+            SET
+                local_path = NULL,
+                downloaded = 0
+            WHERE id = ?
+            """,
+            (
+                asset_id,
             )
         )
 
