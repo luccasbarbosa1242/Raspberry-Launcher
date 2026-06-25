@@ -2,7 +2,10 @@ import customtkinter as ctk
 import webbrowser
 import os
 from PIL import Image
-from tkdial import Meter
+
+from CORE.assets.asset_manager import (
+    AssetManager
+)
 
 PCSX2_URL = "https://pcsx2.net/downloads/"
 
@@ -27,10 +30,15 @@ def renderPS2(parent):
     )
     banner.pack_propagate(False)
 
-    bannerImage = ctk.CTkImage(
-        Image.open("ASSETS/icons/ps2_banner.png"),
-        size=(1100, 250)
+    asset_manager = AssetManager()
 
+    banner_path = asset_manager.get_banner(
+        "platform_ps2"
+    )
+
+    bannerImage = ctk.CTkImage(
+        Image.open(banner_path),
+        size=(1100, 250)
     )
 
     bannerBg = ctk.CTkLabel(
