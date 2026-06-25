@@ -4,21 +4,25 @@
 
 🌎 Language:
 
-- 🇺🇸 English (Current)
-- 🇧🇷 [Versão em Português](README.md)
+* 🇺🇸 English (Current)
+* 🇧🇷 [Versão em Português](README.md)
 
 ### Game Launcher built with Python, CustomTkinter and SQLite
 
 Centralize native games, web games and ROMs into a single library.
 
-### 📈 Overall Development Progress
+### 📈 Development Status
 
->Phase 1 Complete / Phase 2 In Progress
+> **Phase 1 Completed • Phase 2 In Progress (Steps 1–11 Completed)**
 
 <img src="https://img.shields.io/badge/Python-3.x-blue?style=for-the-badge" />
 <img src="https://img.shields.io/badge/CustomTkinter-UI-green?style=for-the-badge" />
 <img src="https://img.shields.io/badge/SQLite-Database-blue?style=for-the-badge" />
-<img src="https://img.shields.io/badge/Status-In%20Development-orange?style=for-the-badge" />
+<img src="https://img.shields.io/badge/Status-Under%20Development-orange?style=for-the-badge" />
+
+<img src="https://img.shields.io/badge/Linux-Supported-success?style=for-the-badge" />
+<img src="https://img.shields.io/badge/Windows-Supported-success?style=for-the-badge" />
+<img src="https://img.shields.io/badge/Open%20Source-Yes-blue?style=for-the-badge" />
 
 </div>
 
@@ -26,18 +30,34 @@ Centralize native games, web games and ROMs into a single library.
 
 # 📖 About the Project
 
-Launcher PI is a game launcher developed in Python with a focus on simplicity, organization, and automation.
+**Launcher PI** is a game launcher built with **Python**, using **CustomTkinter** for the graphical interface and **SQLite** as its primary database.
 
-The goal of the project is to allow users to manage:
+The project aims to centralize different types of games into a single library, allowing users to install, organize and launch their games through a modern and intuitive interface.
 
-- 🎮 Native Games
-- 🌐 Web Games
-- 🕹️ ROMs
-- ⚙️ Emulators
+Launcher PI currently supports:
 
-All through a single interface.
+* 🎮 Native Games
+* 🌐 Web Games
+* 🕹️ ROMs
+* ⚙️ Emulators
 
-In addition, the launcher is being developed to automatically handle downloads, installations, and configurations, minimizing the need for manual user intervention.
+Everything is managed from a single application.
+
+---
+
+## 🎯 Project Philosophy
+
+Launcher PI has been designed around a few core principles since the beginning of development:
+
+* Modular architecture
+* Decoupled codebase
+* Database-driven design
+* Automated installation workflow
+* Plugin-based expansion
+* Linux and Windows compatibility
+* Easy game registration without modifying the source code
+
+The long-term goal is to allow new games to be added simply by inserting records into the database, eliminating the need to modify the launcher itself.
 
 ---
 
@@ -45,542 +65,907 @@ In addition, the launcher is being developed to automatically handle downloads, 
 
 > [!CAUTION]
 >
-> ## 🔴 DATABASE TRANSITION IN PROGRESS
+> ## 🔴 DATABASE MIGRATION IN PROGRESS
 >
-> The project is currently in Phase 2 of its migration to a fully SQLite-based system.
+> Launcher PI is currently undergoing **Phase 2**, migrating to a fully database-driven architecture.
 >
-> The goal is to completely remove the dependency on the `games.py` file, making the database the launcher's only source of data.
+> During this phase, almost every system inside the launcher is being converted to rely exclusively on SQLite.
 >
-> During this phase, manual modifications to the database are not recommended.
+> The `games.py` file is still available only for temporary backward compatibility and will be removed in a future update.
+>
+> Database migrations now preserve existing data, meaning the database no longer needs to be recreated during development.
 
 ---
 
 # 🎯 Current Priorities
 
-> This section represents the current development focus.
-
-## 🔴 Highest Priority
-
-### Database (85%)
-
-- [x] SQLite structure created
-- [x] Repositories implemented
-- [x] Library integrated with the database
-- [x] Asset system integrated
-- [x] Installation persistence
-- [ ] Migrations without deleting the database
-- [ ] Complete removal of `games.py`
-- [ ] Database administration tools
-
-### Emulators (60%)
-
-- [x] Core structure created
-- [x] EmulatorManager
-- [x] PackageResolver
-- [x] PluginLoader
-- [x] PluginRegistry
-- [x] RomLauncher
-- [ ] Real emulator downloads
-- [ ] Fully automated installation
-- [ ] Final ROM integration
-- [ ] Emulator library
-
-### Game System (80%)
-
-- [x] Native games
-- [x] Web games
-- [x] Automatic installation
-- [x] Automatic uninstallation
-- [x] Database-integrated library
-- [ ] 100% database-driven game registration
-- [ ] Game update system
+> This section reflects the current focus of development.
 
 ---
 
-## 🟠 High Priority
+# 🔴 Highest Priority
 
-### Interface (75%)
+## Database (93%)
 
-- [x] Functional library
-- [x] Card system
-- [x] Covers through AssetManager
-- [x] Visual game status indicators
-- [x] Database-integrated Home page
-- [ ] Individual game page
-- [ ] Final visual improvements
-- [ ] Animations and visual feedback
-
-### Internal Browser
-
-- [ ] Fix current issues
-- [ ] Improve launcher integration
-
----
-
-## 🟡 Medium Priority
-
-### Library
-
-- [ ] Individual game page
-- [ ] Game descriptions
-- [ ] Genres
-- [ ] Release year
-- [ ] Emulator information
-
-### Content
-
-- [ ] Add more games
-- [ ] Add more emulators
+* [x] SQLite structure
+* [x] Migration system
+* [x] Persistent database
+* [x] Library integration
+* [x] GameRepository
+* [x] LibraryManager
+* [x] AssetRepository
+* [x] GameVersionRepository
+* [x] Game registration tools
+* [x] Game update tools
+* [x] Game removal tools
+* [x] Asset registration
+* [x] Game version management
+* [ ] Platform management through the database
+* [ ] Emulator management through the database
+* [ ] Complete removal of `games.py`
 
 ---
 
-## 🟢 Low Priority
+## Game System (92%)
 
-### Settings
-
-- [ ] Light/Dark theme
-- [ ] Background music
-- [ ] Volume control
-- [ ] Brightness control
-
-### Users
-
-- [ ] User profiles
-- [ ] Individual statistics
-
-### Distribution
-
-- [ ] Fix external executables
-- [ ] Create an official Launcher PI installer
+* [x] Native games
+* [x] Web games
+* [x] Dynamic library
+* [x] Automatic downloads
+* [x] Automatic installation
+* [x] Automatic uninstallation
+* [x] Database-driven updates
+* [x] Administrative registration tools
+* [x] Multi-platform game versions (Linux / Windows)
+* [ ] Individual game pages
 
 ---
 
-## 🔵 Future Ideas
+## Emulators (65%)
 
-- [ ] Achievement system
-- [ ] Cloud backups
-- [ ] Device synchronization
-- [ ] Theme store
+* [x] Core architecture
+* [x] EmulatorManager
+* [x] PackageResolver
+* [x] PluginLoader
+* [x] PluginRegistry
+* [x] RomLauncher
+* [x] Download architecture
+* [ ] Real emulator downloads
+* [ ] Fully automated installation
+* [ ] Complete ROM integration
+* [ ] Emulator library
+
+---
+
+# 🟠 High Priority
+
+## User Interface (80%)
+
+* [x] Functional game library
+* [x] Game card system
+* [x] Standardized covers
+* [x] Covers loaded through AssetManager
+* [x] Database-integrated home page
+* [x] Visual installation status
+* [ ] Individual game pages
+* [ ] Collections system
+* [ ] Final UI improvements
+* [ ] Visual download feedback
+
+---
+
+## Assets (90%)
+
+* [x] AssetManager
+* [x] AssetRepository
+* [x] Local cache
+* [x] Remote assets
+* [x] Local assets
+* [x] Fallback system
+* [x] Administrative tools
+* [ ] Screenshots
+* [ ] Background images
+* [ ] Custom icons
+
+---
+
+## Built-in Browser
+
+* [ ] Fix current issues
+* [ ] Improve launcher integration
+* [ ] Better tab management
+
+---
+
+# 🟡 Medium Priority
+
+## Library
+
+* [ ] Individual game pages
+* [ ] Description
+* [ ] Developer
+* [ ] Genre
+* [ ] Release year
+* [ ] Play time
+* [ ] Update history
+
+---
+
+## Content
+
+* [ ] Add more games
+* [ ] Add more emulators
+* [ ] Add more plugins
+* [ ] Add more platforms
+
+---
+
+# 🟢 Low Priority
+
+## Settings
+
+* [ ] Light theme
+* [ ] Dark theme
+* [ ] Background music
+* [ ] Volume control
+* [ ] Brightness control
+
+---
+
+## Users
+
+* [ ] User profiles
+* [ ] Individual statistics
+* [ ] Gameplay history
+* [ ] Configuration backup
+
+---
+
+## Distribution
+
+* [ ] Official installer
+* [ ] Automatic updater
+* [ ] Digital signature
+* [ ] Official distribution
+
+---
+
+# 🔵 Future Ideas
+
+* [ ] Achievement system
+* [ ] Cloud backup
+* [ ] Cross-device synchronization
+* [ ] Theme marketplace
+* [ ] Mod support
+* [ ] Assisted local multiplayer
+* [ ] Public plugin API
+
+---
 
 # ✨ Features
 
 ## 🎮 Native Games
 
-- Automatic installation
-- Automatic downloads
-- Integrated execution
-- Linux support
-- Windows support
+* Automatic installation
+* Automatic downloads
+* SQLite-based registration
+* Integrated launcher
+* Linux support
+* Windows support
+* Multiple versions per game
+
+---
 
 ## 🌐 Web Games
 
-- Internal browser
-- Direct launcher integration
+* Built-in browser
+* Direct launcher integration
+* Fully database-driven registration
 
-## 🕹️ ROMs and Emulators
+---
 
-- Structure prepared for ROM integration
-- Emulator plugin system
-- Automatic emulator downloads (in development)
+## 🕹️ ROMs & Emulators
 
-## 📊 Library
+* ROM-ready architecture
+* Plugin system
+* Automatic emulator downloads (under development)
+* Multi-emulator support
+* Expansion-ready architecture
 
-- Centralized library
-- Score system
-- Installed game management
+---
+
+## 📚 Library
+
+* Dynamic game library
+* Database-driven registration
+* Score system
+* Favorites
+* Play history
+* Centralized management
+
+---
 
 ## 🖼️ Assets
 
-- AssetManager
-- AssetRepository
-- Local cache
-- Remote covers
-- Fallback system
+* AssetManager
+* AssetRepository
+* Intelligent cache
+* Remote covers
+* Local covers
+* Fallback system
+* Automatic updates
+* Administrative tools
 
 ---
 
-# 🏗️ Project Architecture
+# ⚙️ Internal Architecture
+
+Launcher PI was designed around a modular architecture where every component has a single responsibility.
+
+Instead of concentrating all logic into a few large files, the project is divided into specialized modules that communicate through managers and repositories.
+
+The application is currently composed of five major subsystems:
+
+* Library
+* Installation
+* Assets
+* Launchers
+* Emulators
+
+---
+
+# 📚 Library System
+
+The Library System is the heart of Launcher PI.
+
+Almost every screen displayed by the application retrieves its information through this module.
+
+Current flow:
 
 ```text
-launcher-pi/
-
-CORE/
-├── assets/
-├── database/
-├── download/
-├── emulators/
-├── launchers/
-├── library/
-├── plugins/
-
-DATA/
-├── library.db
-├── emulator_packages.json
-
-DOWNLOADS/
-EMULATORS/
-USERDATA/
-
-UI/
-├── views/
-├── cards.py
-├── pages.py
-├── window.py
-
-UTILS/
-tools/
-
-main.py
+User Interface
+      │
+      ▼
+LibraryManager
+      │
+      ▼
+GameRepository
+      │
+      ▼
+SQLite Database
 ```
-## CORE/database
 
-Responsible for:
+The `LibraryManager` acts as a service layer between the graphical interface and the database.
 
-- SQLite
-- Migrations
-- Data persistence
+Its responsibilities include:
 
-## CORE/library
+* Listing games
+* Searching games
+* Retrieving installed games
+* Managing favorites
+* Updating installation status
+* Registering play time
+* Providing game metadata
 
-Responsible for:
-
-- Game library
-- Repositories
-- Data management and queries
-
-## CORE/launchers
-
-Responsible for:
-
-- NativeLauncher
-- RomLauncher
-- LauncherFactory
-
-## CORE/emulators
-
-Responsible for:
-
-- Emulator downloads
-- Automatic installation
-- Version management
-
-## CORE/plugins
-
-Responsible for:
-
-- Plugin registration
-- Emulator adapters
-- System extensibility
+The UI never communicates directly with SQLite.
 
 ---
 
-# 🔄 System Flow
+# 🎮 Game Version System
+
+Each game may have one or more platform-specific versions.
+
+Example:
 
 ```text
-User
-    │
-    ▼
-Library
+Snake
+
+├── Linux
+└── Windows
+```
+
+These versions are stored inside the:
+
+```text
+game_versions
+```
+
+table.
+
+Every version contains its own:
+
+* Download URL
+* Archive name
+* Executable
+* Launch type
+* Platform
+* Installation status
+
+Architecture:
+
+```text
+Game
+     │
+     ▼
+GameVersionManager
+     │
+     ▼
+GameVersionRepository
+     │
+     ▼
+game_versions
+```
+
+This allows a single game entry to support multiple operating systems without duplicating game records.
+
+---
+
+# 📦 Installation System
+
+Every installation is handled by the `NativeGameInstaller`.
+
+Installation workflow:
+
+```text
+Install Button
+        │
+        ▼
+NativeGameInstaller
+        │
+        ▼
+GameVersionManager
+        │
+        ▼
+game_versions
+        │
+        ▼
+Download
+        │
+        ▼
+Extraction
+        │
+        ▼
+Database Update
+```
+
+After installation the launcher automatically updates:
+
+* executable path;
+* installation status;
+* installed version;
+* game library.
+
+The long-term goal is to make the installation process completely database-driven.
+
+---
+
+# 🖼️ Asset Management System
+
+The graphical interface never loads images directly.
+
+Every asset passes through the Asset Management pipeline.
+
+Architecture:
+
+```text
+Game Card
+      │
+      ▼
+AssetManager
+      │
+      ▼
+AssetRepository
+      │
+      ▼
+assets Table
+      │
+      ▼
+Local Cache
+      │
+      ▼
+Rendered Image
+```
+
+Whenever an asset is requested:
+
+1. The launcher checks the local cache.
+2. If the file exists, it is loaded immediately.
+3. Otherwise, it downloads (or copies) the asset.
+4. The cache is updated.
+5. The database is updated.
+6. The interface displays the image.
+
+If no image is available, a fallback placeholder is automatically used.
+
+---
+
+# 🚀 Launcher System
+
+Launcher PI uses a launcher factory pattern.
+
+This allows the interface to launch any game without knowing how that game should actually be executed.
+
+Architecture:
+
+```text
+Game
     │
     ▼
 LauncherFactory
     │
-    ├──────────────► NativeLauncher
-    │                    │
-    │                    ▼
-    │                Executable
+    ├────────► NativeLauncher
     │
-    └──────────────► RomLauncher
-                         │
-                         ▼
-                   EmulatorManager
-                         │
-                         ▼
-                        ROM
+    └────────► RomLauncher
 ```
 
----
+Every game launch request goes through the `LauncherFactory`.
 
-# 🛠️ Technologies Used
-
-| Technology | Usage |
-|------------|------------|
-| Python | Backend |
-| CustomTkinter | Interface |
-| SQLite3 | Database |
-| Git | Version Control |
-| GitHub Releases | Distribution |
-| Google Drive | Temporary Distribution |
+The factory decides which launcher should be used according to the game type.
 
 ---
 
-# 📊 Current Status
+## NativeLauncher
 
-| Area | Progress |
-|--------|--------|
-| Launcher Core | ✅ 100% |
-| Library | ✅ 85% |
-| Database | 🚧 85% |
-| Assets | 🚧 80% |
-| Downloads | ✅ 90% |
-| Web Games | ✅ 90% |
-| Native Games | ✅ 85% |
-| Emulators | 🚧 60% |
-| Plugins | 🚧 65% |
-| Interface | 🚧 75% |
+Responsible for launching:
+
+* Native Linux games
+* Native Windows games
+* Installed executables
+* Local applications
+
+Its only responsibility is to locate the executable and launch it.
 
 ---
 
-# 🚀 Overall Progress
+## RomLauncher
+
+Responsible for:
+
+* Locating the correct emulator
+* Locating the ROM
+* Launching both together
+
+Its full implementation is currently under development.
+
+---
+
+# 🔌 Plugin System
+
+Every emulator integration was designed to work through plugins.
+
+Architecture:
 
 ```text
-Launcher Core         ██████████ 100%
-Library               ████████░░  85%
-Database              ████████░░  85%
-Assets                ████████░░  80%
-Downloads             █████████░  90%
-Native Games          ████████░░  85%
-Web Games             █████████░  90%
-Emulators             ██████░░░░  60%
-Plugins               ██████░░░░  65%
-Interface             ███████░░░  75%
+PluginLoader
+      │
+      ▼
+PluginRegistry
+      │
+      ▼
+Plugin
+```
+
+Every plugin will eventually be able to define:
+
+* Installation logic
+* Update logic
+* Executable detection
+* Launch arguments
+* Supported ROM formats
+* Emulator-specific configuration
+
+This architecture allows Launcher PI to support new emulators without modifying its core code.
+
+---
+
+# 🕹️ Emulator System
+
+Emulators are managed by the `EmulatorManager`.
+
+Planned execution flow:
+
+```text
+RomLauncher
+      │
+      ▼
+EmulatorManager
+      │
+      ▼
+PackageResolver
+      │
+      ▼
+Plugin
+      │
+      ▼
+Download
+```
+
+The final objective is for users to never install emulators manually.
+
+If an emulator is missing, Launcher PI will:
+
+* detect the missing emulator;
+* download it automatically;
+* install it;
+* register it in the database;
+* launch the game.
+
+---
+
+# 🗄️ Database Design
+
+Launcher PI currently separates responsibilities across multiple tables.
+
+---
+
+## games
+
+Stores general information about every registered game.
+
+Examples:
+
+* Title
+* Type
+* Main platform
+* Favorites
+* Installation status
+* Play time
+
+---
+
+## game_versions
+
+Stores platform-specific versions.
+
+Example:
+
+```text
+snake_linux
+snake_windows
+```
+
+Each version stores:
+
+* Download URL
+* Archive
+* Executable
+* Platform
+* Installation status
+
+---
+
+## assets
+
+Stores every visual asset.
+
+Including:
+
+* Covers
+* Banners
+* Logos
+
+Each asset stores:
+
+* Remote source
+* Cached file
+* Download status
+
+---
+
+## Planned Database Tables
+
+The following tables will complete the migration to a fully database-driven launcher:
+
+```text
+platforms
+```
+
+Stores every supported gaming platform.
+
+---
+
+```text
+emulators
+```
+
+Stores every installed emulator.
+
+---
+
+```text
+collections
+```
+
+Stores user-created collections.
+
+---
+
+```text
+game_collections
+```
+
+Associates games with collections.
+
+---
+
+# 🔄 Complete Launcher Flow
+
+```text
+User
+      │
+      ▼
+User Interface
+      │
+      ▼
+LibraryManager
+      │
+      ▼
+SQLite Database
+      │
+      ▼
+LauncherFactory
+      │
+      ├──────────────► NativeLauncher
+      │                     │
+      │                     ▼
+      │              NativeGameInstaller
+      │                     │
+      │                     ▼
+      │             GameVersionManager
+      │                     │
+      │                     ▼
+      │              game_versions
+      │
+      └──────────────► RomLauncher
+                            │
+                            ▼
+                     EmulatorManager
+                            │
+                            ▼
+                      PluginLoader
+                            │
+                            ▼
+                           Plugin
+                            │
+                            ▼
+                            ROM
 ```
 
 ---
 
-# 📋 Roadmap
+# 💡 Architectural Goals
 
-## ✅ Completed
+Launcher PI was designed so that adding a new game eventually becomes a simple administrative task.
 
-### Architecture
+The expected workflow is:
 
-- [x] Complete project modularization
-- [x] LauncherFactory
-- [x] NativeLauncher
-- [x] RomLauncher
-- [x] EmulatorManager
-- [x] Plugin system
-- [x] SQLite integration
+1. Register the game in the database.
+2. Register one or more platform-specific versions.
+3. Register the game assets.
+4. Launch the application.
 
-### Library
+No source code modifications should be required.
 
-- [x] SQLite-based library
-- [x] Dynamic cards
-- [x] Remote covers
-- [x] Asset cache
-- [x] Visual game status system
-
-### Installation
-
-- [x] Automatic downloads
-- [x] Automatic installation
-- [x] Automatic uninstallation
-- [x] Database persistence
-
----
-
-## 🚧 In Development
-
-### Database - Phase 2
-
-- [ ] Database migrations without deletion
-- [ ] Tool-based game registration
-- [ ] Tool-based asset registration
-- [ ] Removal of `games.py` dependency
-
-### Emulators
-
-- [ ] Real downloads
-- [ ] Real installation
-- [ ] Full ROM integration
-
-### Interface
-
-- [ ] Individual game pages
-- [ ] Detailed information
-- [ ] Screenshots
-- [ ] Visual improvements
-
----
-
-## ⏳ Planned
-
-### 👤 Users
-
-- [ ] User profiles
-- [ ] Individual statistics
-
-### 🎮 Library
-
-- [ ] Individual game pages
-- [ ] Game descriptions
-- [ ] Genres
-- [ ] Release year
-- [ ] Emulator information
-
-### 📦 Installation
-
-- [ ] Silent installers
-- [ ] Manual game addition
-- [ ] Manual installer addition
-- [ ] Manual emulator addition
-
-### ⚙️ Settings
-
-- [ ] Light/Dark theme
-- [ ] Background music
-- [ ] Volume control
-- [ ] Brightness control
-- [ ] Advanced settings
-
-### 🕹️ Content
-
-- [ ] Add new games
-- [ ] Add new emulators
-
-### 📦 Distribution
-
-- [ ] Fix external executables
-- [ ] Create an official Launcher PI installer
-
-### 🌐 Browser
-
-- [ ] Improve integration
-- [ ] Fix current issues
+This architecture makes Launcher PI highly scalable and significantly simplifies future maintenance and expansion.
 
 ---
 
 # 🎯 Final Goal
 
-The goal of Launcher PI is to become a unified platform for game management, allowing users to access:
+Launcher PI aims to become a complete game management platform, providing a simple, modern and highly automated experience.
 
-- Native Games
-- Web Games
-- ROMs
-- Emulators
+When development is complete, users will be able to manage:
 
-Through a single modern, simple, and automated interface.
+* 🎮 Native Games
+* 🌐 Web Games
+* 🕹️ ROMs
+* ⚙️ Emulators
+* 🖼️ Game Assets
+* 📚 Unified Game Library
 
-Launcher PI is now entering its second major development phase.
+—all from a single application.
 
-Phase 1 focused on building the project's core architecture:
-
-- Database
-- Library
-- Downloads
-- Installation
-- Assets
-- Emulator system
-- Plugin system
-
-### ✅ Phase 1 Completed
-
-Main achievements:
-
-- SQLite integration
-- LibraryManager
-- GameRepository
-- AssetManager
-- AssetRepository
-- NativeLauncher
-- RomLauncher
-- LauncherFactory
-- EmulatorManager
-- PluginLoader
-- PluginRegistry
-- Automatic game installation
-- Automatic game uninstallation
-- Internal browser integration
-- Dynamic cards
-- Remote asset support
-- Cover cache system
-- Visual game status system
-
-### 🚧 Phase 2 In Progress
-
-Current focus:
-
-- Remove dependency on `games.py`
-- Make SQLite the single source of truth
-- Database migration system
-- Administrative tools
-- Game registration tools
-- Asset registration tools
-- Emulator registration tools
-- ROM registration tools
-- Individual game pages
-- Full ROM + Emulator integration
-
-The long-term goal is to allow games, ROMs, emulators, covers, banners and metadata to be managed entirely through the database, without requiring code changes.
+The long-term vision is to make Launcher PI entirely database-driven, allowing new games to be added without modifying the application's source code.
 
 ---
 
-# 🗺️ Development Phases
+# 🗺️ Development Roadmap
 
-## Phase 1 — Core Architecture ✅
+## ✅ Phase 1 — Core Architecture (Completed)
 
-- [x] Database foundation
-- [x] Library system
-- [x] Download system
-- [x] Installation system
-- [x] Asset system
-- [x] Launcher system
-- [x] Emulator foundation
-- [x] Plugin foundation
+The first development phase focused on building the technical foundation of Launcher PI.
 
-## Phase 2 — Database Driven Launcher 🚧
+Main achievements:
 
-- [ ] Database migrations
-- [ ] Administrative tools
-- [ ] Game registration
-- [ ] Asset registration
-- [ ] Emulator registration
-- [ ] ROM registration
-- [ ] Full removal of `games.py`
+* Modular architecture
+* Dynamic game library
+* Download system
+* Automatic installation
+* Automatic uninstallation
+* LauncherFactory
+* NativeLauncher
+* RomLauncher
+* EmulatorManager
+* Plugin system
+* Asset system
+* SQLite integration
+* Initial user interface
 
-## Phase 3 — Content & Experience ⏳
+This phase established the foundation for every future feature.
 
-- [ ] Individual game pages
-- [ ] Metadata system
-- [ ] Screenshots
-- [ ] Statistics
-- [ ] Search and filters
-- [ ] Collections
+---
 
-## Phase 4 — Distribution & Polish ⏳
+## 🚧 Phase 2 — Database Migration
 
-- [ ] Official installer
-- [ ] Linux packages
-- [ ] Windows packages
-- [ ] Automatic updates
-- [ ] Final UI polish
+The current phase focuses on migrating the entire launcher to a fully database-driven architecture.
+
+Current objectives:
+
+* Make SQLite the single source of truth.
+* Remove every dependency on `games.py`.
+* Register games using administrative tools.
+* Register assets through the database.
+* Support multiple platform-specific versions.
+* Preserve user data through migrations.
+* Prepare platforms and emulators for full database integration.
+
+Once completed, nearly every aspect of Launcher PI will be configurable through the database alone.
+
+---
+
+## ⏳ Phase 3 — Content Expansion
+
+After the migration is complete, development will focus on expanding the launcher's ecosystem.
+
+Planned additions include:
+
+* More games
+* More emulators
+* More gaming platforms
+* Collections
+* Individual game pages
+* Improved user interface
+* Additional administrative tools
+
+---
+
+## 🚀 Phase 4 — Public Release
+
+The final development phase will focus on preparing Launcher PI for public distribution.
+
+Planned deliverables:
+
+* Official installer
+* Automatic updater
+* Linux packages
+* Windows packages
+* Complete documentation
+* Stable public release
+
+---
+
+# 📚 Development Philosophy
+
+Launcher PI follows a few core software engineering principles throughout its development.
+
+## Modular Design
+
+Every module has a single responsibility.
+
+This makes the project easier to maintain, test and expand over time.
+
+---
+
+## Database-Driven Architecture
+
+The database is responsible for storing nearly every piece of information used by the launcher.
+
+This includes:
+
+* Games
+* Game versions
+* Assets
+* Installation status
+* Favorites
+* Play time
+
+Future versions will also manage:
+
+* Platforms
+* Emulators
+* Collections
+* User data
+
+The objective is to make the database the single source of truth.
+
+---
+
+## Plugin-Based Expansion
+
+Support for new emulators should never require modifying Launcher PI itself.
+
+Instead, new functionality will be added through plugins.
+
+This architecture keeps the project scalable while making community contributions significantly easier.
+
+---
+
+## Cross-Platform Compatibility
+
+Launcher PI has been designed from the beginning to support both Linux and Windows.
+
+The game version system allows each operating system to use its own installation package while remaining under a single game entry.
+
+---
+
+## Organization
+
+Every folder inside the project has a clearly defined responsibility.
+
+Maintaining this organization keeps the codebase readable and allows the project to grow without becoming difficult to maintain.
+
+---
+
+# 🚀 Long-Term Vision
+
+The ultimate goal of Launcher PI is to allow users to:
+
+* Install games automatically
+* Update games automatically
+* Install emulators on demand
+* Launch ROMs seamlessly
+* Organize a unified game library
+* Track play time
+* Manage favorites
+* Configure plugins
+* Browse complete game information
+
+—all without requiring manual configuration.
+
+The launcher should be capable of handling everything behind the scenes, providing a smooth and beginner-friendly experience.
 
 ---
 
 # 🤝 Contributing
 
-Contributions are welcome.
+Launcher PI is currently under active development.
 
-If you plan to contribute to database-related features, please check the current migration stage before modifying database structures.
+Suggestions, bug reports and future contributions are always welcome.
 
-During Phase 2, database architecture is considered highly sensitive and may change frequently.
+As the architecture reaches stability, contribution guidelines and development documentation will also be published.
 
 ---
 
-# 📜 License
+# 📄 License
 
-This project is currently under development.
+The project's license will be defined before the first stable public release.
 
-License information will be defined before the first stable public release.
+Until then, Launcher PI remains under active development.
+
+---
+
+# ❤️ Acknowledgements
+
+Special thanks to everyone following and supporting the development of Launcher PI.
+
+Every completed milestone brings the project one step closer to its primary goal:
+
+Creating a unified platform capable of managing games from multiple platforms and technologies through a single modern application.
 
 ---
 
 <div align="center">
 
-### 🚀 Project Under Active Development
+# 🚀 Launcher PI
 
-Phase 2 — Database Driven Launcher
+### A modern, modular and fully database-driven game launcher.
 
-Last Updated: June 2026
+**Built with Python • CustomTkinter • SQLite**
+
+---
+
+⭐ **Actively developed**
+
+Last updated: **June 2026**
 
 </div>
