@@ -1,14 +1,32 @@
-from CORE.library.library_manager import (
-    LibraryManager
+from CORE.library.collection_manager import (
+    CollectionManager
 )
 
-games = (
-    LibraryManager()
-    .all_games()
+
+manager = CollectionManager()
+
+collections = (
+    manager
+    .all_collections()
 )
 
-for game in games:
+for collection in collections:
 
-    if game["id"] == "tictactoe":
+    print(
+        collection["id"],
+        collection["name"]
+    )
 
-        print(dict(game))
+    games = (
+        manager
+        .games_from_collection(
+            collection["id"]
+        )
+    )
+
+    for game in games:
+
+        print(
+            "-",
+            game["title"]
+        )
