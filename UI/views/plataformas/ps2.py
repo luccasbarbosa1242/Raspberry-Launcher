@@ -3,8 +3,8 @@ import webbrowser
 import os
 from PIL import Image
 
-from CORE.assets.asset_manager import (
-    AssetManager
+from CORE.assets.platform_asset_manager import (
+    PlatformAssetManager
 )
 
 PCSX2_URL = "https://pcsx2.net/downloads/"
@@ -30,14 +30,17 @@ def renderPS2(parent):
     )
     banner.pack_propagate(False)
 
-    asset_manager = AssetManager()
-
-    banner_path = asset_manager.get_banner(
-        "platform_ps2"
+    banner_path = (
+        PlatformAssetManager()
+        .get_banner(
+            "ps2"
+        )
     )
 
     bannerImage = ctk.CTkImage(
-        Image.open(banner_path),
+        Image.open(
+            banner_path
+        ),
         size=(1100, 250)
     )
 

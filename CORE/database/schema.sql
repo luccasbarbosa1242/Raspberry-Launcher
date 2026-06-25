@@ -143,3 +143,4 @@ CREATE TABLE IF NOT EXISTS game_versions (
 
     UNIQUE(game_id, platform)
 );
+
