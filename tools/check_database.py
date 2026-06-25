@@ -36,4 +36,19 @@ for row in cursor.fetchall():
         row["name"]
     )
 
+cursor = connection.execute(
+    "PRAGMA table_info(game_versions)"
+)
+
+print(
+    "Colunas da tabela game_versions:"
+)
+
+for row in cursor.fetchall():
+
+    print(
+        "-",
+        row["name"]
+    )
+
 connection.close()
