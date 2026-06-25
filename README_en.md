@@ -24,7 +24,7 @@ Centralize native games, web games and ROMs into a single library.
 <img src="https://img.shields.io/badge/Windows-Supported-success?style=for-the-badge" />
 <img src="https://img.shields.io/badge/Open%20Source-Yes-blue?style=for-the-badge" />
 
-</div>
+</div
 
 ---
 
