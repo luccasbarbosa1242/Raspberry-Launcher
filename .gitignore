@@ -24,3 +24,11 @@ installed/
 #downloads
 downloads/
 *.zip
+
+DOWNLOADS/
+USERDATA/cache/
+LOGS/
+
+#backups
+BACKUPS/
+DATA/*.before_restore.db

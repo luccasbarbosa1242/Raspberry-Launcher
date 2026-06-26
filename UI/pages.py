@@ -19,6 +19,14 @@ from UI.views.jogos import renderJogos
 from UTILS.helpers import clearFrame
 from UI.views.plataformas.ps2 import renderPS2
 
+from UI.views.game.details import (
+    renderGameDetails
+)
+
+from UI.views.search import (
+    renderSearch
+)
+
 
 def showPage(page):
 
@@ -61,10 +69,16 @@ def showPage(page):
 
     elif page == "megadrive":
         renderMegaDrive(pageContainer)
+   
     elif page == "pc":
         from UI.views.plataformas.PC import renderPC
         renderPC(pageContainer)
+    elif page == "game":
+        from UI.views.game.details import renderGameDetails
+        renderGameDetails(pageContainer)
 
+    elif page == "search":
+        renderSearch(pageContainer)
 
 def render():
 
@@ -76,3 +90,14 @@ def render():
 def abrirPaginaInterna(title, url):
 
     webbrowser.open(url)
+
+def showGamePage(
+    game_id
+):
+
+    clearFrame(pageContainer)
+
+    renderGameDetails(
+        pageContainer,
+        game_id
+    )

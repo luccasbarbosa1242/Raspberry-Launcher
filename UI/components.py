@@ -37,6 +37,17 @@ def createSidebar(callback):
         expand=True
     )
 
+    searchBtn = ctk.CTkButton(
+        sidebar,
+        text="Buscar",
+        command=lambda: callback(
+            "search"
+        )
+    )
+
+    searchBtn.pack(fill="x", padx=10, pady=5)
+
+
     bibliotecaBtn = ctk.CTkButton(
         contentFrame,
         text="Biblioteca",

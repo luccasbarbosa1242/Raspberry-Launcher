@@ -69,3 +69,27 @@ class GameVersionManager:
         self.repository.mark_uninstalled_by_game(
             game_id
         )
+
+    def versions_for_game(
+        self,
+        game_id
+    ):
+
+        return (
+            self.repository
+            .by_game(
+                game_id
+            )
+        )
+    
+    def get_version(
+        self,
+        version_id
+    ):
+
+        return (
+            self.repository
+            .get_by_id(
+                version_id
+            )
+        )

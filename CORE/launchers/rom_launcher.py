@@ -10,6 +10,9 @@ from CORE.emulators.emulator_manager import (
     EmulatorManager
 )
 
+from CORE.services.playtime_service import (
+    PlaytimeService
+)
 
 class RomLauncher(BaseLauncher):
 
@@ -43,6 +46,12 @@ class RomLauncher(BaseLauncher):
             .ensure_installed(
                 emulator_id
             )
+        )
+
+        playtime = PlaytimeService()
+
+        start_time = playtime.mark_started(
+            game
         )
 
         plugin["adapter"].launch(

@@ -1,32 +1,34 @@
-from CORE.library.collection_manager import (
-    CollectionManager
+from CORE.library.platform_manager import (
+    PlatformManager
 )
 
 
-manager = CollectionManager()
+manager = PlatformManager()
 
-collections = (
+platforms = (
     manager
-    .all_collections()
+    .all_platforms()
 )
 
-for collection in collections:
+for platform in platforms:
 
     print(
-        collection["id"],
-        collection["name"]
+        platform["id"],
+        platform["name"],
+        platform["type"]
     )
 
-    games = (
-        manager
-        .games_from_collection(
-            collection["id"]
-        )
+print()
+print(
+    "Emulador do PS2:",
+    manager.emulator_for_platform(
+        "ps2"
     )
+)
 
-    for game in games:
-
-        print(
-            "-",
-            game["title"]
-        )
+print(
+    "Plugin do PS2:",
+    manager.plugin_for_platform(
+        "ps2"
+    )
+)

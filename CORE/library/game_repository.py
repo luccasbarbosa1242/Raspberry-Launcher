@@ -158,3 +158,195 @@ class GameRepository:
         )
 
         self.db.commit()
+
+    def get_by_id(
+        self,
+        game_id
+    ):
+
+        cursor = self.db.cursor()
+
+        cursor.execute(
+            """
+            SELECT *
+            FROM games
+            WHERE id = ?
+            """,
+            (
+                game_id,
+            )
+        )
+
+        return cursor.fetchone()
+
+    def set_favorite(
+        self,
+        game_id,
+        favorite
+    ):
+
+        cursor = self.db.cursor()
+
+        cursor.execute(
+            """
+            UPDATE games
+            SET favorite = ?
+            WHERE id = ?
+            """,
+            (
+                int(favorite),
+                game_id
+            )
+        )
+
+        self.db.commit()
+
+
+    def toggle_favorite(
+        self,
+        game_id
+    ):
+
+        cursor = self.db.cursor()
+
+        cursor.execute(
+            """
+            UPDATE games
+            SET favorite =
+                CASE
+                    WHEN favorite = 1 THEN 0
+                    ELSE 1
+                END
+            WHERE id = ?
+            """,
+            (
+                game_id,
+            )
+        )
+
+        self.db.commit()
+
+
+    def add_play_time(
+        self,
+        game_id,
+        seconds
+    ):
+
+        cursor = self.db.cursor()
+
+        cursor.execute(
+            """
+            UPDATE games
+            SET play_time = play_time + ?,
+                last_played = datetime('now')
+            WHERE id = ?
+            """,
+            (
+                seconds,
+                game_id
+            )
+        )
+
+        self.db.commit()
+
+
+    def mark_last_played(
+        self,
+        game_id
+    ):
+
+        cursor = self.db.cursor()
+
+        cursor.execute(
+            """
+            UPDATE games
+            SET last_played = datetime('now')
+            WHERE id = ?
+            """,
+            (
+                game_id,
+            )
+        )
+
+        self.db.commit()
+
+    def search(
+        self,
+        term=None,
+        game_type=None,
+        platform=None,
+        installed=None,
+        favorite=None
+    ):
+
+        query = """
+            SELECT *
+            FROM games
+            WHERE 1 = 1
+        """
+
+        params = []
+
+        if term:
+
+            query += """
+                AND title LIKE ?
+            """
+
+            params.append(
+                f"%{term}%"
+            )
+
+        if game_type:
+
+            query += """
+                AND type = ?
+            """
+
+            params.append(
+                game_type
+            )
+
+        if platform:
+
+            query += """
+                AND platform = ?
+            """
+
+            params.append(
+                platform
+            )
+
+        if installed is not None:
+
+            query += """
+                AND installed = ?
+            """
+
+            params.append(
+                int(installed)
+            )
+
+        if favorite is not None:
+
+            query += """
+                AND favorite = ?
+            """
+
+            params.append(
+                int(favorite)
+            )
+
+        query += """
+            ORDER BY title ASC
+        """
+
+        cursor = self.db.cursor()
+
+        cursor.execute(
+            query,
+            params
+        )
+
+        return cursor.fetchall()

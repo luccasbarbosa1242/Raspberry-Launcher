@@ -17,7 +17,6 @@ from CORE.launcher import (
     abrirJogo
 )
 
-
 CARD_WIDTH = 230
 CARD_HEIGHT = 420
 
@@ -40,6 +39,16 @@ def get_game_id(game):
         game["id"]
         if "id" in game.keys()
         else game["folder"]
+    )
+
+def open_game_page(game_id):
+
+    from UI.pages import (
+        showGamePage
+    )
+
+    showGamePage(
+        game_id
     )
 
 def get_game_type(game):
@@ -230,6 +239,13 @@ def criarCardJogo(
     card.grid_propagate(False)
     card.pack_propagate(False)
 
+    card.bind(
+    "<Button-1>",
+    lambda event: open_game_page(
+        get_game_id(game)
+    )
+)
+
     iconImage = carregarImagemJogo(
         game
     )
@@ -246,9 +262,23 @@ def criarCardJogo(
         pady=(14, 8)
     )
 
+    icon.bind(
+    "<Button-1>",
+    lambda event: open_game_page(
+        get_game_id(game)
+    )
+)
+    icon.configure(
+    cursor="hand2"
+)
+
     title = ctk.CTkLabel(
         card,
-        text=get_game_title(game),
+        text=(
+            f"★ {get_game_title(game)}"
+            if game["favorite"]
+            else get_game_title(game)
+        ),
         font=("Arial", 15, "bold"),
         wraplength=190,
         justify="center",
@@ -259,6 +289,16 @@ def criarCardJogo(
     title.pack(
         pady=(0, 2)
     )
+
+    title.bind(
+    "<Button-1>",
+    lambda event: open_game_page(
+        get_game_id(game)
+    )
+)
+    title.configure(
+    cursor="hand2"
+)
 
     platformLabel = ctk.CTkLabel(
     card,

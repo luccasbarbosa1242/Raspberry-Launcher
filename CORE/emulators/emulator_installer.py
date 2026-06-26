@@ -1,3 +1,4 @@
+import shutil
 from pathlib import Path
 
 from CORE.path_resolver import PathResolver
@@ -15,13 +16,9 @@ class EmulatorInstaller:
 
     def __init__(self):
 
-        self.downloader = (
-            DownloadManager()
-        )
+        self.downloader = DownloadManager()
 
-        self.extractor = (
-            Extractor()
-        )
+        self.extractor = Extractor()
 
     def install(
         self,
@@ -49,18 +46,36 @@ class EmulatorInstaller:
             archive_path
         )
 
-        self.extractor.extract(
-            archive_path,
-            install_dir,
-            package["archive_type"]
-        )
+        if package["archive_type"] == "appimage":
 
-        executable_path = (
-            self.find_executable(
-                install_dir,
-                package["executable"]
+            executable_path = (
+                install_dir
+                / package["executable"]
             )
-        )
+
+            shutil.copy(
+                archive_path,
+                executable_path
+            )
+
+            executable_path.chmod(
+                executable_path.stat().st_mode | 0o111
+            )
+
+        else:
+
+            self.extractor.extract(
+                archive_path,
+                install_dir,
+                package["archive_type"]
+            )
+
+            executable_path = (
+                self.find_executable(
+                    install_dir,
+                    package["executable"]
+                )
+            )
 
         if not executable_path:
 

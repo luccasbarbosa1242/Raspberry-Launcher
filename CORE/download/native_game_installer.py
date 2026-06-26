@@ -316,3 +316,44 @@ class NativeGameInstaller:
         showPage(
             "biblioteca"
         )
+
+    def install_version(
+        self,
+        game,
+        version,
+        button=None
+    ):
+
+        if game["type"] != "native":
+
+            raise RuntimeError(
+                "Este instalador só instala jogos nativos."
+            )
+
+        if version["launch_type"] == "html":
+
+            return
+
+        if not version["download_url"]:
+
+            raise RuntimeError(
+                f"Versão sem URL de download: {version['id']}"
+            )
+
+        if button:
+
+            button.configure(
+                text="Baixando...",
+                state="disabled"
+            )
+
+        thread = threading.Thread(
+            target=lambda: self._process(
+                game,
+                version,
+                button
+            ),
+            daemon=True
+        )
+
+        thread.start()

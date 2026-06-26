@@ -7,12 +7,54 @@ from CORE.assets.platform_asset_manager import (
     PlatformAssetManager
 )
 
+from CORE.emulators.emulator_manager import (
+    EmulatorManager
+)
 PCSX2_URL = "https://pcsx2.net/downloads/"
 
+def instalarPCSX2(button=None):
 
-def instalarPCSX2():
-    webbrowser.open(PCSX2_URL)
+    try:
 
+        if button:
+
+            button.configure(
+                text="Baixando...",
+                state="disabled"
+            )
+
+        executable_path = (
+            EmulatorManager()
+            .ensure_installed(
+                "pcsx2"
+            )
+        )
+
+        print(
+            f"PCSX2 instalado em: {executable_path}"
+        )
+
+        if button:
+
+            button.configure(
+                text="Instalado",
+                state="disabled"
+            )
+
+    except Exception as e:
+
+        print(
+            "Erro ao instalar PCSX2:"
+        )
+
+        print(e)
+
+        if button:
+
+            button.configure(
+                text="Tentar novamente",
+                state="normal"
+            )
 
 def renderPS2(parent):
 
@@ -77,7 +119,10 @@ def renderPS2(parent):
         corner_radius=10,  # deixar o botão redondo
         fg_color="#7C3AED",  # cor do botão
         hover_color="#8B5CF6",  # quando passar o mouse em cima do botão, ele muda de cor
-        font=("Arial", 16, "bold")
+        font=("Arial", 16, "bold"),
+        command=lambda: instalarPCSX2(
+            biosBtn
+        )
     )
 
     biosBtn.pack(

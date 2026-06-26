@@ -96,3 +96,23 @@ class GameVersionRepository:
         )
 
         self.db.commit()
+
+    def get_by_id(
+        self,
+        version_id
+    ):
+
+        cursor = self.db.cursor()
+
+        cursor.execute(
+            """
+            SELECT *
+            FROM game_versions
+            WHERE id = ?
+            """,
+            (
+                version_id,
+            )
+        )
+
+        return cursor.fetchone()

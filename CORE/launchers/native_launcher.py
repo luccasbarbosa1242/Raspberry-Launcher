@@ -1,9 +1,14 @@
 import os
 import subprocess
 import sys
+import threading
 
 from CORE.launchers.base_launcher import (
     BaseLauncher
+)
+
+from CORE.services.playtime_service import (
+    PlaytimeService
 )
 
 
@@ -16,6 +21,12 @@ class NativeLauncher(BaseLauncher):
         if "launch_type" in game.keys():
 
             launch_type = game["launch_type"]
+
+        playtime = PlaytimeService()
+
+        start_time = playtime.mark_started(
+            game
+        )
 
         if launch_type == "html":
 
@@ -42,19 +53,42 @@ class NativeLauncher(BaseLauncher):
 
         if launch_type == "python":
 
-            subprocess.Popen(
-                [
-                    sys.executable,
-                    path
-                ]
-            )
-
-            return
-
-        subprocess.Popen(
-            [
+            command = [
+                sys.executable,
                 path
             ]
+
+        else:
+
+            command = [
+                path
+            ]
+
+        threading.Thread(
+            target=lambda: self._run_and_track(
+                command,
+                game,
+                start_time
+            ),
+            daemon=True
+        ).start()
+
+    def _run_and_track(
+        self,
+        command,
+        game,
+        start_time
+    ):
+
+        process = subprocess.Popen(
+            command
+        )
+
+        process.wait()
+
+        PlaytimeService().mark_finished(
+            game,
+            start_time
         )
 
     def is_installed(self, game):
@@ -69,8 +103,6 @@ class NativeLauncher(BaseLauncher):
 
             return True
 
-        path = game["path"]
-
         return os.path.exists(
-            path
+            game["path"]
         )
