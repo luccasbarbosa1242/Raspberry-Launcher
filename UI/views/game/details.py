@@ -1,5 +1,7 @@
 import customtkinter as ctk
 
+from PIL import Image, ImageOps
+
 from CORE.assets.asset_manager import (
     AssetManager
 )
@@ -22,6 +24,10 @@ from UTILS.images import loadCover
 from CORE.library.game_version_manager import (
     GameVersionManager
 )
+
+
+BG_COLOR = "#0b0f1a"
+CARD_COLOR = "#181c2b"
 
 
 def get_game_title(game):
@@ -51,7 +57,7 @@ def load_cover(game):
 
 def load_banner(
     game,
-    size=(1400, 360)
+    size
 ):
 
     banner_path = (
@@ -61,8 +67,20 @@ def load_banner(
         )
     )
 
-    return loadCover(
-        banner_path,
+    image = Image.open(
+        banner_path
+    ).convert("RGBA")
+
+    image = ImageOps.fit(
+        image,
+        size,
+        method=Image.Resampling.LANCZOS,
+        centering=(0.5, 0.35)
+    )
+
+    return ctk.CTkImage(
+        light_image=image,
+        dark_image=image,
         size=size
     )
 
@@ -78,6 +96,35 @@ def install_specific_version(
         version,
         button
     )
+
+
+def render_gradient(
+    parent
+):
+
+    gradient_steps = 14
+
+    for index in range(gradient_steps):
+
+        opacity = index / gradient_steps
+
+        value = int(
+            26 - (opacity * 15)
+        )
+
+        color = f"#{value:02x}{value + 4:02x}{value + 12:02x}"
+
+        strip = ctk.CTkFrame(
+            parent,
+            height=7,
+            fg_color=color,
+            corner_radius=0
+        )
+
+        strip.pack(
+            fill="x",
+            side="bottom"
+        )
 
 
 def render_versions(
@@ -115,7 +162,7 @@ def render_versions(
 
         version_card = ctk.CTkFrame(
             parent,
-            fg_color="#181c2b",
+            fg_color=CARD_COLOR,
             corner_radius=14
         )
 
@@ -245,11 +292,21 @@ def renderGameDetails(
 
     parent.update_idletasks()
 
-    hero_height = 360
+    installed = jogoInstalado(
+        game
+    )
+
+    status = (
+        "Instalado"
+        if installed
+        else "Não instalado"
+    )
+
+    hero_height = 430
 
     hero = ctk.CTkFrame(
         parent,
-        fg_color="#0b0f1a",
+        fg_color=BG_COLOR,
         corner_radius=0,
         height=hero_height
     )
@@ -262,36 +319,56 @@ def renderGameDetails(
 
     hero.pack_propagate(False)
 
-    try:
+    banner = ctk.CTkLabel(
+        hero,
+        text=""
+    )
 
-        banner_width = max(
-            parent.winfo_width(),
-            1400
-        )
+    banner.place(
+        x=0,
+        y=0,
+        relwidth=1,
+        relheight=1
+    )
 
-        banner_image = load_banner(
-            game,
-            size=(banner_width, hero_height)
-        )
+    render_gradient(
+        hero
+    )
 
-        banner = ctk.CTkLabel(
-            hero,
-            text="",
-            image=banner_image
-        )
+    def update_banner(event=None):
 
-        banner.image = banner_image
+        width = hero.winfo_width()
 
-        banner.place(
-            x=0,
-            y=0,
-            relwidth=1,
-            relheight=1
-        )
+        if width <= 10:
 
-    except Exception as error:
+            return
 
-        print("Erro ao carregar banner:", error)
+        try:
+
+            banner_image = load_banner(
+                game,
+                size=(width, hero_height)
+            )
+
+            banner.configure(
+                image=banner_image
+            )
+
+            banner.image = banner_image
+
+        except Exception as error:
+
+            print("Erro ao carregar banner:", error)
+
+    hero.bind(
+        "<Configure>",
+        update_banner
+    )
+
+    hero.after(
+        200,
+        update_banner
+    )
 
     container = ctk.CTkScrollableFrame(
         parent,
@@ -302,7 +379,7 @@ def renderGameDetails(
         fill="both",
         expand=True,
         padx=25,
-        pady=25
+        pady=(0, 25)
     )
 
     body = ctk.CTkFrame(
@@ -312,7 +389,8 @@ def renderGameDetails(
 
     body.pack(
         fill="x",
-        expand=True
+        expand=True,
+        pady=(0, 20)
     )
 
     cover_image = load_cover(
@@ -345,42 +423,30 @@ def renderGameDetails(
         anchor="n"
     )
 
-    installed = jogoInstalado(
-        game
+    title = ctk.CTkLabel(
+        info,
+        text=get_game_title(game),
+        font=("Arial", 34, "bold"),
+        anchor="w"
     )
 
-    status = (
-        "Instalado"
-        if installed
-        else "Não instalado"
+    title.pack(
+        anchor="w",
+        pady=(0, 8)
     )
 
-    rows = [
-        ("ID", game["id"]),
-        ("Tipo", game["type"]),
-        ("Plataforma", game["platform"]),
-        ("Status", status),
-        ("Launch type", game["launch_type"]),
-        ("Caminho", game["path"]),
-        ("Favorito", "Sim" if game["favorite"] else "Não"),
-        ("Tempo jogado", f"{game['play_time']} segundos"),
-        ("Última vez jogado", game["last_played"])
-    ]
+    subtitle = ctk.CTkLabel(
+        info,
+        text=f"{game['platform']}  •  {status}",
+        font=("Arial", 16),
+        text_color="#b8c0d8",
+        anchor="w"
+    )
 
-    for label, value in rows:
-
-        row = ctk.CTkLabel(
-            info,
-            text=f"{label}: {value}",
-            font=("Arial", 16),
-            anchor="w",
-            justify="left"
-        )
-
-        row.pack(
-            anchor="w",
-            pady=4
-        )
+    subtitle.pack(
+        anchor="w",
+        pady=(0, 18)
+    )
 
     buttons = ctk.CTkFrame(
         info,
@@ -389,7 +455,7 @@ def renderGameDetails(
 
     buttons.pack(
         anchor="w",
-        pady=(25, 0)
+        pady=(0, 25)
     )
 
     if installed:
@@ -449,6 +515,45 @@ def renderGameDetails(
         side="left",
         padx=(0, 10)
     )
+
+    details_box = ctk.CTkFrame(
+        info,
+        fg_color=CARD_COLOR,
+        corner_radius=14
+    )
+
+    details_box.pack(
+        fill="x",
+        pady=(0, 10)
+    )
+
+    rows = [
+        ("ID", game["id"]),
+        ("Tipo", game["type"]),
+        ("Launch type", game["launch_type"]),
+        ("Caminho", game["path"]),
+        ("Favorito", "Sim" if game["favorite"] else "Não"),
+        ("Tempo jogado", f"{game['play_time']} segundos"),
+        ("Última vez jogado", game["last_played"])
+    ]
+
+    for label, value in rows:
+
+        row = ctk.CTkLabel(
+            details_box,
+            text=f"{label}: {value}",
+            font=("Arial", 15),
+            text_color="#d7dcec",
+            anchor="w",
+            justify="left"
+        )
+
+        row.pack(
+            anchor="w",
+            fill="x",
+            padx=15,
+            pady=4
+        )
 
     render_versions(
         info,
