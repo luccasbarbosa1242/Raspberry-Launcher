@@ -75,7 +75,78 @@ def load_banner(
         image,
         size,
         method=Image.Resampling.LANCZOS,
-        centering=(0.5, 0.35)
+        centering=(0.5, 0.20)
+    )
+
+    dark_overlay = Image.new(
+        "RGBA",
+        size,
+        (
+            0,
+            0,
+            0,
+            60
+        )
+    )
+
+    image.alpha_composite(
+        dark_overlay
+    )
+
+    gradient_height = int(
+        size[1] * 0.65
+    )
+
+    gradient = Image.new(
+        "RGBA",
+        (
+            size[0],
+            gradient_height
+        ),
+        (
+            0,
+            0,
+            0,
+            0
+        )
+    )
+
+    for y in range(gradient_height):
+
+        progress = y / gradient_height
+
+        alpha = int(
+            255 * (progress ** 2)
+        )
+
+        line = Image.new(
+            "RGBA",
+            (
+                size[0],
+                1
+            ),
+            (
+                11,
+                15,
+                26,
+                alpha
+            )
+        )
+
+        gradient.paste(
+            line,
+            (
+                0,
+                y
+            )
+        )
+
+    image.alpha_composite(
+        gradient,
+        (
+            0,
+            size[1] - gradient_height
+        )
     )
 
     return ctk.CTkImage(
@@ -96,35 +167,6 @@ def install_specific_version(
         version,
         button
     )
-
-
-def render_gradient(
-    parent
-):
-
-    gradient_steps = 14
-
-    for index in range(gradient_steps):
-
-        opacity = index / gradient_steps
-
-        value = int(
-            26 - (opacity * 15)
-        )
-
-        color = f"#{value:02x}{value + 4:02x}{value + 12:02x}"
-
-        strip = ctk.CTkFrame(
-            parent,
-            height=7,
-            fg_color=color,
-            corner_radius=0
-        )
-
-        strip.pack(
-            fill="x",
-            side="bottom"
-        )
 
 
 def render_versions(
@@ -302,13 +344,13 @@ def renderGameDetails(
         else "Não instalado"
     )
 
-    hero_height = 430
+    HERO_HEIGHT = 320
 
     hero = ctk.CTkFrame(
         parent,
         fg_color=BG_COLOR,
         corner_radius=0,
-        height=hero_height
+        height=HERO_HEIGHT
     )
 
     hero.pack(
@@ -331,10 +373,6 @@ def renderGameDetails(
         relheight=1
     )
 
-    render_gradient(
-        hero
-    )
-
     def update_banner(event=None):
 
         width = hero.winfo_width()
@@ -347,7 +385,7 @@ def renderGameDetails(
 
             banner_image = load_banner(
                 game,
-                size=(width, hero_height)
+                size=(width, HERO_HEIGHT)
             )
 
             banner.configure(
@@ -376,11 +414,11 @@ def renderGameDetails(
     )
 
     container.pack(
-        fill="both",
-        expand=True,
-        padx=25,
-        pady=(0, 25)
-    )
+    fill="both",
+    expand=True,
+    padx=25,
+    pady=(0, 25)
+)
 
     body = ctk.CTkFrame(
         container,
