@@ -105,7 +105,7 @@ def render_details(parent, details, actions, bindings):
         label = (
             f"Instalar {version.platform.upper()}"
             if version.can_install
-            else ("Online" if version.launch_type == "html" else status)
+            else status
         )
         button = ctk.CTkButton(
             row,

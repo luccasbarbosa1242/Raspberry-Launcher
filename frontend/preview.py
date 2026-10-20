@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+from contracts.catalog import CatalogEntry
 from contracts.models import (
     GameAction,
     GameDetails,
@@ -31,6 +32,27 @@ SAMPLE = GameSummary(
     cover_path=COVER,
     best_score="42",
 )
+CATALOG_EXAMPLES = {
+    "game": CatalogEntry("game", "preview", SAMPLE.title, {
+        "id": "preview", "title": SAMPLE.title, "type": "native", "platform": "linux",
+        "path": "preview", "launch_type": "linux", "download_url": "local:exemplo.zip",
+        "archive_name": "exemplo.zip", "archive_type": "zip", "executable": "exemplo",
+    }),
+    "game_version": CatalogEntry("game_version", "preview_linux", "Exemplo — Linux", {
+        "id": "preview_linux", "game_id": "preview", "platform": "linux",
+        "architecture": "x86_64", "path": "preview", "launch_type": "linux",
+        "download_url": "local:exemplo.zip", "archive_name": "exemplo.zip",
+        "archive_type": "zip", "executable": "exemplo",
+    }),
+    "emulator": CatalogEntry("emulator", "pcsx2", "PCSX2", {
+        "id": "pcsx2", "name": "PCSX2", "plugin_id": "pcsx2",
+    }),
+    "emulator_package": CatalogEntry("emulator_package", "pcsx2_linux_x64", "PCSX2 — Linux", {
+        "id": "pcsx2_linux_x64", "emulator_id": "pcsx2", "system": "linux",
+        "architecture": "x86_64", "version": "exemplo", "download_url": "local:pcsx2.zip",
+        "archive_type": "zip", "executable": "pcsx2-qt",
+    }),
+}
 
 
 class PreviewActions:
@@ -60,6 +82,21 @@ class PreviewActions:
 
     def search(self, term):
         self.view.show_search_results((SAMPLE,))
+
+    def open_registry(self, kind):
+        self.view.show_registry(kind, (CATALOG_EXAMPLES[kind],))
+
+    def edit_catalog(self, kind, record_id=None):
+        values = CATALOG_EXAMPLES[kind].values if record_id else {}
+        self.view.show_catalog_form(
+            kind, values,
+            {"platforms": ("linux", "windows", "ps2"), "games": ("preview",),
+             "emulators": ("pcsx2",)},
+            record_id,
+        )
+
+    def save_catalog(self, kind, data, record_id=None):
+        self._notice()
 
     def _notice(self):
         self.view.show_error("Prévia visual: esta ação não executa operações reais.")

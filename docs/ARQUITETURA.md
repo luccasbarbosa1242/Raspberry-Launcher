@@ -43,6 +43,11 @@ O worker coloca os callbacks em uma fila. O frontend chama `controller.poll()` p
 - `InstallationResult`: jogo, versão e caminho instalado.
 - `UiResources`: localização dos ícones estáticos usados pela interface.
 
+`contracts/catalog.py` define `CatalogEntry`, com campos simples para os quatro
+cadastros, e referências de perfil/origem reservadas para fases futuras. Os
+formulários enviam dicionários estruturados; widgets e linhas SQLite não cruzam
+esses contratos.
+
 `LibraryFilter`, `GameAction` e `Phase` são valores semânticos. O backend conhece filtros como `INSTALLED` e `FAVORITES`; o controlador traduz as rotas visuais, como `biblioteca`, para esses filtros.
 
 `contracts/ports.py` define três protocolos:
@@ -63,10 +68,13 @@ O ponto de entrada recomendado é `backend/api.py`, classe `LauncherService`.
 | `library/` | Jogos, versões, plataformas, coleções e repositórios. |
 | `download/` | Transporte, extração e instalação de jogos. |
 | `assets/` | Registro de recursos, download, cache portátil e caminhos de fallback. |
-| `launchers/` | Execução nativa/web e execução de ROMs via plugin. |
+| `launchers/` | Execução nativa e execução de ROMs via plugin; HTML/navegador é recusado. |
 | `emulators/` | Pacotes, instalação e estado dos emuladores. |
 | `plugins/`, `plugin_adapters/` | Carregamento de plugins e adaptador PCSX2. |
-| `catalog/platforms.json` | Nomes e exemplos de jogos das antigas telas de plataformas. |
+| `catalog/platforms.json` | Seed de nomes/exemplos importado uma vez; runtime consulta `platforms`. |
+| `catalog_service.py` | Validações e transações usadas por GUI, CLI e importação. |
+| `game_support.py` | Política compartilhada de exclusão e bloqueio de HTML/navegador. |
+| `recovery.py` | Pontos de recuperação SQLite consistentes e restauração verificada. |
 | `score.py`, `services/` | Pontuações persistentes e tempo jogado. |
 | `path_resolver.py` | Política central de caminhos. |
 | `tools/` | Ferramentas administrativas de terminal. |
@@ -75,6 +83,13 @@ O ponto de entrada recomendado é `backend/api.py`, classe `LauncherService`.
 Cada chamada da fachada usa `database_scope()` e fecha as conexões que criou. Não são compartilhadas conexões SQLite entre a thread principal e os workers. O acompanhamento de tempo de um processo também abre suas conexões na própria thread.
 
 A API propaga falhas de operação ao chamador. Falhas de assets são recuperáveis e retornam um placeholder existente, com registro no log.
+
+As migrações 009–011 separam catálogo, pacotes/versões e instalações locais. A
+execução lê `runtime_games`, `runtime_game_versions` e `emulator_installations`;
+triggers mantêm as escritas legadas de instalação compatíveis. O resolvedor de
+pacotes consulta SQLite por SO/arquitetura, sem reler o JSON inicial. Registros
+HTML ficam arquivados com histórico preservado e fora das consultas ativas.
+Tabelas de perfis e identidades externas são apenas preparação de esquema.
 
 ## Frontend
 
@@ -89,6 +104,7 @@ A API propaga falhas de operação ao chamador. Falhas de assets são recuperáv
 | `views/details.py` | Detalhes e versões. |
 | `views/platform.py` | Template visual reutilizado pelas plataformas. |
 | `views/settings.py` | Tela de configurações. |
+| `views/registry.py` | Listas e formulários de jogos, versões, emuladores e pacotes. |
 | `window.py` | Janela, ciclo de vida, apresentação das telas e temporizador de polling. |
 | `preview.py` | Fixtures e navegação para trabalhar no visual sem o backend. |
 
@@ -101,3 +117,9 @@ Para mudar cores, espaçamentos ou a disposição dos botões, altere somente o 
 Uma funcionalidade com novos dados ou uma nova ação exige atualizar o contrato e os adaptadores envolvidos. A separação reduz acoplamentos internos; ela não elimina a necessidade de compatibilidade no contrato de comunicação.
 
 A prévia visual serve para testar apresentação com fixtures. A CLI serve para exercitar operações reais do backend. A suíte automatizada verifica as duas camadas separadamente e também a integração entre elas.
+
+Cadastros seguem o mesmo fluxo assíncrono: evento de formulário → controlador →
+`LauncherService`/`CatalogService` → resultado na thread principal. Erros mantêm
+os campos; IDs preservados e a geração da rota impedem callbacks antigos de
+substituir uma tela nova. A CLI e as ferramentas interativas chamam o mesmo
+serviço diretamente, sem simular respostas de terminal para a GUI.

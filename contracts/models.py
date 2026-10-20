@@ -55,6 +55,7 @@ class VersionInfo:
     installed: bool
     can_install: bool
     current: bool
+    architecture: str = "any"
 
 
 @dataclass(frozen=True)

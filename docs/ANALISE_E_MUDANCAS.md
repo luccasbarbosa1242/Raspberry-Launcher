@@ -1,12 +1,17 @@
 # Análise e reestruturação
 
+> Registro histórico da reestruturação anterior à Fase 1. As referências abaixo
+> a execução web e às fontes JSON descrevem aquele estado. Na entrega atual,
+> HTML/navegador foi retirado e os cadastros de runtime estão no SQLite. Consulte
+> [Fase 1](FASE1.md), [Arquitetura](ARQUITETURA.md) e [Validação](VALIDACAO.md).
+
 O ZIP original continha 161 arquivos, sendo 121 arquivos Python. Foram analisados os módulos, os dois READMEs, as migrações SQL, os JSONs, o resumo textual do banco e o esquema/conteúdo real de `DATA/library.db`. As imagens foram tratadas como recursos do programa.
 
 O projeto já apresentava uma divisão nominal entre `CORE` e `UI`, mas havia dependências nos dois sentidos. Apenas mover as pastas manteria esses acoplamentos.
 
 ## Acoplamentos encontrados e destino das responsabilidades
 
-| Código original | Problema observado | Organização atual |
+| Código original | Problema observado | Organização após a reestruturação anterior |
 | --- | --- | --- |
 | `CORE/download/native_game_installer.py` | Recebia botões, atualizava widgets, criava threads e navegava para a biblioteca. | Instalador síncrono em `backend/download/`; tarefas e navegação em `application/`; estado visual em `frontend/bindings.py`. |
 | `CORE/uninstaller.py` | Importava a janela, alterava botões e chamava `showPage`. | Operação sem GUI em `backend/uninstaller.py`; apresentação e atualização da tela pelo controlador. |

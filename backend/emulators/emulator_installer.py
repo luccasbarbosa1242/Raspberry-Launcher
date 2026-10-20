@@ -17,6 +17,17 @@ class EmulatorInstaller:
 
     def install(self, emulator_id, package):
 
+        if (
+            not emulator_id
+            or Path(emulator_id).name != emulator_id
+            or emulator_id in (".", "..")
+            or "\\" in emulator_id
+        ):
+            raise ValueError("ID de emulador inválido para instalação.")
+        executable = Path(package["executable"])
+        if executable.is_absolute() or ".." in executable.parts or "\\" in str(executable):
+            raise ValueError("O executável do pacote deve ser um caminho relativo seguro.")
+
         install_dir = PathResolver.emulators() / emulator_id
 
         install_dir.mkdir(parents=True, exist_ok=True)

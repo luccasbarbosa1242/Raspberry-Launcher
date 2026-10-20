@@ -29,6 +29,7 @@ class LauncherController:
         self._closed = False
         self._last_scores = 0
         self._scores_pending = False
+        self._catalog_saves = set()
 
     def attach_view(self, view: View):
         self.view = view
@@ -50,6 +51,9 @@ class LauncherController:
         self.runner.submit(work, success, failure)
 
     def navigate(self, page):
+        if page.startswith("registry:"):
+            self.open_registry(page.removeprefix("registry:"))
+            return
         self.route = (page, None)
         if page == "search":
             self.term = ""
@@ -92,8 +96,62 @@ class LauncherController:
             self.open_game(game_id)
         elif page == "search":
             self.search(self.term)
+        elif page == "registry":
+            self.open_registry(game_id)
+        elif page == "catalog_form":
+            return
         else:
             self.navigate(page)
+
+    def open_registry(self, kind):
+        self.route = ("registry", kind)
+        self.view.show_loading()
+        self._query(
+            lambda: self.backend.list_catalog(kind),
+            lambda entries: self.view.show_registry(kind, entries),
+        )
+
+    def edit_catalog(self, kind, record_id=None):
+        self.route = ("catalog_form", (kind, record_id))
+        self.view.show_loading()
+
+        def load():
+            values = {} if record_id is None else dict(self.backend.get_catalog(kind, record_id).values)
+            return values, self.backend.catalog_choices()
+
+        self._query(
+            load,
+            lambda result: self.view.show_catalog_form(kind, result[0], result[1], record_id),
+        )
+
+    def save_catalog(self, kind, data, record_id=None):
+        if self._closed:
+            return
+        # Copy data on the UI thread; worker callbacks never retain widgets.
+        values = dict(data)
+        key = (kind, record_id if record_id is not None else str(values.get("id", "")))
+        if key in self._catalog_saves:
+            self.view.show_error("Já existe um salvamento em andamento para este registro.")
+            return
+        self._catalog_saves.add(key)
+        route, generation = self.route, self._generation
+
+        def current():
+            return not self._closed and self.route == route and self._generation == generation
+
+        def success(entry):
+            self._catalog_saves.discard(key)
+            if current():
+                self.open_registry(kind)
+
+        def failure(error):
+            self._catalog_saves.discard(key)
+            if current():
+                self.view.show_error(str(error))
+
+        self.runner.submit(
+            lambda: self.backend.save_catalog(kind, values, record_id), success, failure
+        )
 
     def _operation(self, target_id, kind, work):
         key = f"{'emulator' if kind == 'emulator' else 'game'}:{target_id}"

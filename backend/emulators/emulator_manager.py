@@ -1,5 +1,7 @@
 from pathlib import Path
 from backend.emulators.package_resolver import PackageResolver
+from backend.emulators.package_resolver import current_architecture
+from backend.system.platform_detector import PlatformDetector
 
 from backend.emulators.emulator_installer import EmulatorInstaller
 
@@ -20,6 +22,12 @@ class EmulatorManager:
         emulator = self.repository.get_installed(emulator_id)
 
         if not emulator:
+            return False
+
+        if emulator["package_id"] and (
+            emulator["package_system"] != PlatformDetector.current()
+            or emulator["package_architecture"] not in ("any", current_architecture())
+        ):
             return False
 
         return bool(
@@ -59,6 +67,7 @@ class EmulatorManager:
                 "executable_path": result["executable_path"],
                 "installed": 1,
                 "plugin_id": package["plugin_id"],
+                "package_id": package.get("id"),
             }
         )
 

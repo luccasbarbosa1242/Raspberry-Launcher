@@ -13,7 +13,7 @@ from backend.emulators.emulator_manager import EmulatorManager
 from backend.launchers.rom_launcher import RomLauncher
 from backend.score import lerBestScore
 from backend.system.platform_detector import PlatformDetector
-from contracts.models import GameAction, Phase
+from contracts.models import Phase
 from tests.support import BackendCase, PROJECT
 
 
@@ -144,7 +144,9 @@ class BackendTests(BackendCase):
         )
         connection = self.connection()
         connection.execute(
-            "INSERT INTO emulators(id,name,executable_path,installed) VALUES(?,?,?,?)",
+            """INSERT INTO emulators(id,name,executable_path,installed) VALUES(?,?,?,?)
+            ON CONFLICT(id) DO UPDATE SET executable_path=excluded.executable_path,
+                installed=excluded.installed""",
             ("pcsx2", "PCSX2", str(emulator), 1),
         )
         connection.commit()
@@ -174,7 +176,7 @@ class BackendTests(BackendCase):
         self.assertEqual(existing.read_text(), "keep")
         self.assertTrue(self.service.list_games()[0].can_uninstall)
 
-    def test_web_launch_uses_system_browser_without_ui(self):
+    def test_browser_game_is_hidden_and_cannot_be_launched(self):
         self.add_game(
             "web",
             path="https://example.invalid/game",
@@ -183,14 +185,12 @@ class BackendTests(BackendCase):
             download_url=None,
             score_enabled=0,
         )
-        with patch(
-            "backend.launchers.native_launcher.webbrowser.open", return_value=True
-        ) as browser:
-            self.service.launch_game("web")
-        browser.assert_called_once_with("https://example.invalid/game")
-        self.assertEqual(self.service.list_games()[0].primary_action, GameAction.PLAY)
-        self.assertFalse(self.service.list_games()[0].can_uninstall)
-        self.assertIsNotNone(
+        with patch("subprocess.Popen") as process:
+            with self.assertRaises((LookupError, ValueError)):
+                self.service.launch_game("web")
+        process.assert_not_called()
+        self.assertEqual(self.service.list_games(), ())
+        self.assertIsNone(
             self.connection().execute("SELECT last_played FROM games").fetchone()[0]
         )
 
@@ -232,7 +232,9 @@ class BackendTests(BackendCase):
     def test_stale_emulator_record_is_not_considered_installed(self):
         connection = self.connection()
         connection.execute(
-            "INSERT INTO emulators (id,name,installed,executable_path) VALUES(?,?,?,?)",
+            """INSERT INTO emulators (id,name,installed,executable_path) VALUES(?,?,?,?)
+            ON CONFLICT(id) DO UPDATE SET executable_path=excluded.executable_path,
+                installed=excluded.installed""",
             ("pcsx2", "PCSX2", 1, "/other/computer/pcsx2"),
         )
         connection.commit()

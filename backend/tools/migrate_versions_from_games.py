@@ -2,6 +2,7 @@ import sqlite3
 
 
 from backend.path_resolver import PathResolver
+from backend.game_support import active_catalog_sql
 
 ROOT = PathResolver.root()
 
@@ -13,9 +14,10 @@ connection = sqlite3.connect(DB_PATH)
 connection.row_factory = sqlite3.Row
 
 games = connection.execute(
-    """
+    f"""
     SELECT *
     FROM games
+    WHERE {active_catalog_sql()}
     """
 ).fetchall()
 

@@ -1,12 +1,12 @@
 import subprocess
 import sys
 import threading
-import webbrowser
 from pathlib import Path
 from backend.launchers.base_launcher import BaseLauncher
 from backend.services.playtime_service import PlaytimeService
 from backend.database.database import database_scope
 from backend.path_resolver import PathResolver
+from backend.game_support import browser_game, require_supported_game
 
 
 def track_process(process, game, start_time):
@@ -17,11 +17,7 @@ def track_process(process, game, start_time):
 
 class NativeLauncher(BaseLauncher):
     def launch(self, game):
-        if game["launch_type"] == "html":
-            if not webbrowser.open(game["path"]):
-                raise RuntimeError("Não foi possível abrir o navegador padrão.")
-            PlaytimeService().mark_started(game)
-            return
+        require_supported_game(game)
         path = self.resolve_path(game["path"])
         if not path.is_file():
             raise FileNotFoundError(f"Jogo não encontrado: {path}")
@@ -39,4 +35,4 @@ class NativeLauncher(BaseLauncher):
         return path if path.is_absolute() else PathResolver.root() / path
 
     def is_installed(self, game):
-        return game["launch_type"] == "html" or self.resolve_path(game["path"]).is_file()
+        return not browser_game(game) and self.resolve_path(game["path"]).is_file()

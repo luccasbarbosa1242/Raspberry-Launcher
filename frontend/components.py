@@ -9,6 +9,15 @@ from frontend import theme
 
 GROUPS = (
     (
+        "Cadastros",
+        (
+            ("Cadastrar jogos", "registry:game"),
+            ("Versões de jogos", "registry:game_version"),
+            ("Emuladores", "registry:emulator"),
+            ("Pacotes de emuladores", "registry:emulator_package"),
+        ),
+    ),
+    (
         "Coleções",
         (
             ("Todos os Jogos", "home"),
@@ -76,7 +85,11 @@ def navigation_button(parent, text, page, actions):
         height=32,
         fg_color="transparent",
         hover_color="#2b3150",
-        command=lambda: actions.navigate(page),
+        command=(
+            (lambda: actions.open_registry(page.removeprefix("registry:")))
+            if page.startswith("registry:")
+            else (lambda: actions.navigate(page))
+        ),
     )
 
 

@@ -1,4 +1,6 @@
 from backend.database.database import Database
+from backend.game_support import active_catalog_sql, require_supported_game
+from dataclasses import asdict
 from backend.library.models.game import Game
 
 
@@ -8,12 +10,18 @@ class GameRepository:
         self.db = Database()
 
     def add(self, game: Game):
+        require_supported_game(asdict(game))
+        existing = self.db.connection.execute(
+            "SELECT archived FROM games WHERE id = ?", (game.id,)
+        ).fetchone()
+        if existing is not None and existing["archived"]:
+            raise ValueError("Este ID pertence a um jogo arquivado; preserve seu histórico.")
 
         cursor = self.db.cursor()
 
         cursor.execute(
             """
-            INSERT OR REPLACE INTO games(
+            INSERT INTO games(
                 id,
                 title,
                 type,
@@ -34,6 +42,21 @@ class GameRepository:
                 logo_url
             )
             VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            ON CONFLICT(id) DO UPDATE SET
+                title = excluded.title,
+                type = excluded.type,
+                platform = excluded.platform,
+                path = CASE WHEN games.installed = 1 THEN games.path ELSE excluded.path END,
+                launch_type = excluded.launch_type,
+                download_url = excluded.download_url,
+                archive_name = excluded.archive_name,
+                archive_type = excluded.archive_type,
+                executable = excluded.executable,
+                strip_root_folder = excluded.strip_root_folder,
+                score_enabled = excluded.score_enabled,
+                cover_url = excluded.cover_url,
+                banner_url = excluded.banner_url,
+                logo_url = excluded.logo_url
             """,
             (
                 game.id,
@@ -63,7 +86,7 @@ class GameRepository:
 
         cursor = self.db.cursor()
 
-        cursor.execute("SELECT * FROM games")
+        cursor.execute(f"SELECT * FROM runtime_games WHERE {active_catalog_sql()}")
 
         return cursor.fetchall()
 
@@ -72,10 +95,10 @@ class GameRepository:
         cursor = self.db.cursor()
 
         cursor.execute(
-            """
+            f"""
             SELECT *
-            FROM games
-            WHERE installed = 1
+            FROM runtime_games
+            WHERE installed = 1 AND {active_catalog_sql()}
             """
         )
 
@@ -86,10 +109,10 @@ class GameRepository:
         cursor = self.db.cursor()
 
         cursor.execute(
-            """
+            f"""
             SELECT *
-            FROM games
-            WHERE favorite = 1
+            FROM runtime_games
+            WHERE favorite = 1 AND {active_catalog_sql()}
             """
         )
 
@@ -100,10 +123,10 @@ class GameRepository:
         cursor = self.db.cursor()
 
         cursor.execute(
-            """
+            f"""
             SELECT *
-            FROM games
-            WHERE platform = ?
+            FROM runtime_games
+            WHERE platform = ? AND {active_catalog_sql()}
             """,
             (platform,),
         )
@@ -149,10 +172,10 @@ class GameRepository:
         cursor = self.db.cursor()
 
         cursor.execute(
-            """
+            f"""
             SELECT *
-            FROM games
-            WHERE id = ?
+            FROM runtime_games
+            WHERE id = ? AND {active_catalog_sql()}
             """,
             (game_id,),
         )
@@ -226,10 +249,10 @@ class GameRepository:
 
     def search(self, term=None, game_type=None, platform=None, installed=None, favorite=None):
 
-        query = """
+        query = f"""
             SELECT *
-            FROM games
-            WHERE 1 = 1
+            FROM runtime_games
+            WHERE {active_catalog_sql()}
         """
 
         params = []

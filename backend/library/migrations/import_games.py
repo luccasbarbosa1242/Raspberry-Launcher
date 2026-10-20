@@ -1,9 +1,9 @@
-print("Este script foi desativado.")
+"""Compatibility entry point for JSON imports; games.py is no longer a source."""
 
-print("O projeto não usa mais games.py como fonte de dados.")
+from backend.tools.import_games_from_json import import_games, main
 
-print("Use:")
+__all__ = ('import_games', 'main')
 
-print("python -m backend.tools.add_game")
 
-print("python -m backend.tools.import_games_from_json")
+if __name__ == '__main__':
+    raise SystemExit(main())

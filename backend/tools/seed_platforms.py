@@ -11,7 +11,7 @@ DB_PATH = ROOT / "DATA" / "library.db"
 PLATFORMS = [
     {"id": "linux", "name": "Linux", "type": "native", "plugin_id": None, "emulator_id": None},
     {"id": "windows", "name": "Windows", "type": "native", "plugin_id": None, "emulator_id": None},
-    {"id": "web", "name": "Web", "type": "web", "plugin_id": None, "emulator_id": None},
+    {"id": "macos", "name": "macOS", "type": "native", "plugin_id": None, "emulator_id": None},
     {
         "id": "ps1",
         "name": "PlayStation",
@@ -59,7 +59,7 @@ def seed_platforms():
     for platform in PLATFORMS:
         connection.execute(
             """
-            INSERT OR REPLACE INTO platforms (
+            INSERT OR IGNORE INTO platforms (
                 id,
                 name,
                 type,

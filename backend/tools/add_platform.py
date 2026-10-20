@@ -72,8 +72,6 @@ def main():
 
     print("2 - rom")
 
-    print("3 - web")
-
     option = ask("Escolha", default="2")
 
     if option == "1":
@@ -81,9 +79,6 @@ def main():
 
     elif option == "2":
         platform_type = "rom"
-
-    elif option == "3":
-        platform_type = "web"
 
     else:
         print("Opção inválida.")

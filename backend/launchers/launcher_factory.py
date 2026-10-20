@@ -1,12 +1,13 @@
 from backend.launchers.native_launcher import NativeLauncher
 
 from backend.launchers.rom_launcher import RomLauncher
+from backend.game_support import browser_game, require_supported_game
 
 
 class LauncherFactory:
     @staticmethod
     def get_launcher(game):
-
+        require_supported_game(game)
         if isinstance(game, dict):
             game_type = game.get("type")
 
@@ -33,7 +34,8 @@ class LauncherFactory:
 
     @staticmethod
     def is_installed(game):
-
+        if browser_game(game):
+            return False
         launcher = LauncherFactory.get_launcher(game)
 
         return launcher.is_installed(game)

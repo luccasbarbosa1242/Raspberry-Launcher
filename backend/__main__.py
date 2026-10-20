@@ -29,6 +29,18 @@ def parser():
     commands.add_parser("emulator").add_argument("emulator_id")
     commands.add_parser("platform").add_argument("platform_id")
     commands.add_parser("scores")
+    catalog = commands.add_parser("catalog", help="Consultar e editar cadastros compartilhados.")
+    catalog_commands = catalog.add_subparsers(dest="catalog_command", required=True)
+    for command in ("list", "get", "save"):
+        operation = catalog_commands.add_parser(command)
+        operation.add_argument("kind", choices=("game", "game_version", "emulator", "emulator_package"))
+        if command == "get":
+            operation.add_argument("record_id")
+        if command == "save":
+            operation.add_argument("--file", required=True, help="Objeto JSON; '-' lê a entrada padrão.")
+            operation.add_argument("--edit", metavar="ID", help="Editar um ID existente, sem alterá-lo.")
+    importing = catalog_commands.add_parser("import", help="Importar uma lista JSON de jogos atomicamente.")
+    importing.add_argument("--file", required=True, help="Lista JSON; '-' lê a entrada padrão.")
     return result
 
 
@@ -59,6 +71,25 @@ def main(argv=None):
             value = {"executable_path": service.install_emulator(args.emulator_id)}
         elif args.command == "platform":
             value = service.platform(args.platform_id)
+        elif args.command == "catalog":
+            from pathlib import Path
+            from backend.catalog_service import CatalogService
+
+            catalog = CatalogService()
+            if args.catalog_command == "list":
+                value = [asdict(record) for record in catalog.list_records(args.kind)]
+            elif args.catalog_command == "get":
+                value = catalog.get_record(args.kind, args.record_id)
+            else:
+                if args.file == "-":
+                    data = json.load(sys.stdin)
+                else:
+                    with Path(args.file).open(encoding="utf-8") as source:
+                        data = json.load(source)
+                if args.catalog_command == "import":
+                    value = [asdict(record) for record in catalog.import_games(data)]
+                else:
+                    value = catalog.save(args.kind, data, record_id=args.edit)
         else:
             value = service.scores()
         print(

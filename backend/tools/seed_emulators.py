@@ -1,100 +1,25 @@
-import sqlite3
+"""Add optional emulator catalog entries without overwriting user edits."""
 
+from backend.catalog_service import CatalogService
+from backend.database.migrations import initialize_database
 
-from backend.path_resolver import PathResolver
-
-ROOT = PathResolver.root()
-
-DB_PATH = ROOT / "DATA" / "library.db"
-
-
-EMULATORS = [
-    {
-        "id": "pcsx2",
-        "name": "PCSX2",
-        "version": None,
-        "install_path": None,
-        "executable_path": None,
-        "installed": 0,
-        "plugin_id": "pcsx2",
-    },
-    {
-        "id": "duckstation",
-        "name": "DuckStation",
-        "version": None,
-        "install_path": None,
-        "executable_path": None,
-        "installed": 0,
-        "plugin_id": "duckstation",
-    },
-    {
-        "id": "ppsspp",
-        "name": "PPSSPP",
-        "version": None,
-        "install_path": None,
-        "executable_path": None,
-        "installed": 0,
-        "plugin_id": "ppsspp",
-    },
-    {
-        "id": "dolphin",
-        "name": "Dolphin",
-        "version": None,
-        "install_path": None,
-        "executable_path": None,
-        "installed": 0,
-        "plugin_id": "dolphin",
-    },
-]
-
-
-def connect():
-
-    connection = sqlite3.connect(DB_PATH)
-
-    connection.row_factory = sqlite3.Row
-
-    return connection
+EMULATORS = (
+    {"id": "pcsx2", "name": "PCSX2", "plugin_id": "pcsx2"},
+    {"id": "duckstation", "name": "DuckStation", "plugin_id": "duckstation"},
+    {"id": "ppsspp", "name": "PPSSPP", "plugin_id": "ppsspp"},
+    {"id": "dolphin", "name": "Dolphin", "plugin_id": "dolphin"},
+)
 
 
 def seed_emulators():
-
-    connection = connect()
-
+    initialize_database()
+    service = CatalogService()
+    existing = {record.id for record in service.list_records("emulator")}
     for emulator in EMULATORS:
-        connection.execute(
-            """
-            INSERT OR IGNORE INTO emulators (
-                id,
-                name,
-                version,
-                install_path,
-                executable_path,
-                installed,
-                plugin_id
-            )
-            VALUES (
-                ?,?,?,?,?,?,?
-            )
-            """,
-            (
-                emulator["id"],
-                emulator["name"],
-                emulator["version"],
-                emulator["install_path"],
-                emulator["executable_path"],
-                emulator["installed"],
-                emulator["plugin_id"],
-            ),
-        )
-
-        print(f"Emulador registrado: {emulator['id']}")
-
-    connection.commit()
-
-    connection.close()
-
-    print("Emuladores finalizados.")
+        if emulator["id"] not in existing:
+            service.save("emulator", emulator)
+            print(f"Emulador registrado: {emulator['id']}")
+    print("Cadastros existentes e instalações preservados. Adaptadores não são instalados por este comando.")
 
 
 if __name__ == "__main__":

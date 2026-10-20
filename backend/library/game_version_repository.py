@@ -1,4 +1,5 @@
 from backend.database.database import Database
+from backend.game_support import active_catalog_sql
 
 
 class GameVersionRepository:
@@ -11,11 +12,13 @@ class GameVersionRepository:
         cursor = self.db.cursor()
 
         cursor.execute(
-            """
-            SELECT *
-            FROM game_versions
-            WHERE game_id = ?
-            AND platform = ?
+            f"""
+            SELECT v.*
+            FROM runtime_game_versions v
+            WHERE v.game_id = ? AND v.platform = ?
+            AND {active_catalog_sql('v', version=True)}
+            AND EXISTS (SELECT 1 FROM runtime_games g WHERE g.id = v.game_id
+                        AND {active_catalog_sql('g')})
             """,
             (game_id, platform),
         )
@@ -27,11 +30,13 @@ class GameVersionRepository:
         cursor = self.db.cursor()
 
         cursor.execute(
-            """
-            SELECT *
-            FROM game_versions
-            WHERE game_id = ?
-            ORDER BY platform ASC
+            f"""
+            SELECT v.*
+            FROM runtime_game_versions v
+            WHERE v.game_id = ? AND {active_catalog_sql('v', version=True)}
+            AND EXISTS (SELECT 1 FROM runtime_games g WHERE g.id = v.game_id
+                        AND {active_catalog_sql('g')})
+            ORDER BY v.platform ASC
             """,
             (game_id,),
         )
@@ -77,10 +82,12 @@ class GameVersionRepository:
         cursor = self.db.cursor()
 
         cursor.execute(
-            """
-            SELECT *
-            FROM game_versions
-            WHERE id = ?
+            f"""
+            SELECT v.*
+            FROM runtime_game_versions v
+            WHERE v.id = ? AND {active_catalog_sql('v', version=True)}
+            AND EXISTS (SELECT 1 FROM runtime_games g WHERE g.id = v.game_id
+                        AND {active_catalog_sql('g')})
             """,
             (version_id,),
         )

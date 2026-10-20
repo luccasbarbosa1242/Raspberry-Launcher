@@ -9,11 +9,11 @@
 
 ### Launcher de Jogos desenvolvido com Python, CustomTkinter e SQLite
 
-Centralize jogos nativos, jogos web e ROMs em uma única biblioteca.
+Centralize jogos nativos e ROMs em uma única biblioteca.
 
 ### 📈 Desenvolvimento Geral
 
-> **Fase 1 Completa • Fase 2 em Desenvolvimento (Etapas 1–11 concluídas) • Interface e Lógica Separadas**
+> **Fase 1 — T00, T01, T03 e T05 • Cadastros integrados • Interface e Lógica Separadas**
 
 <img src="https://img.shields.io/badge/Python-3.x-blue?style=for-the-badge" />
 <img src="https://img.shields.io/badge/CustomTkinter-UI-green?style=for-the-badge" />
@@ -37,7 +37,6 @@ O projeto foi pensado para centralizar diferentes tipos de jogos em uma única b
 O launcher suporta atualmente:
 
 * 🎮 Jogos nativos
-* 🌐 Jogos Web
 * 🕹️ ROMs
 * ⚙️ Emuladores
 
@@ -65,15 +64,15 @@ A ideia é que, futuramente, um novo jogo possa ser adicionado apenas cadastrand
 
 > [!CAUTION]
 >
-> ## 🔴 BANCO DE DADOS EM TRANSIÇÃO
+> ## 🔴 PROTEJA OS DADOS ANTES DE MIGRAR
 >
-> O Launcher PI encontra-se atualmente na **Fase 2** de migração para um sistema totalmente baseado em banco de dados.
+> A **Fase 1 (T00, T01, T03 e T05)** consolida os cadastros no SQLite e integra os formulários às ferramentas de terminal.
 >
-> Durante esta fase, praticamente todo o funcionamento do launcher está sendo migrado para utilizar exclusivamente o SQLite.
+> O arquivo **games.py** já está fora da execução. JSONs permanecem para dados iniciais, importação/exportação e descritores de plugins.
 >
-> O arquivo **games.py** permanece apenas por compatibilidade temporária e será removido futuramente.
+> As migrações preservam os registros existentes; não recrie o banco vazio para atualizar. Jogos HTML/de navegador são arquivados e saem do catálogo ativo. Google Drive e `gdown` continuam disponíveis para downloads.
 >
-> As migrações já preservam os dados existentes, portanto o banco não precisa mais ser recriado durante o desenvolvimento.
+> Consulte a [entrega da Fase 1](docs/FASE1.md) e o [procedimento de recuperação](docs/RECUPERACAO.md) antes de alterar os dados.
 
 ---
 
@@ -85,7 +84,7 @@ A ideia é que, futuramente, um novo jogo possa ser adicionado apenas cadastrand
 
 # 🔴 Prioridade Máxima
 
-## Banco de Dados (93%)
+## Banco de Dados — Fase 1
 
 * [x] Estrutura SQLite criada
 * [x] Sistema de migrações
@@ -100,16 +99,16 @@ A ideia é que, futuramente, um novo jogo possa ser adicionado apenas cadastrand
 * [x] Remoção de jogos
 * [x] Cadastro de assets
 * [x] Sistema de versões (game_versions)
-* [ ] Plataformas totalmente baseadas no banco
-* [ ] Emuladores totalmente baseados no banco
-* [ ] Remoção definitiva do games.py
+* [x] Plataformas utilizadas em execução consultadas no banco
+* [x] Cadastros e pacotes de emuladores consultados no banco
+* [x] `games.py` fora da execução
 
 ---
 
 ## Sistema de Jogos (92%)
 
 * [x] Jogos nativos
-* [x] Jogos Web
+* [x] Retirada de jogos HTML/navegador, com histórico arquivado
 * [x] Biblioteca dinâmica
 * [x] Download automático
 * [x] Instalação automática
@@ -171,11 +170,11 @@ A ideia é que, futuramente, um novo jogo possa ser adicionado apenas cadastrand
 
 ---
 
-## Navegador Interno
+## Jogos HTML e de Navegador
 
-* [ ] Corrigir problemas atuais
-* [ ] Melhor integração com o launcher
-* [ ] Melhor gerenciamento de abas
+* [x] Modalidade retirada do cadastro, importação, catálogo ativo e execução
+* [x] Histórico legado preservado por arquivamento
+* [x] Downloads de arquivos por HTTP e Google Drive preservados
 
 ---
 
@@ -258,11 +257,13 @@ A ideia é que, futuramente, um novo jogo possa ser adicionado apenas cadastrand
 
 ---
 
-## 🌐 Jogos Web
+## 🌐 Jogos HTML e de Navegador
 
-* Abertura no navegador padrão do sistema
-* Integração direta ao launcher
-* Cadastro totalmente pelo banco
+* Suporte retirado na Fase 1
+* Registros antigos preservados como histórico arquivado
+* Novos cadastros e importações dessa modalidade são rejeitados
+
+Downloads por Google Drive e `gdown` continuam disponíveis; a retirada se refere à execução de jogos no navegador.
 
 ---
 
@@ -302,9 +303,14 @@ A ideia é que, futuramente, um novo jogo possa ser adicionado apenas cadastrand
 
 # 🆕 Atualização — Interface e Lógica Separadas
 
-> **Reestruturação concluída • Downloads corrigidos • Menu de desinstalação restaurado**
+> **Fase 1: base recuperável • Cadastros consolidados • Formulários e CLI compartilhados**
 
 ## ✅ Entregas desta atualização
+
+* [x] **T00:** baseline, backup consistente e restauração em cópia temporária
+* [x] **T01:** cadastros consolidados no banco, com migrações versionadas e instalações locais separadas
+* [x] **T03:** adicionar e editar jogos, versões, emuladores e pacotes nos formulários de **Cadastros** e na CLI, usando os mesmos serviços
+* [x] **T05:** jogos HTML/navegador arquivados e bloqueados para cadastro, importação e execução
 
 * [x] Interface gráfica isolada em `frontend/`
 * [x] Lógica de jogos, banco, downloads, instalações e emuladores concentrada em `backend/`
@@ -341,7 +347,7 @@ A interface envia ações com identificadores e recebe dados prontos para exibi�
 
 * [x] Download compatível com o `gdown 6.1.0`, removendo o argumento não suportado `fuzzy`
 * [x] Download de assets e instalação de jogos usando a chamada corrigida
-* [x] Opção **Desinstalar** restaurada no menu de três pontos dos jogos instalados que não são web
+* [x] Opção **Desinstalar** preservada no menu de três pontos dos jogos instalados
 * [x] Disponibilidade da desinstalação corrigida para jogos locais e ROMs, inclusive fora da pasta gerenciada
 * [x] Remoção da instalação gerenciada e atualização dos registros sem apagar executáveis ou ROMs externos
 
@@ -349,37 +355,58 @@ A interface envia ações com identificadores e recebe dados prontos para exibi�
 
 ## ▶️ Execução por Camada
 
-Aplicativo completo:
+Aplicativo completo, a partir do checkout deste ambiente:
 
 ```bash
-python -m pip install -r requirements.txt
+cd /workspace/Raspberry-Launcher
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+source /workspace/.launcher-cloud/env.sh
 python main.py
 ```
 
-Prévia da interface, com dados demonstrativos:
+O `env.sh` preparado na nuvem ativa o ambiente virtual e direciona os dados para `/workspace/.launcher-cloud/runtime`, preservando o banco fornecido no checkout. Em uma sessão sem tela gráfica, use `xvfb-run -a python main.py`. Em uma instalação local com tela, ative seu ambiente virtual e execute `python main.py`; para escolher outro diretório de dados, defina `RASPBERRY_LAUNCHER_HOME` fora do checkout.
+
+Prévia da interface, com dados demonstrativos e sem carregar o backend:
 
 ```bash
-python -m pip install -r requirements/frontend.txt
-python -m frontend.preview
+cd /workspace/Raspberry-Launcher
+source /workspace/.launcher-cloud/env.sh
+xvfb-run -a python -m frontend.preview
 ```
 
-Backend pelo terminal:
+Backend pelo terminal e cadastros compartilhados:
 
 ```bash
-python -m pip install -r requirements/backend.txt
+cd /workspace/Raspberry-Launcher
+source /workspace/.launcher-cloud/env.sh
 python -m backend --help
 python -m backend list
+python -m backend catalog list game
+python -m backend catalog --help
 ```
 
-As ferramentas administrativas passam a ser executadas como módulos, por exemplo: `python -m backend.tools.add_game`.
+Os formulários ficam no grupo **Cadastros** da barra lateral. Cadastrar um emulador ou pacote não implementa seu adaptador nem garante que ele possa executar ROMs. As ferramentas administrativas continuam como módulos, por exemplo `python -m backend.tools.add_game`; exemplos de cadastro e edição estão em [Fase 1](docs/FASE1.md).
+
+Validação em Linux com tela virtual:
+
+```bash
+cd /workspace/Raspberry-Launcher
+source /workspace/.launcher-cloud/env.sh
+xvfb-run -a python -m unittest discover -s tests -v
+python -m compileall -q backend frontend application contracts tests main.py
+ruff check .
+```
+
+O `PYTHONPYCACHEPREFIX` ativado pelo `env.sh` mantém caches fora dos arquivos `.pyc` rastreados. Antes de migrar ou editar dados importantes, crie e ensaie um ponto de recuperação conforme [Recuperação](docs/RECUPERACAO.md).
 
 ---
 
 ## 🧪 Validação da Atualização
 
-* [x] **43 testes automatizados aprovados** em Linux, incluindo testes gráficos com CustomTkinter real em tela virtual
+* [x] Testes de backend, migrações, recuperação, cadastros e interface executados em Linux; resultados atuais em [Validação](docs/VALIDACAO.md)
 * [x] Compilação dos módulos Python e verificação estática aprovadas
-* [x] **27 arquivos de dados e recursos preservados**, comparados byte a byte com o ZIP original
+* [x] Histórico da reestruturação: 27 arquivos de dados e recursos comparados byte a byte com o ZIP original; esse registro não substitui os testes atuais da Fase 1
 
 Os testes de download utilizaram arquivos locais e transporte HTTP controlado. A disponibilidade de todos os links externos do catálogo não foi validada, e não houve execução em Windows ou de uma ROM real no PCSX2.
 
@@ -664,7 +691,7 @@ Banco principal do launcher.
 emulator_packages.json
 ```
 
-Informações sobre downloads dos emuladores.
+Dados iniciais dos pacotes de emuladores, importados uma vez pelas migrações. Em execução, o `PackageResolver` consulta o SQLite; editar este JSON não altera cadastros já migrados.
 
 ```text
 games_seed.json
@@ -716,6 +743,7 @@ Atualmente permitem:
 
 * cadastrar jogos
 * atualizar jogos
+* cadastrar e editar emuladores e pacotes pelos mesmos serviços da interface
 * remover jogos
 * cadastrar assets
 * sincronizar assets
@@ -772,7 +800,7 @@ Armazena:
 
 ---
 
-No futuro também serão adicionadas:
+Também estão presentes:
 
 ```text
 platforms
@@ -781,7 +809,7 @@ collections
 game_collections
 ```
 
-permitindo que toda a estrutura do launcher seja totalmente orientada ao banco de dados.
+Os cadastros de pacotes e as instalações locais ficam separados em `emulator_packages`, `emulator_installations`, `game_installations` e `game_version_installations`. Estruturas para perfis e fontes externas estão preparadas, sem implementar esses recursos nesta fase.
 
 ---
 
@@ -915,17 +943,17 @@ Jogo Instalado
 | -------------- | --------- |
 | Launcher Base  | ✅ 100%    |
 | Biblioteca     | 🚧 90%    |
-| Banco de Dados | 🚧 93%    |
+| Banco de Dados | ✅ Cadastros consolidados na Fase 1 |
 | Assets         | 🚧 90%    |
 | Downloads      | ✅ 90%     |
-| Jogos Web      | ✅ 90%     |
+| Jogos HTML/navegador | ✅ Retirados; histórico arquivado |
 | Jogos Nativos  | 🚧 92%    |
 | Emuladores     | 🚧 65%    |
 | Plugins        | 🚧 70%    |
 | Interface      | 🚧 80%    |
 | Separação UI / Backend | ✅ 100% |
 | CLI e Prévia de UI | ✅ 100% |
-| Testes desta atualização | ✅ 43 aprovados |
+| Testes desta atualização | Resultados em [Validação](docs/VALIDACAO.md) |
 
 ---
 
@@ -936,7 +964,7 @@ Launcher Base         ██████████ 100%
 
 Biblioteca            █████████░  90%
 
-Banco de Dados        █████████░  93%
+Banco de Dados        cadastros consolidados (Fase 1)
 
 Assets                █████████░  90%
 
@@ -944,7 +972,7 @@ Downloads             █████████░  90%
 
 Jogos Nativos         █████████░  92%
 
-Jogos Web             █████████░  90%
+HTML / Navegador      retirados; histórico arquivado
 
 Emuladores            ██████▓░░░  65%
 
@@ -1031,7 +1059,7 @@ CLI / Prévia de UI    ██████████ 100%
 
 ## 🚧 Em Desenvolvimento
 
-### Banco de Dados — Fase 2
+### Banco de Dados — Fase 1
 
 * [x] Migrações sem apagar banco
 * [x] Cadastro de jogos
@@ -1039,9 +1067,9 @@ CLI / Prévia de UI    ██████████ 100%
 * [x] Remoção de jogos
 * [x] Cadastro de assets
 * [x] Sistema de versões
-* [ ] Plataformas no banco
-* [ ] Emuladores no banco
-* [ ] Remoção definitiva do games.py
+* [x] Plataformas no banco
+* [x] Emuladores e pacotes no banco
+* [x] `games.py` fora da execução
 
 ---
 
@@ -1152,67 +1180,38 @@ CLI / Prévia de UI    ██████████ 100%
 
 # 📈 Evolução do Projeto
 
-## Fase 1 — Arquitetura Base ✅
+## Fase 1 — Base, Cadastros e Jogos Suportados
 
-Durante a primeira fase foi construída toda a estrutura principal do Launcher PI.
+A fase atual reúne **T00, T01, T03 e T05** sobre a arquitetura modular já existente.
 
 Principais entregas:
 
-* Arquitetura modular
-* Biblioteca
-* Sistema de downloads
-* Instalação automática
-* LauncherFactory
-* NativeLauncher
-* RomLauncher
-* Sistema de plugins
-* Sistema de assets
-* Banco SQLite
+* baseline identificado e ponto de recuperação validado;
+* cadastros de jogos, plataformas, emuladores e pacotes consolidados no SQLite;
+* versões e instalações locais separadas;
+* serviços compartilhados entre formulários e terminal;
+* jogos HTML/de navegador arquivados e retirados da execução;
+* camadas `frontend`, `backend`, `application` e `contracts` preservadas.
+
+Escopo, migrações e evidências: [Fase 1](docs/FASE1.md).
 
 ---
 
-## Fase 2 — Banco de Dados 🚧
+## Fase 2 — Perfis e Configurações (Planejada)
 
-A segunda fase está focada na migração completa para um sistema orientado ao banco de dados.
-
-Objetivos desta fase:
-
-* eliminar a dependência do `games.py`;
-* tornar o SQLite a única fonte de dados;
-* cadastrar jogos por ferramentas administrativas;
-* cadastrar assets pelo banco;
-* cadastrar versões de jogos por plataforma;
-* preparar plataformas e emuladores para funcionamento totalmente orientado ao banco;
-* preservar os dados através de migrações.
+Seleção de perfis e preferências persistentes são etapas futuras. A Fase 1 prepara apenas as estruturas e contratos necessários, sem implementar perfis completos.
 
 ---
 
-## Fase 3 — Conteúdo (Planejada)
+## Fase 3 — Downloads, Emuladores e ROMs (Planejada)
 
-Após a conclusão da migração, o foco será expandir o conteúdo do launcher.
-
-Incluindo:
-
-* novos jogos;
-* novos emuladores;
-* novas plataformas;
-* novas coleções;
-* melhorias visuais;
-* documentação completa.
+Ampliar a instalação e execução por sistema operacional, arquitetura e adaptador, validando uma plataforma por vez. Os fluxos nativos e de ROMs já existentes são preservados na Fase 1.
 
 ---
 
-## Fase 4 — Distribuição (Planejada)
+## Fase 4 — Integração RGSX (Planejada)
 
-A última grande fase será dedicada à distribuição oficial do Launcher PI.
-
-Incluindo:
-
-* instalador oficial;
-* atualizador automático;
-* versões para Linux e Windows;
-* documentação definitiva;
-* primeiros lançamentos públicos.
+Catálogo externo, sincronização e ligação com downloads/ROMs ficam para a etapa própria. Nenhuma integração RGSX é implementada na Fase 1.
 
 ---
 
@@ -1569,9 +1568,9 @@ Cada asset possui:
 
 ---
 
-## (Planejado)
+## Cadastros Consolidados
 
-Nas próximas etapas serão adicionadas:
+Além de jogos, versões e assets, o banco já contém:
 
 ```text
 platforms
@@ -1589,7 +1588,7 @@ collections
 game_collections
 ```
 
-Essas tabelas completarão a migração da arquitetura para um sistema totalmente orientado ao banco de dados.
+Esses cadastros são consultados em execução no SQLite. Pacotes de emuladores e instalações locais têm tabelas próprias; JSONs não são uma segunda fonte de cadastro em execução.
 
 ---
 
@@ -1663,7 +1662,6 @@ O Launcher PI tem como objetivo se tornar uma plataforma completa para gerenciam
 Ao final do desenvolvimento, será possível gerenciar em um único lugar:
 
 * 🎮 Jogos nativos
-* 🌐 Jogos Web
 * 🕹️ ROMs
 * ⚙️ Emuladores
 * 🖼️ Assets
@@ -1677,75 +1675,35 @@ O projeto foi planejado para que praticamente todo o conteúdo seja controlado p
 
 # 🗺️ Planejamento das Fases
 
-## ✅ Fase 1 — Arquitetura Base (Concluída)
+## ✅ Fase 1 — Base, Cadastros e Jogos Suportados
 
-A primeira fase foi dedicada à construção da infraestrutura do Launcher PI.
+A entrega atual abrange **T00, T01, T03 e T05**:
 
-Principais entregas:
+* recuperação consistente e restauração ensaiada;
+* migrações seguras e cadastros consolidados no banco;
+* formulários e CLI para adicionar e editar registros com as mesmas validações;
+* arquivamento e bloqueio dos jogos HTML/de navegador;
+* preservação do menu de ações, desinstalação, jogos nativos, ROMs e downloads por Google Drive.
 
-* Arquitetura modular
-* Biblioteca funcional
-* Sistema de downloads
-* Sistema de instalação
-* Sistema de desinstalação
-* LauncherFactory
-* NativeLauncher
-* RomLauncher
-* EmulatorManager
-* Sistema de Plugins
-* Sistema de Assets
-* Banco SQLite
-* Interface inicial
-
-Essa etapa criou toda a base necessária para a evolução do projeto.
+A ausência de `games.py` na execução já estava resolvida e foi preservada. Consulte [Fase 1](docs/FASE1.md) e [Validação](docs/VALIDACAO.md) para os resultados e limites da entrega.
 
 ---
 
-## 🚧 Fase 2 — Migração para Banco de Dados
+## ⏳ Fase 2 — Perfis e Configurações Persistentes
 
-A fase atual concentra praticamente todo o esforço de desenvolvimento.
-
-Objetivos:
-
-* tornar o SQLite a única fonte de dados do launcher;
-* remover completamente a dependência do `games.py`;
-* cadastrar jogos por ferramentas administrativas;
-* cadastrar assets diretamente no banco;
-* permitir múltiplas versões por jogo;
-* preservar dados através de migrações;
-* preparar o sistema para expansão futura.
-
-Ao final desta fase, praticamente toda a configuração do launcher será realizada através do banco de dados.
+Perfis locais, estado pessoal e preferências serão implementados em uma etapa posterior. A Fase 1 prepara o modelo e os contratos.
 
 ---
 
-## ⏳ Fase 3 — Conteúdo
+## ⏳ Fase 3 — Downloads, Emuladores e ROMs
 
-Após concluir a migração, o foco passará para a expansão do conteúdo disponível.
-
-Planejamento:
-
-* adicionar novos jogos;
-* adicionar novos emuladores;
-* adicionar novas plataformas;
-* adicionar coleções;
-* adicionar páginas individuais;
-* melhorar a interface.
+Completar o fluxo de instalação e execução por SO, arquitetura e adaptador, sem tratar todo emulador cadastrado como automaticamente compatível.
 
 ---
 
-## 🚀 Fase 4 — Distribuição
+## 🚀 Fase 4 — Integração RGSX
 
-A última grande etapa será voltada para distribuição pública do Launcher PI.
-
-Incluindo:
-
-* instalador oficial;
-* atualizador automático;
-* distribuição para Linux;
-* distribuição para Windows;
-* documentação definitiva;
-* primeiros lançamentos públicos.
+Consultar e sincronizar um catálogo externo; conectar downloads e ROMs apenas nas plataformas suportadas. Biblioteca ampliada, estatísticas, versões, temas, música, conquistas e controles do sistema continuam nas fases futuras do plano.
 
 ---
 

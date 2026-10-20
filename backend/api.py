@@ -5,7 +5,6 @@ The application layer, not this service, schedules work for a desktop window.
 """
 
 import json
-from pathlib import Path
 
 from backend.assets.asset_manager import AssetManager
 from backend.assets.platform_asset_manager import PlatformAssetManager
@@ -16,6 +15,7 @@ from backend.emulators.emulator_manager import EmulatorManager
 from backend.launcher import abrirJogo, jogoInstalado
 from backend.library.library_manager import LibraryManager
 from backend.library.game_version_manager import GameVersionManager
+from backend.library.platform_repository import PlatformRepository
 from backend.path_resolver import PathResolver
 from backend.plugins.plugin_manager import PluginManager
 from backend.score import lerBestScore
@@ -59,17 +59,19 @@ class LauncherService:
                     "strip_root_folder",
                     "score_enabled",
                     "installed",
+                    "architecture",
                 ):
                     result[key] = version[key]
         return result
 
     def _summary(self, game):
         effective = self._effective_game(game)
-        is_web = effective["launch_type"] == "html"
         compatible = (
             effective["type"] == "rom"
-            or is_web
-            or effective["platform"] in (None, "pc", PlatformDetector.current())
+            or (
+                effective["platform"] in (None, "pc", PlatformDetector.current())
+                and self._architecture_compatible(effective.get("architecture", "any"))
+            )
         )
         present = jogoInstalado(effective)
         installed = compatible and present
@@ -94,7 +96,7 @@ class LauncherService:
             play_time=int(game["play_time"] or 0),
             last_played=game["last_played"],
             primary_action=action,
-            can_uninstall=not is_web and (present or managed.is_dir()),
+            can_uninstall=present or managed.is_dir(),
             cover_path=AssetManager().get_cover(game["id"]),
             best_score=lerBestScore(effective)
             if installed and effective["score_enabled"]
@@ -136,11 +138,14 @@ class LauncherService:
                 installed=bool(row["installed"]),
                 can_install=(
                     game["type"] == "native"
-                    and row["launch_type"] != "html"
                     and bool(row["download_url"])
                     and not row["installed"]
+                    and row["platform"] == system
+                    and self._architecture_compatible(row["architecture"])
                 ),
-                current=row["platform"] == system,
+                current=row["platform"] == system
+                and self._architecture_compatible(row["architecture"]),
+                architecture=row["architecture"],
             )
             for row in GameVersionManager().versions_for_game(game_id)
         )
@@ -148,9 +153,9 @@ class LauncherService:
 
     @scoped
     def platform(self, platform_id):
-        catalog_path = Path(__file__).parent / "catalog" / "platforms.json"
-        catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
-        entry = catalog.get(platform_id, {"name": platform_id.upper(), "examples": []})
+        entry = PlatformRepository().get(platform_id)
+        if entry is None:
+            raise LookupError(f"Plataforma não encontrada: {platform_id}")
         manager = LibraryManager()
         if platform_id == "pc":
             rows = [game for game in manager.all_games() if game["type"] == "native"]
@@ -165,7 +170,7 @@ class LauncherService:
             if platform_id != "pc"
             else None,
             games=tuple(self._summary(game) for game in rows),
-            examples=tuple(entry["examples"]),
+            examples=tuple(json.loads(entry["examples_json"])),
             emulator_id=emulator_id,
             emulator_installed=bool(emulator_id and EmulatorManager().is_installed(emulator_id)),
         )
@@ -189,16 +194,18 @@ class LauncherService:
     @scoped
     def uninstall_game(self, game_id, on_progress=None):
         game = self._get_game(game_id)
-        if (
-            game["type"] not in ("native", "rom")
-            or self._effective_game(game)["launch_type"] == "html"
-        ):
+        if game["type"] not in ("native", "rom"):
             raise ValueError("Este tipo de jogo não pode ser desinstalado.")
         desinstalarJogo(game, on_progress)
 
     @scoped
     def launch_game(self, game_id):
         game = self._effective_game(self._get_game(game_id))
+        if game["type"] == "native" and (
+            game["platform"] not in (None, "pc", PlatformDetector.current())
+            or not self._architecture_compatible(game.get("architecture", "any"))
+        ):
+            raise ValueError("A versão do jogo não é compatível com este sistema/arquitetura.")
         abrirJogo(game)
 
     @scoped
@@ -215,3 +222,37 @@ class LauncherService:
             if effective["score_enabled"] and jogoInstalado(effective):
                 result[game["id"]] = lerBestScore(effective)
         return result
+
+    @staticmethod
+    def _architecture_compatible(architecture):
+        import platform
+
+        machine = platform.machine().lower()
+        machine = {"amd64": "x86_64", "arm64": "aarch64", "i686": "x86", "i386": "x86"}.get(
+            machine, machine
+        )
+        return architecture in (None, "any", machine)
+
+    @scoped
+    def list_catalog(self, kind):
+        from backend.catalog_service import CatalogService
+
+        return CatalogService().list_records(kind)
+
+    @scoped
+    def get_catalog(self, kind, record_id):
+        from backend.catalog_service import CatalogService
+
+        return CatalogService().get_record(kind, record_id)
+
+    @scoped
+    def catalog_choices(self):
+        from backend.catalog_service import CatalogService
+
+        return CatalogService().choices()
+
+    @scoped
+    def save_catalog(self, kind, data, record_id=None):
+        from backend.catalog_service import CatalogService
+
+        return CatalogService().save(kind, data, record_id)

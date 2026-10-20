@@ -2,6 +2,7 @@
 
 import shutil
 import tempfile
+import platform
 from pathlib import Path
 from backend.database.database import scoped
 from backend.download.download_manager import DownloadManager
@@ -9,6 +10,8 @@ from backend.download.extractor import Extractor
 from backend.library.library_manager import LibraryManager
 from backend.library.game_version_manager import GameVersionManager
 from backend.path_resolver import PathResolver
+from backend.game_support import require_supported_game
+from backend.system.platform_detector import PlatformDetector
 from contracts.models import InstallationResult, Phase
 
 
@@ -22,12 +25,22 @@ class NativeGameInstaller:
 
     @scoped
     def install_version(self, game, version, on_progress=None):
+        require_supported_game(game)
+        require_supported_game(version)
         if game["type"] != "native":
             raise ValueError("Este instalador só instala jogos nativos.")
         if version["game_id"] != game["id"]:
             raise ValueError("A versão não pertence a este jogo.")
-        if version["launch_type"] == "html":
-            raise ValueError("Jogos web não precisam de instalação.")
+        if version["platform"] != PlatformDetector.current():
+            raise ValueError("A versão não é compatível com o sistema operacional atual.")
+        architecture = version["architecture"] if "architecture" in version.keys() else "any"
+        machine = platform.machine().lower()
+        machine = {
+            "amd64": "x86_64", "x64": "x86_64", "arm64": "aarch64",
+            "i386": "x86", "i686": "x86",
+        }.get(machine, machine)
+        if architecture not in (None, "any", machine):
+            raise ValueError("A versão não é compatível com a arquitetura atual.")
         if not version["download_url"]:
             raise ValueError(f"Versão sem URL de download: {version['id']}")
         if not version["archive_name"] or not version["executable"]:

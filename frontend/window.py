@@ -8,6 +8,7 @@ from frontend.components import create_sidebar, heading
 from frontend.views.catalog import SearchView, render_catalog
 from frontend.views.details import render_details
 from frontend.views.platform import render_platform
+from frontend.views.registry import CatalogForm, render_registry
 from frontend.views.settings import render_settings
 from frontend import theme
 
@@ -26,6 +27,7 @@ class LauncherWindow:
         self._poll_id = None
         self._closed = False
         self.search_view = None
+        self.catalog_form = None
         self.sidebar = create_sidebar(self.root, actions, resources)
         main = ctk.CTkFrame(self.root, fg_color=theme.PAGE, corner_radius=0)
         main.pack(side="right", fill="both", expand=True)
@@ -36,7 +38,9 @@ class LauncherWindow:
     def _clear(self):
         self.bindings.clear()
         self.search_view = None
+        self.catalog_form = None
         self.notice.pack_forget()
+        self.notice.configure(text="")
         for widget in self.page.winfo_children():
             widget.destroy()
 
@@ -68,6 +72,16 @@ class LauncherWindow:
         self._clear()
         render_settings(self.page)
 
+    def show_registry(self, kind, entries):
+        self._clear()
+        render_registry(self.page, kind, entries, self.actions)
+
+    def show_catalog_form(self, kind, values, choices, record_id=None):
+        self._clear()
+        self.catalog_form = CatalogForm(
+            self.page, kind, values, choices, self.actions, record_id
+        )
+
     def show_placeholder(self, page):
         self._clear()
         title = {"finalized": "Finalizados", "genre": "Gênero", "year": "Ano"}.get(page, page)
@@ -77,6 +91,8 @@ class LauncherWindow:
         ).pack(padx=20, pady=20)
 
     def show_error(self, message):
+        if self.catalog_form is not None:
+            self.catalog_form.set_saving(False)
         self.notice.configure(text=message)
         self.notice.pack(side="bottom", fill="x", padx=20, pady=10)
 

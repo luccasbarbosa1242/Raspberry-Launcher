@@ -8,7 +8,7 @@ from frontend import theme
 
 def primary_button(parent, game, actions, bindings, **kwargs):
     labels = {
-        GameAction.PLAY: "Abrir" if game.launch_type == "html" else "Jogar",
+        GameAction.PLAY: "Jogar",
         GameAction.INSTALL: "Instalar",
         GameAction.CONFIGURE: "Configurar emulador",
         GameAction.UNAVAILABLE: "Indisponível",
@@ -29,8 +29,6 @@ def primary_button(parent, game, actions, bindings, **kwargs):
 
 
 def status_style(game):
-    if game.launch_type == "html":
-        return "Online", "#4fa3ff"
     if game.type == "rom":
         return "ROM", "#9b7cff"
     return ("Instalado", "#5bc77b") if game.installed else ("Não instalado", "#d6a84f")
@@ -68,7 +66,7 @@ class GameCard(ctk.CTkFrame):
         )
         title.pack(pady=(0, 2))
         title.bind("<Button-1>", lambda event: actions.open_game(game.id))
-        platform = "WEB" if game.launch_type == "html" else (game.platform or "PC").upper()
+        platform = (game.platform or "PC").upper()
         ctk.CTkLabel(
             self, text=platform, text_color=theme.MUTED, font=("Arial", 11, "bold"), height=18
         ).pack()

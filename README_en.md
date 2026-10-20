@@ -9,11 +9,11 @@
 
 ### Game Launcher built with Python, CustomTkinter and SQLite
 
-Centralize native games, web games and ROMs into a single library.
+Centralize native games and ROMs into a single library.
 
 ### 📈 Development Status
 
-> **Phase 1 Completed • Phase 2 In Progress (Steps 1–11 Completed) • UI and Application Logic Separated**
+> **Phase 1 — T00, T01, T03 and T05 • Shared Catalog Editing • UI and Application Logic Separated**
 
 <img src="https://img.shields.io/badge/Python-3.x-blue?style=for-the-badge" />
 <img src="https://img.shields.io/badge/CustomTkinter-UI-green?style=for-the-badge" />
@@ -37,7 +37,6 @@ The project aims to centralize different types of games into a single library, a
 Launcher PI currently supports:
 
 * 🎮 Native Games
-* 🌐 Web Games
 * 🕹️ ROMs
 * ⚙️ Emulators
 
@@ -65,15 +64,15 @@ The long-term goal is to allow new games to be added simply by inserting records
 
 > [!CAUTION]
 >
-> ## 🔴 DATABASE MIGRATION IN PROGRESS
+> ## 🔴 PROTECT YOUR DATA BEFORE MIGRATING
 >
-> Launcher PI is currently undergoing **Phase 2**, migrating to a fully database-driven architecture.
+> **Phase 1 (T00, T01, T03 and T05)** consolidates catalog records in SQLite and connects desktop forms and terminal tools to shared services.
 >
-> During this phase, almost every system inside the launcher is being converted to rely exclusively on SQLite.
+> `games.py` is already absent from execution. JSON files remain for initial data, import/export and plugin descriptors.
 >
-> The `games.py` file is still available only for temporary backward compatibility and will be removed in a future update.
+> Migrations preserve existing records; do not recreate an empty database to update. HTML/browser games are archived and removed from the active catalog. Google Drive and `gdown` remain available for downloads.
 >
-> Database migrations now preserve existing data, meaning the database no longer needs to be recreated during development.
+> Read the [Phase 1 delivery](docs/FASE1.md) and [recovery procedure](docs/RECUPERACAO.md) before changing data. These detailed documents are in Portuguese.
 
 ---
 
@@ -85,7 +84,7 @@ The long-term goal is to allow new games to be added simply by inserting records
 
 # 🔴 Highest Priority
 
-## Database (93%)
+## Database — Phase 1
 
 * [x] SQLite structure
 * [x] Migration system
@@ -100,16 +99,16 @@ The long-term goal is to allow new games to be added simply by inserting records
 * [x] Game removal tools
 * [x] Asset registration
 * [x] Game version management
-* [ ] Platform management through the database
-* [ ] Emulator management through the database
-* [ ] Complete removal of `games.py`
+* [x] Runtime platform records queried from the database
+* [x] Emulator catalog and package records queried from the database
+* [x] `games.py` absent from execution
 
 ---
 
 ## Game System (92%)
 
 * [x] Native games
-* [x] Web games
+* [x] HTML/browser support removed with legacy history archived
 * [x] Dynamic library
 * [x] Automatic downloads
 * [x] Automatic installation
@@ -171,11 +170,11 @@ The long-term goal is to allow new games to be added simply by inserting records
 
 ---
 
-## Built-in Browser
+## HTML and Browser Games
 
-* [ ] Fix current issues
-* [ ] Improve launcher integration
-* [ ] Better tab management
+* [x] Removed from registration, import, active catalog and execution
+* [x] Legacy history preserved through archiving
+* [x] File downloads over HTTP and Google Drive preserved
 
 ---
 
@@ -258,11 +257,13 @@ The long-term goal is to allow new games to be added simply by inserting records
 
 ---
 
-## 🌐 Web Games
+## 🌐 HTML and Browser Games
 
-* Opens games in the system default browser
-* Direct launcher integration
-* Fully database-driven registration
+* Support removed in Phase 1
+* Legacy records preserved as archived history
+* New registrations and imports of this game mode are rejected
+
+Google Drive and `gdown` remain available for file downloads. The removal applies to running games in a browser.
 
 ---
 
@@ -302,9 +303,14 @@ The long-term goal is to allow new games to be added simply by inserting records
 
 # 🆕 Latest Update — Separate UI and Application Logic
 
-> **Restructuring completed • Downloads fixed • Uninstall menu restored**
+> **Phase 1: recoverable baseline • Consolidated catalog • Shared desktop and CLI services**
 
 ## ✅ Delivered in This Update
+
+* [x] **T00:** identified baseline, consistent backup and temporary restore rehearsal
+* [x] **T01:** consolidated database catalog, versioned migrations and separate local installations
+* [x] **T03:** shared services for adding/editing games, versions, emulators and packages through desktop forms and CLI
+* [x] **T05:** archived HTML/browser games and blocked registration, import and execution
 
 * [x] Graphical interface isolated in `frontend/`
 * [x] Game logic, database, downloads, installation and emulators concentrated in `backend/`
@@ -341,7 +347,7 @@ The interface sends actions containing identifiers and receives data ready for d
 
 * [x] Download calls compatible with `gdown 6.1.0`, removing the unsupported `fuzzy` argument
 * [x] Asset downloads and game installation using the corrected download call
-* [x] **Uninstall** action restored in the three-dot menu for installed non-web games
+* [x] **Uninstall** action preserved in the three-dot menu for installed games
 * [x] Uninstall availability fixed for local games and ROMs, including those outside the managed installation folder
 * [x] Managed installation removal and record updates without deleting external executables or ROM files
 
@@ -349,37 +355,58 @@ The interface sends actions containing identifiers and receives data ready for d
 
 ## ▶️ Running Each Layer
 
-Complete application:
+Complete application, from this environment's checkout:
 
 ```bash
-python -m pip install -r requirements.txt
+cd /workspace/Raspberry-Launcher
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+source /workspace/.launcher-cloud/env.sh
 python main.py
 ```
 
-UI preview using demonstration data:
+The cloud setup's `env.sh` activates the virtual environment and uses `/workspace/.launcher-cloud/runtime` for writable data, preserving the supplied checkout database. Without a graphical display, run `xvfb-run -a python main.py`. On a local installation with a display, activate your virtual environment and run `python main.py`; set `RASPBERRY_LAUNCHER_HOME` outside the checkout to choose a separate data directory.
+
+UI preview using demonstration data without loading the backend:
 
 ```bash
-python -m pip install -r requirements/frontend.txt
-python -m frontend.preview
+cd /workspace/Raspberry-Launcher
+source /workspace/.launcher-cloud/env.sh
+xvfb-run -a python -m frontend.preview
 ```
 
-Backend from the terminal:
+Backend and shared catalog tools from the terminal:
 
 ```bash
-python -m pip install -r requirements/backend.txt
+cd /workspace/Raspberry-Launcher
+source /workspace/.launcher-cloud/env.sh
 python -m backend --help
 python -m backend list
+python -m backend catalog list game
+python -m backend catalog --help
 ```
 
-Administrative tools now run as modules, for example: `python -m backend.tools.add_game`.
+Desktop forms are in the sidebar's **Cadastros** group. Registering an emulator or package does not implement its adapter or guarantee ROM execution. Administrative tools still run as modules, for example `python -m backend.tools.add_game`; registration and editing examples are in [Phase 1](docs/FASE1.md).
+
+Linux validation using a virtual display:
+
+```bash
+cd /workspace/Raspberry-Launcher
+source /workspace/.launcher-cloud/env.sh
+xvfb-run -a python -m unittest discover -s tests -v
+python -m compileall -q backend frontend application contracts tests main.py
+ruff check .
+```
+
+The `env.sh` sets `PYTHONPYCACHEPREFIX` to keep caches outside tracked `.pyc` files. Before migrating or editing important data, create a recovery point and rehearse restoring it as described in [Recovery](docs/RECUPERACAO.md).
 
 ---
 
 ## 🧪 Update Validation
 
-* [x] **43 automated tests passed** on Linux, including graphical tests with real CustomTkinter widgets on a virtual display
+* [x] Backend, migration, recovery, catalog and graphical tests run on Linux; current results are in [Validation](docs/VALIDACAO.md)
 * [x] Python module compilation and static checks passed
-* [x] **27 data and resource files preserved**, compared byte for byte with the original ZIP
+* [x] Historical restructuring check: 27 data/resource files compared byte for byte with the original ZIP; this does not replace current Phase 1 tests
 
 Download tests used local files and controlled HTTP transport. The availability of every external catalog link was not validated, and tests were not run on Windows or with a real ROM in PCSX2.
 
@@ -759,9 +786,9 @@ Each asset stores:
 
 ---
 
-## Planned Database Tables
+## Consolidated Database Tables
 
-The following tables will complete the migration to a fully database-driven launcher:
+The database already includes these catalog and collection tables:
 
 ```text
 platforms
@@ -775,7 +802,7 @@ Stores every supported gaming platform.
 emulators
 ```
 
-Stores every installed emulator.
+Stores emulator catalog records. Packages live in `emulator_packages`; local installations live in `emulator_installations`.
 
 ---
 
@@ -870,7 +897,6 @@ Launcher PI aims to become a complete game management platform, providing a simp
 When development is complete, users will be able to manage:
 
 * 🎮 Native Games
-* 🌐 Web Games
 * 🕹️ ROMs
 * ⚙️ Emulators
 * 🖼️ Game Assets
@@ -884,85 +910,37 @@ The long-term vision is to make Launcher PI entirely database-driven, allowing n
 
 # 🗺️ Development Roadmap
 
-## ✅ Phase 1 — Core Architecture (Completed)
+## ✅ Phase 1 — Baseline, Catalog Editing and Supported Games
 
-The first development phase focused on building the technical foundation of Launcher PI.
+The current delivery covers **T00, T01, T03 and T05** on the existing modular architecture:
 
-Main achievements:
+* Identified baseline, consistent recovery point and temporary restore rehearsal
+* Safe migrations and consolidated game, platform, emulator and package records
+* Separate package/version catalog data and local installations
+* Desktop forms and CLI using the same registration/editing services and validation
+* Archived HTML/browser games, blocked from new registration, import and execution
+* Preserved action menu, uninstallation, native games, existing ROM flows and Google Drive downloads
+* Preserved `frontend`, `backend`, `application` and `contracts` boundaries
 
-* Modular architecture
-* Dynamic game library
-* Download system
-* Automatic installation
-* Automatic uninstallation
-* LauncherFactory
-* NativeLauncher
-* RomLauncher
-* EmulatorManager
-* Plugin system
-* Asset system
-* SQLite integration
-* Initial user interface
-
-This phase established the foundation for every future feature.
+`games.py` was already absent from execution. Current migration details, results and practical limits are in [Phase 1](docs/FASE1.md) and [Validation](docs/VALIDACAO.md).
 
 ---
 
-## 🚧 Phase 2 — Database Migration
+## ⏳ Phase 2 — Profiles and Persistent Preferences
 
-The current phase focuses on migrating the entire launcher to a fully database-driven architecture.
-
-Current objectives:
-
-* Make SQLite the single source of truth.
-* Remove every dependency on `games.py`.
-* Register games using administrative tools.
-* Register assets through the database.
-* Support multiple platform-specific versions.
-* Preserve user data through migrations.
-* Prepare platforms and emulators for full database integration.
-
-Delivered in this update:
-
-* [x] Separate frontend, backend, application and contracts layers
-* [x] Backend CLI and independent UI preview
-* [x] Separate dependencies and preserved administrative tools
-* [x] Google Drive download compatibility fix
-* [x] Restored three-dot uninstall menu
-* [x] 43 automated tests passed on Linux
-
-Once completed, nearly every aspect of Launcher PI will be configurable through the database alone.
+Local profile selection, personal state and preferences belong to a later phase. Phase 1 prepares only their database structures and contracts.
 
 ---
 
-## ⏳ Phase 3 — Content Expansion
+## ⏳ Phase 3 — Downloads, Emulators and ROMs
 
-After the migration is complete, development will focus on expanding the launcher's ecosystem.
-
-Planned additions include:
-
-* More games
-* More emulators
-* More gaming platforms
-* Collections
-* Individual game pages
-* Improved user interface
-* Additional administrative tools
+Complete installation and launching by operating system, architecture and adapter, validating one supported platform at a time. A registered emulator is not automatically compatible or ready to run ROMs.
 
 ---
 
-## 🚀 Phase 4 — Public Release
+## 🚀 Phase 4 — RGSX Integration
 
-The final development phase will focus on preparing Launcher PI for public distribution.
-
-Planned deliverables:
-
-* Official installer
-* Automatic updater
-* Linux packages
-* Windows packages
-* Complete documentation
-* Stable public release
+Query and synchronize an external catalog, then connect downloads and ROM launching on supported platforms. No RGSX integration is implemented in Phase 1. Richer library pages, statistics, version recovery, themes, music, achievements and system controls remain future phases.
 
 ---
 
@@ -991,12 +969,14 @@ This includes:
 * Favorites
 * Play time
 
-Future versions will also manage:
+The database also stores:
 
 * Platforms
-* Emulators
+* Emulator catalog and packages
 * Collections
-* User data
+* Local game and emulator installations
+
+Profile and external-source structures are prepared for later phases; full profiles and external synchronization are not implemented in Phase 1.
 
 The objective is to make the database the single source of truth.
 
