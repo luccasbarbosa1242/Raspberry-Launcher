@@ -1,4 +1,0 @@
-CREATE TABLE IF NOT EXISTS migrations (
-    id TEXT PRIMARY KEY,
-    applied_at TEXT DEFAULT CURRENT_TIMESTAMP
-);
