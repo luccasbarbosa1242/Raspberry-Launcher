@@ -1,19 +1,27 @@
-from CORE.database.migrations import (
-    initialize_database
-)
+"""Composition root: the only module binding concrete frontend and backend."""
 
-from UI.window import app
-from UI.pages import render
-from UI.pages import showPage
+from application.controller import LauncherController
+from backend.api import LauncherService
+from backend.path_resolver import PathResolver
+from contracts.models import UiResources
 
-from CORE.score import atualizarScores
 
-initialize_database()
+def main():
+    # Lazy GUI import lets the backend run on systems without Tk or a display.
+    from frontend.window import LauncherWindow
 
-render()
+    backend = LauncherService()
+    backend.initialize()
+    controller = LauncherController(backend)
+    window = LauncherWindow(controller, UiResources(str(PathResolver.assets() / "icons")))
+    controller.attach_view(window)
+    window.start_polling(controller.poll)
+    controller.navigate("home")
+    try:
+        window.run()
+    finally:
+        controller.close()
 
-showPage("home")
 
-atualizarScores()
-
-app.mainloop()
+if __name__ == "__main__":
+    main()
