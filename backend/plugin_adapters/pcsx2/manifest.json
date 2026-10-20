@@ -1,0 +1,11 @@
+{
+    "id": "pcsx2",
+
+    "name": "PCSX2",
+
+    "platforms": [
+        "ps2"
+    ],
+
+    "version": "1.0"
+}

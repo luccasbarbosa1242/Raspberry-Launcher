@@ -1,0 +1,23 @@
+{
+    "pcsx2": {
+        "name": "PCSX2",
+        "plugin_id": "pcsx2",
+
+        "packages": {
+
+            "linux": {
+                "version": "2.7.424",
+                "download_url": "https://github.com/PCSX2/pcsx2/releases/download/v2.7.424/pcsx2-v2.7.424-linux-appimage-x64-Qt.AppImage",
+                "archive_type": "appimage",
+                "executable": "pcsx2-v2.7.424-linux-appimage-x64-Qt.AppImage"
+            },
+
+            "windows": {
+                "version": "2.7.424",
+                "download_url": "https://github.com/PCSX2/pcsx2/releases/download/v2.7.424/pcsx2-v2.7.424-windows-x64-Qt.7z",
+                "archive_type": "7z",
+                "executable": "pcsx2-qt.exe"
+            }
+        }
+    }
+}

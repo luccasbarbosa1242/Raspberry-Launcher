@@ -1,0 +1,6 @@
+ALTER TABLE games ADD COLUMN download_url TEXT;
+ALTER TABLE games ADD COLUMN archive_name TEXT;
+ALTER TABLE games ADD COLUMN archive_type TEXT;
+ALTER TABLE games ADD COLUMN executable TEXT;
+ALTER TABLE games ADD COLUMN strip_root_folder INTEGER DEFAULT 0;
+ALTER TABLE games ADD COLUMN score_enabled INTEGER DEFAULT 0;

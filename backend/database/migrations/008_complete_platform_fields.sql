@@ -1,0 +1,2 @@
+ALTER TABLE platforms ADD COLUMN type TEXT NOT NULL DEFAULT 'rom';
+ALTER TABLE platforms ADD COLUMN emulator_id TEXT;
