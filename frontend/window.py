@@ -16,7 +16,7 @@ from frontend import theme
 class LauncherWindow:
     def __init__(self, actions: Actions, resources: UiResources):
         self.actions = actions
-        ctk.set_appearance_mode("dark")
+        ctk.set_appearance_mode(resources.theme)
         ctk.set_default_color_theme("green")
         self.root = ctk.CTk()
         self.root.title("RaspberryLC")
