@@ -265,7 +265,8 @@ class LauncherController:
                 theme=theme, music_volume=music_volume,
                 profile_id=self.backend.active_profile_id(),
             )
-            self.view.show_settings(preferences)
+            if theme is not None:
+                self.view.show_settings(preferences)
         except (LookupError, ValueError) as error:
             self.view.show_error(str(error))
 
