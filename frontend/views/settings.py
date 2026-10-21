@@ -1,15 +1,54 @@
+"""Local profile selection and persistent personal preferences."""
+
 import customtkinter as ctk
 from frontend.components import heading
 from frontend import theme
 
 
-def render_settings(parent):
+def render_settings(parent, actions=None, preferences=None):
     heading(parent, "Configurações")
+    if preferences is None or actions is None:
+        ctk.CTkLabel(parent, text="Prévia de configurações", text_color=theme.MUTED).pack(padx=20, pady=10)
+        return
+    ctk.CTkLabel(parent, text="Perfil ativo", font=("Arial", 16, "bold")).pack(
+        anchor="w", padx=20, pady=(15, 5)
+    )
+    labels = [f"{p.name} ({p.id[:6]})" for p in preferences.profiles]
+    lookup = dict(zip(labels, (p.id for p in preferences.profiles)))
+    chosen = next((label for label, pid in lookup.items()
+                   if pid == preferences.active_profile_id), labels[0])
+    ctk.CTkOptionMenu(
+        parent, values=labels, command=lambda label: actions.select_profile(lookup[label]),
+    ).pack(anchor="w", padx=20, pady=5)
+    # Reflect the active profile in the actual selector.
+    menu = parent.winfo_children()[-1]
+    menu.set(chosen)
+    new_profile = ctk.CTkFrame(parent, fg_color="transparent")
+    new_profile.pack(fill="x", padx=20, pady=10)
+    name_entry = ctk.CTkEntry(new_profile, placeholder_text="Nome do novo perfil", width=260)
+    name_entry.pack(side="left", padx=(0, 10))
+    ctk.CTkButton(
+        new_profile, text="Criar perfil",
+        command=lambda: actions.create_profile(name_entry.get())
+    ).pack(side="left")
+    ctk.CTkLabel(parent, text="Tema", font=("Arial", 16, "bold")).pack(
+        anchor="w", padx=20, pady=(20, 5)
+    )
+    theme_menu = ctk.CTkOptionMenu(
+        parent, values=["dark", "light", "system"],
+        command=lambda value: actions.update_profile_preferences(theme=value)
+    )
+    theme_menu.set(preferences.theme)
+    theme_menu.pack(anchor="w", padx=20)
+    ctk.CTkLabel(parent, text=f"Volume de música (preferência): {preferences.music_volume}%",
+                 text_color=theme.MUTED).pack(anchor="w", padx=20, pady=(20, 2))
+    ctk.CTkSlider(
+        parent, from_=0, to=100, number_of_steps=100,
+        command=lambda value: actions.update_profile_preferences(music_volume=int(value)),
+    ).pack(fill="x", padx=20, pady=10)
+    slider = parent.winfo_children()[-1]
+    slider.set(preferences.music_volume)
     ctk.CTkLabel(
-        parent,
-        text="Estas opções ainda não possuem persistência nesta versão.",
+        parent, text="Esta opção salva uma preferência, sem controlar o volume do sistema.",
         text_color=theme.MUTED,
-    ).pack(anchor="w", padx=20, pady=10)
-    for text in ("Tema escuro", "Animações"):
-        ctk.CTkSwitch(parent, text=text, state="disabled").pack(anchor="w", padx=20, pady=10)
-    ctk.CTkSlider(parent, from_=0, to=100, state="disabled").pack(fill="x", padx=20, pady=20)
+    ).pack(anchor="w", padx=20, pady=5)
