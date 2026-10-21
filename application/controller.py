@@ -35,6 +35,7 @@ class LauncherController:
         self.view = view
 
     def _query(self, work, present):
+        owner = self.backend.active_profile_id()
         self._generation += 1
         generation = self._generation
 
@@ -48,7 +49,7 @@ class LauncherController:
             if generation == self._generation and not self._closed:
                 self.view.show_error(str(error))
 
-        self.runner.submit(work, success, failure)
+        self.runner.submit(lambda: self.backend.execute_for_profile(owner, work), success, failure)
 
     def navigate(self, page):
         if page.startswith("registry:"):
@@ -71,7 +72,7 @@ class LauncherController:
         else:
             self._generation += 1
             if page == "settings":
-                self.view.show_settings()
+                self.view.show_settings(self.backend.profile_settings())
             else:
                 self.view.show_placeholder(page)
 
@@ -135,6 +136,7 @@ class LauncherController:
             return
         self._catalog_saves.add(key)
         route, generation = self.route, self._generation
+        owner = self.backend.active_profile_id()
 
         def current():
             return not self._closed and self.route == route and self._generation == generation
@@ -150,10 +152,13 @@ class LauncherController:
                 self.view.show_error(str(error))
 
         self.runner.submit(
-            lambda: self.backend.save_catalog(kind, values, record_id), success, failure
+            lambda: self.backend.execute_for_profile(
+                owner, lambda: self.backend.save_catalog(kind, values, record_id)
+            ), success, failure
         )
 
     def _operation(self, target_id, kind, work):
+        owner = self.backend.active_profile_id()
         key = f"{'emulator' if kind == 'emulator' else 'game'}:{target_id}"
         if key in self._busy or self._closed:
             return
@@ -177,7 +182,9 @@ class LauncherController:
             self.view.show_error(str(error))
 
         update(Phase.STARTED)
-        self.runner.submit(lambda: work(progress), success, failure)
+        self.runner.submit(
+            lambda: self.backend.execute_for_profile(owner, lambda: work(progress)), success, failure
+        )
 
     def install(self, game_id, version_id=None):
         self._operation(
@@ -221,7 +228,40 @@ class LauncherController:
                 self._scores_pending = False
                 logging.getLogger(__name__).warning("Falha ao consultar pontuação: %s", error)
 
-            self.runner.submit(self.backend.scores, success, failure)
+            owner = self.backend.active_profile_id()
+            self.runner.submit(
+                lambda: self.backend.execute_for_profile(owner, self.backend.scores),
+                lambda result: success(result) if owner == self.backend.active_profile_id() else setattr(self, '_scores_pending', False),
+                failure,
+            )
+
+    def create_profile(self, name):
+        try:
+            created = self.backend.create_profile(name)
+            self.select_profile(created.id)
+        except (LookupError, ValueError) as error:
+            self.view.show_error(str(error))
+
+    def select_profile(self, profile_id):
+        try:
+            self.backend.select_profile(profile_id)
+        except (LookupError, ValueError) as error:
+            self.view.show_error(str(error))
+            return
+        self._generation += 1
+        self._busy.clear()
+        self._scores_pending = False
+        self._refresh()
+
+    def update_profile_preferences(self, *, theme=None, music_volume=None):
+        try:
+            preferences = self.backend.update_profile_preferences(
+                theme=theme, music_volume=music_volume,
+                profile_id=self.backend.active_profile_id(),
+            )
+            self.view.show_settings(preferences)
+        except (LookupError, ValueError) as error:
+            self.view.show_error(str(error))
 
     def close(self):
         if not self._closed:
