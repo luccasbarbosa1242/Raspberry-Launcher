@@ -113,7 +113,10 @@ def render_registry(parent, kind, entries, actions):
             listing, text="Nenhum registro cadastrado.", text_color=theme.MUTED
         ).pack(anchor="w", padx=8, pady=16)
     for entry in entries:
-        row = ctk.CTkFrame(listing, fg_color=theme.CARD, corner_radius=12)
+        row = ctk.CTkFrame(
+            listing, fg_color=theme.CARD, corner_radius=12,
+            border_width=1, border_color=theme.BORDER,
+        )
         row.pack(fill="x", pady=5)
         ctk.CTkButton(
             row,

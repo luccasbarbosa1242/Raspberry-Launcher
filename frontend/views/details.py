@@ -65,7 +65,10 @@ def render_details(parent, details, actions, bindings):
         )
         bindings.button(f"game:{game.id}", remove)
         remove.pack(anchor="w", pady=(0, 15))
-    box = ctk.CTkFrame(info, fg_color=theme.CARD, corner_radius=14)
+    box = ctk.CTkFrame(
+        info, fg_color=theme.CARD, corner_radius=14,
+        border_width=1, border_color=theme.BORDER,
+    )
     box.pack(fill="x")
     rows = [
         ("ID", game.id),
@@ -95,7 +98,10 @@ def render_details(parent, details, actions, bindings):
             anchor="w", pady=(30, 10)
         )
     for version in details.versions:
-        row = ctk.CTkFrame(info, fg_color=theme.CARD, corner_radius=14)
+        row = ctk.CTkFrame(
+            info, fg_color=theme.CARD, corner_radius=14,
+            border_width=1, border_color=theme.BORDER,
+        )
         row.pack(fill="x", pady=6)
         status = "Instalada" if version.installed else "Não instalada"
         text = f"{version.platform.upper()} | {version.launch_type} | {status}"

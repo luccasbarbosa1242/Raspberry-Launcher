@@ -46,6 +46,8 @@ class GameCard(ctk.CTkFrame):
             height=theme.CARD_HEIGHT,
             corner_radius=20,
             fg_color=theme.CARD,
+            border_width=1,
+            border_color=theme.BORDER,
         )
         self._popup = None
         self._popup_timer = None
@@ -116,7 +118,10 @@ class GameCard(ctk.CTkFrame):
         x = self._menu_button.winfo_rootx() - width + 38
         y = self._menu_button.winfo_rooty() - height - 6
         popup.geometry(f"{width}x{height}+{x}+{y}")
-        frame = ctk.CTkFrame(popup, corner_radius=14, fg_color=theme.POPUP)
+        frame = ctk.CTkFrame(
+            popup, corner_radius=14, fg_color=theme.POPUP,
+            border_width=1, border_color=theme.BORDER,
+        )
         frame.pack(fill="both", expand=True)
         ctk.CTkButton(
             frame,

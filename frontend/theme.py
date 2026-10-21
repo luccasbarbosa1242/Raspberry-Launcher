@@ -7,6 +7,7 @@ of painting permanently dark backgrounds in individual widget constructors.
 BG = ("#EFF3F8", "#0b0f1a")
 PAGE = ("#F6F8FC", "#0d111c")
 CARD = ("#FFFFFF", "#181c2b")
+BORDER = ("#D6DFEA", "#2A3247")
 SIDEBAR = ("#E7EDF5", "#141726")
 FOOTER = ("#DCE5F0", "#1b2033")
 POPUP = ("#FFFFFF", "#131620")

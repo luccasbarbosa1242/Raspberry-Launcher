@@ -25,7 +25,8 @@ def contrast(foreground, background):
 
 class PaletteTests(unittest.TestCase):
     def test_page_sidebar_and_cards_have_distinct_light_and_dark_colors(self):
-        for name in ("BG", "PAGE", "CARD", "SIDEBAR", "FOOTER", "POPUP", "HOVER"):
+        for name in ("BG", "PAGE", "CARD", "SIDEBAR", "FOOTER", "POPUP", "HOVER",
+            "BORDER"):
             colors = getattr(theme, name)
             with self.subTest(token=name):
                 self.assertEqual(len(colors), 2)

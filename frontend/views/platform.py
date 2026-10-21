@@ -42,7 +42,10 @@ def render_platform(parent, platform, actions, bindings):
                 examples, text="Exemplos de jogos (não cadastrados)", font=("Arial", 18, "bold")
             ).pack(anchor="w")
         for title in platform.examples:
-            card = ctk.CTkFrame(examples, fg_color=theme.CARD, corner_radius=12)
+            card = ctk.CTkFrame(
+                examples, fg_color=theme.CARD, corner_radius=12,
+                border_width=1, border_color=theme.BORDER,
+            )
             card.pack(fill="x", pady=5)
             ctk.CTkLabel(card, text=title, font=("Arial", 18, "bold")).pack(
                 anchor="w", padx=20, pady=18
