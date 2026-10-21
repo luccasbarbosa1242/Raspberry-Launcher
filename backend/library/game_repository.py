@@ -99,25 +99,17 @@ class GameRepository:
 
     def get_all(self):
 
-        cursor = self.db.cursor()
-
         return self._personal_rows(active_catalog_sql("g"))
 
     def installed_games(self):
-
-        cursor = self.db.cursor()
 
         return self._personal_rows(f"g.installed=1 AND {active_catalog_sql('g')}")
 
     def favorites(self):
 
-        cursor = self.db.cursor()
-
         return self._personal_rows(f"COALESCE(ps.favorite,0)=1 AND {active_catalog_sql('g')}")
 
     def by_platform(self, platform):
-
-        cursor = self.db.cursor()
 
         return self._personal_rows(f"g.platform=? AND {active_catalog_sql('g')}", (platform,))
 
@@ -156,8 +148,6 @@ class GameRepository:
         self.db.commit()
 
     def get_by_id(self, game_id):
-
-        cursor = self.db.cursor()
 
         rows = self._personal_rows(f"g.id=? AND {active_catalog_sql('g')}", (game_id,))
         return rows[0] if rows else None
