@@ -68,9 +68,11 @@ class LauncherWindow:
         self._clear()
         render_platform(self.page, platform, self.actions, self.bindings)
 
-    def show_settings(self):
+    def show_settings(self, preferences=None):
         self._clear()
-        render_settings(self.page)
+        if preferences is not None:
+            ctk.set_appearance_mode(preferences.theme)
+        render_settings(self.page, self.actions, preferences)
 
     def show_registry(self, kind, entries):
         self._clear()
