@@ -19,6 +19,7 @@ class LauncherWindow:
         ctk.set_appearance_mode(resources.theme)
         ctk.set_default_color_theme("green")
         self.root = ctk.CTk()
+        self.root.configure(fg_color=theme.BG)
         self.root.title("RaspberryLC")
         self.root.geometry("1100x700")
         self.root.minsize(900, 600)
@@ -31,7 +32,7 @@ class LauncherWindow:
         self.sidebar = create_sidebar(self.root, actions, resources)
         main = ctk.CTkFrame(self.root, fg_color=theme.PAGE, corner_radius=0)
         main.pack(side="right", fill="both", expand=True)
-        self.notice = ctk.CTkLabel(main, text="", text_color="#ffaaaa", wraplength=720)
+        self.notice = ctk.CTkLabel(main, text="", text_color=theme.ERROR, wraplength=720)
         self.page = ctk.CTkFrame(main, fg_color="transparent")
         self.page.pack(fill="both", expand=True)
 
@@ -68,10 +69,14 @@ class LauncherWindow:
         self._clear()
         render_platform(self.page, platform, self.actions, self.bindings)
 
+    def apply_theme(self, selected):
+        """Apply a persisted preference to every existing CustomTkinter widget."""
+        ctk.set_appearance_mode(selected)
+
     def show_settings(self, preferences=None):
-        self._clear()
         if preferences is not None:
-            ctk.set_appearance_mode(preferences.theme)
+            self.apply_theme(preferences.theme)
+        self._clear()
         render_settings(self.page, self.actions, preferences)
 
     def show_registry(self, kind, entries):

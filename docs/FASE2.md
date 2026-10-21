@@ -41,5 +41,10 @@ A pontuação de jogos mantida em arquivos externos ao SQLite continua
 global. Um processo iniciado para um perfil mantém seu histórico de tempo
 nesse perfil, mesmo quando a seleção da interface muda.
 
+O tema claro usa paleta de superfícies, menus, cartões, navegação e textos
+independente da paleta escura. A troca de tema afeta os widgets já abertos;
+a seleção de outro perfil também aplica seu tema imediatamente. Os contrastes
+de texto e status são validados por teste automatizado (mínimo 4,5:1).
+
 Verifique testes e comportamento gráfico no ambiente com Python, Tk e
 CustomTkinter instalados antes de mesclar esta branch.

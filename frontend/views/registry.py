@@ -166,6 +166,8 @@ class CatalogForm:
             text="Cancelar",
             width=110,
             fg_color=theme.CARD,
+            hover_color=theme.HOVER,
+            text_color=theme.TEXT,
             command=lambda: actions.open_registry(kind),
         ).pack(side="left")
         body = ctk.CTkScrollableFrame(parent, fg_color="transparent")

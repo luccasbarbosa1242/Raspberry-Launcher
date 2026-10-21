@@ -49,7 +49,7 @@ def create_sidebar(parent, actions: Actions, resources: UiResources):
     ctk.CTkButton(sidebar, text="Buscar", command=lambda: actions.navigate("search")).pack(
         fill="x", padx=10, pady=(12, 5)
     )
-    footer = ctk.CTkFrame(sidebar, fg_color="#1b2033", corner_radius=0)
+    footer = ctk.CTkFrame(sidebar, fg_color=theme.FOOTER, corner_radius=0)
     footer.pack(side="bottom", fill="x")
     brand = ctk.CTkFrame(footer, fg_color="transparent")
     brand.pack(fill="x", padx=10, pady=10)
@@ -65,6 +65,8 @@ def create_sidebar(parent, actions: Actions, resources: UiResources):
         footer,
         text="⚙ Configurações",
         fg_color="transparent",
+        hover_color=theme.HOVER,
+        text_color=theme.TEXT,
         anchor="w",
         command=lambda: actions.navigate("settings"),
     ).pack(fill="x", padx=10, pady=5)
@@ -84,7 +86,8 @@ def navigation_button(parent, text, page, actions):
         anchor="w",
         height=32,
         fg_color="transparent",
-        hover_color="#2b3150",
+        hover_color=theme.HOVER,
+        text_color=theme.TEXT,
         command=(
             (lambda: actions.open_registry(page.removeprefix("registry:")))
             if page.startswith("registry:")
@@ -112,6 +115,8 @@ def create_group(parent, title, links, actions):
         container,
         text=f"▼ {title}",
         fg_color="transparent",
+        hover_color=theme.HOVER,
+        text_color=theme.TEXT,
         anchor="w",
         height=34,
         font=("Arial", 14, "bold"),

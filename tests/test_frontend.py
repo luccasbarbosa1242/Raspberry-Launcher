@@ -82,6 +82,45 @@ class FrontendTests(unittest.TestCase):
         window.root.update()
         self.assertEqual(self.errors, [])
 
+    def test_light_mode_updates_real_surfaces_and_preserves_dark_mode(self):
+        from frontend import theme
+        from frontend.cards import GameCard
+
+        self.window.show_catalog("home", (self.sample,))
+        self.window.root.update()
+        card = next(
+            widget for widget in descendants(self.window.page)
+            if isinstance(widget, GameCard)
+        )
+        main = self.window.page.master
+        sidebar = self.window.sidebar
+        footer = next(
+            widget for widget in sidebar.winfo_children()
+            if isinstance(widget, ctk.CTkFrame)
+            and widget.cget("fg_color") == theme.FOOTER
+        )
+        nav = next(
+            widget for widget in descendants(sidebar)
+            if isinstance(widget, ctk.CTkButton)
+            and widget.cget("text") == "Biblioteca"
+        )
+        for mode, position in (("light", 0), ("dark", 1), ("light", 0)):
+            self.window.apply_theme(mode)
+            self.window.root.update()
+            self.assertEqual(ctk.get_appearance_mode().lower(), mode)
+            for widget, expected in (
+                (self.window.root, theme.BG),
+                (main, theme.PAGE),
+                (sidebar, theme.SIDEBAR),
+                (footer, theme.FOOTER),
+                (card, theme.CARD),
+            ):
+                actual = widget._apply_appearance_mode(widget.cget("fg_color"))
+                self.assertEqual(actual.upper(), expected[position].upper())
+            actual_text = nav._apply_appearance_mode(nav.cget("text_color"))
+            self.assertEqual(actual_text.upper(), theme.TEXT[position].upper())
+        self.assertEqual(self.errors, [])
+
     def test_card_emits_identifiers_and_restores_controls_after_failure(self):
         window = self.window
         window.show_catalog("home", (self.sample,))
@@ -227,6 +266,27 @@ class GraphicalIntegrationTests(BackendCase):
         self.controller.navigate("settings")
         self.window.root.update()
         self.assertEqual(self.service.profile_settings().theme, "light")
+        self.assertEqual(self.errors, [])
+
+    def test_switching_profiles_updates_theme_without_settings_page(self):
+        second = self.service.create_profile("Tema alternativo")
+        self.service.update_profile_preferences(theme="light", profile_id=second.id)
+        self.controller.navigate("home")
+        self.pump_until(lambda: bool(buttons(self.window.page, "Instalar")) or
+                        any(isinstance(widget, ctk.CTkLabel) and
+                            widget.cget("text") == "Nenhum jogo encontrado."
+                            for widget in descendants(self.window.page)))
+        self.controller.select_profile(second.id)
+        self.window.root.update()
+        self.assertEqual(ctk.get_appearance_mode(), "Light")
+        self.assertEqual(
+            self.window.page.master._apply_appearance_mode(
+                self.window.page.master.cget("fg_color")
+            ).upper(), "#F6F8FC"
+        )
+        self.controller.select_profile("default")
+        self.window.root.update()
+        self.assertEqual(ctk.get_appearance_mode(), "Dark")
         self.assertEqual(self.errors, [])
 
     def test_install_favorite_search_and_uninstall_through_widgets(self):

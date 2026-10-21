@@ -257,6 +257,7 @@ class LauncherController:
         self._generation += 1
         self._busy.clear()
         self._scores_pending = False
+        self.view.apply_theme(self.backend.profile_settings().theme)
         self._refresh()
 
     def update_profile_preferences(self, *, theme=None, music_volume=None):

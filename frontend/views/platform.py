@@ -7,7 +7,7 @@ from frontend import theme
 
 def render_platform(parent, platform, actions, bindings):
     if platform.banner_path:
-        banner = ctk.CTkFrame(parent, height=230, corner_radius=15, fg_color="#111827")
+        banner = ctk.CTkFrame(parent, height=230, corner_radius=15, fg_color=theme.BG)
         banner.pack(fill="x", padx=20, pady=(10, 10))
         banner.pack_propagate(False)
         image = load_banner(platform.banner_path, (1100, 230))
@@ -21,8 +21,8 @@ def render_platform(parent, platform, actions, bindings):
             text="Emulador instalado" if platform.emulator_installed else "Download do emulador",
             width=200,
             height=40,
-            fg_color="#7C3AED",
-            hover_color="#8B5CF6",
+            fg_color=theme.EMULATOR_ACTION,
+            hover_color=theme.EMULATOR_HOVER,
             state="disabled" if platform.emulator_installed else "normal",
             command=lambda: actions.install_emulator(platform.emulator_id),
         )

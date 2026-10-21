@@ -30,8 +30,12 @@ def primary_button(parent, game, actions, bindings, **kwargs):
 
 def status_style(game):
     if game.type == "rom":
-        return "ROM", "#9b7cff"
-    return ("Instalado", "#5bc77b") if game.installed else ("Não instalado", "#d6a84f")
+        return "ROM", theme.STATUS_ROM
+    return (
+        ("Instalado", theme.STATUS_INSTALLED)
+        if game.installed
+        else ("Não instalado", theme.STATUS_MISSING)
+    )
 
 
 class GameCard(ctk.CTkFrame):
@@ -112,7 +116,7 @@ class GameCard(ctk.CTkFrame):
         x = self._menu_button.winfo_rootx() - width + 38
         y = self._menu_button.winfo_rooty() - height - 6
         popup.geometry(f"{width}x{height}+{x}+{y}")
-        frame = ctk.CTkFrame(popup, corner_radius=14, fg_color="#131620")
+        frame = ctk.CTkFrame(popup, corner_radius=14, fg_color=theme.POPUP)
         frame.pack(fill="both", expand=True)
         ctk.CTkButton(
             frame,
@@ -120,8 +124,8 @@ class GameCard(ctk.CTkFrame):
             width=136,
             height=32,
             corner_radius=10,
-            fg_color="#7a2929",
-            hover_color="#8f3333",
+            fg_color=theme.DANGER,
+            hover_color=theme.DANGER_HOVER,
             command=self._uninstall_action,
         ).pack(padx=10, pady=8)
         self._popup_timer = popup.after(4000, self._close_context_menu)

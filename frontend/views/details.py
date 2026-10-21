@@ -60,7 +60,7 @@ def render_details(parent, details, actions, bindings):
             info,
             text="Desinstalar",
             width=150,
-            fg_color="#7a2929",
+            fg_color=theme.DANGER,
             command=lambda: actions.uninstall(game.id),
         )
         bindings.button(f"game:{game.id}", remove)
