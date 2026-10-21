@@ -83,23 +83,113 @@ class GameRepository:
 
         self.db.commit()
 
-    def _personal_rows(self, sql, params=(), profile_id=None):
-        selected = ProfileService().resolved_id(profile_id)
-        sql = active_catalog_sql('g')
+    def _personal_rows(self, sql, params=()):
+        selected = ProfileService().resolved_id()
+        return self.db.connection.execute(
+            f"""SELECT g.id,g.title,g.type,g.platform,g.path,g.launch_type,
+                g.download_url,g.archive_name,g.archive_type,g.executable,
+                g.strip_root_folder,g.score_enabled,g.installed,
+                COALESCE(ps.favorite,0) AS favorite,
+                COALESCE(ps.play_time,0) AS play_time,
+                ps.last_played,g.cover_url,g.banner_url,g.logo_url,g.archived,g.archive_reason
+                FROM runtime_games g LEFT JOIN profile_game_state ps
+                ON ps.game_id=g.id AND ps.profile_id=? WHERE {sql}""",
+            (selected, *params),
+        ).fetchall()
+
+    def get_all(self):
+
+        cursor = self.db.cursor()
+
+        return self._personal_rows(active_catalog_sql("g"))
+
+    def installed_games(self):
+
+        cursor = self.db.cursor()
+
+        return self._personal_rows(f"g.installed=1 AND {active_catalog_sql('g')}")
+
+    def favorites(self):
+
+        cursor = self.db.cursor()
+
+        return self._personal_rows(f"COALESCE(ps.favorite,0)=1 AND {active_catalog_sql('g')}")
+
+    def by_platform(self, platform):
+
+        cursor = self.db.cursor()
+
+        return self._personal_rows(f"g.platform=? AND {active_catalog_sql('g')}", (platform,))
+
+    def mark_installed(self, game_id, executable_path):
+
+        cursor = self.db.cursor()
+
+        cursor.execute(
+            """
+            UPDATE games
+            SET
+                installed = 1,
+                path = ?
+            WHERE id = ?
+            """,
+            (executable_path, game_id),
+        )
+
+        self.db.commit()
+
+    def mark_uninstalled(self, game_id):
+
+        cursor = self.db.cursor()
+
+        cursor.execute(
+            """
+            UPDATE games
+            SET
+                installed = 0,
+                path = id
+            WHERE id = ?
+            """,
+            (game_id,),
+        )
+
+        self.db.commit()
+
+    def get_by_id(self, game_id):
+
+        cursor = self.db.cursor()
+
+        rows = self._personal_rows(f"g.id=? AND {active_catalog_sql('g')}", (game_id,))
+        return rows[0] if rows else None
+
+    def set_favorite(self, game_id, favorite):
+        ProfileService().set_favorite(game_id, favorite)
+
+    def toggle_favorite(self, game_id):
+        ProfileService().toggle_favorite(game_id)
+
+    def add_play_time(self, game_id, seconds):
+        ProfileService().add_play_time(game_id, seconds)
+
+    def mark_last_played(self, game_id):
+        ProfileService().mark_last_played(game_id)
+
+    def search(self, term=None, game_type=None, platform=None, installed=None, favorite=None):
+        sql = active_catalog_sql("g")
         params = []
         if term:
-            sql += ' AND g.title LIKE ?'
-            params.append(f'%{term}%')
+            sql += " AND g.title LIKE ?"
+            params.append(f"%{term}%")
         if game_type:
-            sql += ' AND g.type=?'
+            sql += " AND g.type=?"
             params.append(game_type)
         if platform:
-            sql += ' AND g.platform=?'
+            sql += " AND g.platform=?"
             params.append(platform)
         if installed is not None:
-            sql += ' AND g.installed=?'
+            sql += " AND g.installed=?"
             params.append(int(installed))
         if favorite is not None:
-            sql += ' AND COALESCE(ps.favorite,0)=?'
+            sql += " AND COALESCE(ps.favorite,0)=?"
             params.append(int(favorite))
-        return self._personal_rows(sql + ' ORDER BY g.title ASC', params)
+        return self._personal_rows(sql + " ORDER BY g.title ASC", params)
