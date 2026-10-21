@@ -13,7 +13,10 @@ def main():
     backend = LauncherService()
     backend.initialize()
     controller = LauncherController(backend)
-    window = LauncherWindow(controller, UiResources(str(PathResolver.assets() / "icons")))
+    window = LauncherWindow(controller, UiResources(
+        str(PathResolver.assets() / "icons"),
+        theme=backend.profile_settings().theme,
+    ))
     controller.attach_view(window)
     window.start_polling(controller.poll)
     controller.navigate("home")
