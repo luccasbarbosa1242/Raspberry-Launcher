@@ -161,6 +161,8 @@ class InstallationStateTests(BackendCase):
 class CatalogCoordinationTests(unittest.TestCase):
     def setUp(self):
         self.backend = Mock(spec=Backend)
+        self.backend.active_profile_id.return_value = "default"
+        self.backend.execute_for_profile.side_effect = lambda profile_id, work: work()
         self.backend.catalog_choices.return_value = {}
         self.backend.get_catalog.return_value = CatalogEntry(
             "emulator", "one", "One", {"id": "one", "name": "One", "plugin_id": None}
@@ -175,7 +177,7 @@ class CatalogCoordinationTests(unittest.TestCase):
         self.controller.navigate("settings")
         self.runner.complete()
         self.view.show_catalog_form.assert_not_called()
-        self.view.show_settings.assert_called_once()
+        self.view.show_settings.assert_called_once_with(self.backend.profile_settings.return_value)
 
     def test_save_copies_values_and_suppresses_double_submission(self):
         self.controller.edit_catalog("emulator")
