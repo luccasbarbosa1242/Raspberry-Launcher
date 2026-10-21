@@ -1,8 +1,17 @@
 """T02: isolated profile fixtures, legacy migration and process ownership."""
 
+import os
+from pathlib import Path
+import sqlite3
+import tempfile
+import time
+import unittest
+from unittest.mock import patch
+
+from backend.api import LauncherService
 from backend.database.migrations import initialize_database
 from backend.profiles import ProfileService, profile_scope
-from tests.support import BackendCase
+from tests.support import BackendCase, PROJECT
 
 
 class ProfileTests(BackendCase):
@@ -75,3 +84,74 @@ class ProfileTests(BackendCase):
         self.assertEqual(connection.execute(
             "SELECT count(*) FROM profile_game_state WHERE game_id='demo'"
         ).fetchone()[0], 1)
+
+    def test_native_process_retains_profile_owner_after_switch(self):
+        executable = self.home / "profile_process.py"
+        executable.write_text("import time\ntime.sleep(1.2)\n")
+        self.add_game("demo", path=str(executable), installed=1, download_url=None)
+        second = self.service.create_profile("Outro")
+        self.service.select_profile("default")
+        self.service.launch_game("demo")
+        self.service.select_profile(second.id)
+        deadline = time.monotonic() + 7
+        with self.connection() as connection:
+            while time.monotonic() < deadline:
+                played = connection.execute(
+                    "SELECT play_time FROM profile_game_state WHERE profile_id='default' AND game_id='demo'"
+                ).fetchone()
+                if played and played[0] >= 1:
+                    break
+                time.sleep(.05)
+            self.assertIsNotNone(played)
+            self.assertGreaterEqual(played[0], 1)
+            self.assertEqual(connection.execute(
+                "SELECT COALESCE(play_time,0) FROM profile_game_state WHERE profile_id=? AND game_id='demo'",
+                (second.id,),
+            ).fetchone(), None)
+
+
+class SuppliedDatabaseProfileTests(unittest.TestCase):
+    def test_preserve_committed_runtime_state_when_upgrading_to_t02(self):
+        with tempfile.TemporaryDirectory() as folder:
+            runtime = Path(folder) / "runtime"
+            (runtime / "DATA").mkdir(parents=True)
+            source = PROJECT / "DATA" / "library.db"
+            with sqlite3.connect(f"file:{source.as_posix()}?mode=ro", uri=True) as old, \
+                    sqlite3.connect(runtime / "DATA" / "library.db") as copy:
+                old.backup(copy)
+                history = dict(
+                    (row[0], tuple(row[1:]))
+                    for row in copy.execute(
+                        "SELECT id,favorite,play_time,last_played,archived FROM games"
+                    )
+                )
+                self.assertTrue(history)
+                historical_profiles = dict(
+                    ((r[0], r[1]), tuple(r[2:]))
+                    for r in copy.execute(
+                        "SELECT profile_id,game_id,favorite,play_time,last_played FROM profile_game_state"
+                    )
+                )
+            with patch.dict(os.environ, {"RASPBERRY_LAUNCHER_HOME": str(runtime)}):
+                service = LauncherService()
+                service.initialize()
+                service.initialize()
+                with sqlite3.connect(runtime / "DATA" / "library.db") as migrated:
+                    for game_id, original in history.items():
+                        self.assertEqual(migrated.execute(
+                            "SELECT favorite,play_time,last_played,archived FROM games WHERE id=?",
+                            (game_id,),
+                        ).fetchone(), original)
+                        state = migrated.execute(
+                            "SELECT favorite,play_time,last_played FROM profile_game_state "
+                            "WHERE profile_id='default' AND game_id=?",
+                            (game_id,),
+                        ).fetchone()
+                        expected = historical_profiles.get(("default", game_id), original[:3])
+                        self.assertEqual(state, expected)
+                    self.assertEqual(
+                        migrated.execute("PRAGMA integrity_check").fetchone(), ("ok",)
+                    )
+                    self.assertEqual(migrated.execute(
+                        "SELECT count(*) FROM migrations WHERE id='012_local_profiles'"
+                    ).fetchone(), (1,))
