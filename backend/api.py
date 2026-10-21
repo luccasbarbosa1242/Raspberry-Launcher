@@ -7,6 +7,7 @@ The application layer, not this service, schedules work for a desktop window.
 import json
 
 from backend.assets.asset_manager import AssetManager
+from backend.profiles import ProfileService, profile_scope
 from backend.assets.platform_asset_manager import PlatformAssetManager
 from backend.database.database import scoped
 from backend.database.migrations import initialize_database
@@ -33,6 +34,27 @@ from contracts.models import (
 
 
 class LauncherService:
+    def __init__(self):
+        self.profiles = ProfileService()
+
+    def list_profiles(self):
+        return self.profiles.list_profiles()
+
+    def profile_settings(self, profile_id=None):
+        return self.profiles.settings(profile_id)
+
+    def create_profile(self, name):
+        return self.profiles.create(name)
+
+    def select_profile(self, profile_id):
+        self.profiles.select(profile_id)
+
+    def update_profile_preferences(self, *, theme=None, music_volume=None, profile_id=None):
+        return self.profiles.update_preferences(theme=theme, music_volume=music_volume, profile_id=profile_id)
+
+    def active_profile_id(self):
+        return self.profiles.active_id()
+
     def initialize(self):
         PathResolver.ensure_runtime_directories()
         initialize_database()
@@ -206,7 +228,8 @@ class LauncherService:
             or not self._architecture_compatible(game.get("architecture", "any"))
         ):
             raise ValueError("A versão do jogo não é compatível com este sistema/arquitetura.")
-        abrirJogo(game)
+        with profile_scope(self.profiles.resolved_id()):
+            abrirJogo(game)
 
     @scoped
     def install_emulator(self, emulator_id, on_progress=None):
