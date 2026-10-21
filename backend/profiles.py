@@ -2,37 +2,13 @@
 
 from contextlib import contextmanager
 from contextvars import ContextVar
-from dataclasses import dataclass
+from contracts.models import ProfileInfo, ProfilePreferences
 from uuid import uuid4
 
 from backend.database.database import Database, scoped
 
 _bound_profile = ContextVar("raspberry_bound_profile", default=None)
 DEFAULT_PROFILE_ID = "default"
-
-
-@dataclass(frozen=True)
-class LocalProfile:
-    id: str
-    name: str
-
-
-@dataclass(frozen=True)
-class ProfileSettings:
-    profiles: tuple[LocalProfile, ...]
-    active_profile_id: str
-    theme: str
-    music_volume: int
-
-
-@contextmanager
-def profile_scope(profile_id):
-    """A worker is owned by the profile that queued it, not the current selection."""
-    token = _bound_profile.set(profile_id)
-    try:
-        yield
-    finally:
-        _bound_profile.reset(token)
 
 
 class ProfileService:
@@ -62,7 +38,7 @@ class ProfileService:
     def list_profiles(self):
         db = Database()
         return tuple(
-            LocalProfile(row["id"], row["name"])
+            ProfileInfo(row["id"], row["name"])
             for row in db.connection.execute(
                 "SELECT id,name FROM profiles ORDER BY CASE WHEN id='default' THEN 0 ELSE 1 END, name, id"
             )
@@ -104,7 +80,7 @@ class ProfileService:
             "SELECT theme,music_volume FROM profile_preferences WHERE profile_id=?",
             (selected,),
         ).fetchone()
-        return ProfileSettings(
+        return ProfilePreferences(
             self.list_profiles(), selected,
             row["theme"] if row else "dark",
             int(row["music_volume"]) if row else 50,
