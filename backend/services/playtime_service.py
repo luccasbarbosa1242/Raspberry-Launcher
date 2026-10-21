@@ -1,12 +1,12 @@
 import time
 
-from backend.library.library_manager import LibraryManager
+from backend.profiles import ProfileService
 
 
 class PlaytimeService:
     def __init__(self):
 
-        self.manager = LibraryManager()
+        self.manager = ProfileService()
 
     def mark_started(self, game):
 
