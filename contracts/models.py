@@ -95,3 +95,17 @@ class InstallationResult:
 @dataclass(frozen=True)
 class UiResources:
     icons_dir: str
+
+
+@dataclass(frozen=True)
+class ProfileInfo:
+    id: str
+    name: str
+
+
+@dataclass(frozen=True)
+class ProfilePreferences:
+    profiles: tuple[ProfileInfo, ...]
+    active_profile_id: str
+    theme: str
+    music_volume: int
