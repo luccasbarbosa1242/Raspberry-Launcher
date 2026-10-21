@@ -50,6 +50,38 @@ class ApplicationTests(unittest.TestCase):
         self.controller = LauncherController(self.backend, self.runner)
         self.controller.attach_view(self.view)
 
+    def test_profile_switch_hides_stale_result_and_captures_operation_owner(self):
+        from contracts.models import ProfileInfo
+        self.backend.create_profile.return_value = ProfileInfo("other", "Outro")
+        self.backend.active_profile_id.return_value = "default"
+        seen = []
+        def execute(owner, work):
+            seen.append(owner)
+            return work()
+        self.backend.execute_for_profile.side_effect = execute
+        self.controller.navigate("home")
+        self.backend.active_profile_id.return_value = "other"
+        self.controller.select_profile("other")
+        self.runner.complete(0)
+        self.assertEqual(seen, ["default"])
+        self.view.show_catalog.assert_not_called()
+        self.runner.complete(0)
+        self.view.show_catalog.assert_called_once_with("home", ())
+        self.assertEqual(seen, ["default", "other"])
+
+    def test_favorite_queued_before_switch_changes_only_captured_profile(self):
+        seen = []
+        self.backend.execute_for_profile.side_effect = lambda owner, work: (
+            seen.append(owner), work()
+        )[1]
+        self.controller.toggle_favorite("demo")
+        self.backend.active_profile_id.return_value = "other"
+        self.controller.select_profile("other")
+        self.runner.complete(0)
+        self.backend.toggle_favorite.assert_called_once_with("demo")
+        self.assertEqual(seen, ["default"])
+        self.view.show_error.assert_not_called()
+
     def test_stale_query_cannot_overwrite_a_new_page(self):
         self.controller.navigate("home")
         self.controller.navigate("biblioteca")
