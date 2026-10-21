@@ -2,13 +2,23 @@
 
 from contextlib import contextmanager
 from contextvars import ContextVar
-from contracts.models import ProfileInfo, ProfilePreferences
 from uuid import uuid4
+
+from contracts.models import ProfileInfo, ProfilePreferences
 
 from backend.database.database import Database, scoped
 
 _bound_profile = ContextVar("raspberry_bound_profile", default=None)
 DEFAULT_PROFILE_ID = "default"
+
+
+@contextmanager
+def profile_scope(profile_id):
+    token = _bound_profile.set(profile_id)
+    try:
+        yield
+    finally:
+        _bound_profile.reset(token)
 
 
 class ProfileService:
@@ -58,7 +68,7 @@ class ProfileService:
             db.connection.execute(
                 "INSERT INTO profile_preferences(profile_id) VALUES(?)", (profile_id,)
             )
-        return LocalProfile(profile_id, clean)
+        return ProfileInfo(profile_id, clean)
 
     @scoped
     def select(self, profile_id):
