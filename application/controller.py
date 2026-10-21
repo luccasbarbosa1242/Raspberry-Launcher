@@ -164,6 +164,8 @@ class LauncherController:
             return
 
         def update(phase, error=None):
+            if owner != self.backend.active_profile_id() or self._closed:
+                return
             status = OperationStatus(key, target_id, kind, phase, error)
             self._busy[key] = status
             self.view.set_operation(status)
@@ -172,11 +174,15 @@ class LauncherController:
             self.runner.post(lambda phase=phase: update(phase))
 
         def success(value):
+            if owner != self.backend.active_profile_id() or self._closed:
+                return
             update(Phase.COMPLETE)
             self._busy.pop(key, None)
             self._refresh()
 
         def failure(error):
+            if owner != self.backend.active_profile_id() or self._closed:
+                return
             update(Phase.FAILED, str(error))
             self._busy.pop(key, None)
             self.view.show_error(str(error))
