@@ -95,6 +95,7 @@ class InstallationResult:
 @dataclass(frozen=True)
 class UiResources:
     icons_dir: str
+    theme: str = 'dark'
 
 
 @dataclass(frozen=True)
