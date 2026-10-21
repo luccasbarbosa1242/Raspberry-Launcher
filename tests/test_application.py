@@ -42,6 +42,8 @@ class ApplicationTests(unittest.TestCase):
     def setUp(self):
         self.backend = Mock(spec=Backend)
         self.backend.list_games.return_value = ()
+        self.backend.active_profile_id.return_value = 'default'
+        self.backend.execute_for_profile.side_effect = lambda profile_id, work: work()
         self.backend.scores.return_value = {"demo": "42"}
         self.view = Mock(spec=View)
         self.runner = DeferredRunner()
@@ -59,7 +61,7 @@ class ApplicationTests(unittest.TestCase):
         self.controller.navigate("home")
         self.controller.navigate("settings")
         self.runner.complete()
-        self.view.show_settings.assert_called_once()
+        self.view.show_settings.assert_called_once_with(self.backend.profile_settings.return_value)
         self.view.show_catalog.assert_not_called()
 
     def test_version_install_forwards_only_ids_and_progress(self):
