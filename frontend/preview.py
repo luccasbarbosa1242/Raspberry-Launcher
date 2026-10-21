@@ -4,6 +4,7 @@ from pathlib import Path
 
 from contracts.catalog import CatalogEntry
 from contracts.models import (
+    ProfileInfo, ProfilePreferences,
     GameAction,
     GameDetails,
     GameSummary,
@@ -60,7 +61,7 @@ class PreviewActions:
 
     def navigate(self, page):
         if page == "settings":
-            self.view.show_settings()
+            self.view.show_settings(ProfilePreferences((ProfileInfo('default', 'Padrão'),), 'default', 'dark', 50))
         elif page == "search":
             self.view.show_search()
             self.view.show_search_results((SAMPLE,))
@@ -114,6 +115,15 @@ class PreviewActions:
         self._notice()
 
     def install_emulator(self, emulator_id):
+        self._notice()
+
+    def create_profile(self, name):
+        self._notice()
+
+    def select_profile(self, profile_id):
+        self._notice()
+
+    def update_profile_preferences(self, *, theme=None, music_volume=None):
         self._notice()
 
     def close(self):
