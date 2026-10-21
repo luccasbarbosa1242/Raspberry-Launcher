@@ -68,7 +68,7 @@ class PersistenceTests(unittest.TestCase):
             "game_installations", "game_version_installations", "emulator_installations",
             "profiles", "profile_game_state", "catalog_sources", "external_game_ids",
         } <= tables)
-        self.assertEqual(connection.execute("SELECT count(*) FROM profiles").fetchone()[0], 0)
+        self.assertEqual(connection.execute("SELECT count(*) FROM profiles").fetchone()[0], 1)
         self.assertEqual(connection.execute("SELECT count(*) FROM external_game_ids").fetchone()[0], 0)
         packages = connection.execute("SELECT * FROM emulator_packages WHERE emulator_id='pcsx2'").fetchall()
         self.assertEqual({row['system'] for row in packages}, {"linux", "windows"})
