@@ -1,9 +1,5 @@
 """T02: isolated profile fixtures, legacy migration and process ownership."""
 
-import sqlite3
-import time
-from unittest.mock import patch
-
 from backend.database.migrations import initialize_database
 from backend.profiles import ProfileService, profile_scope
 from tests.support import BackendCase
