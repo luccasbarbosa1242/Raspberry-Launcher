@@ -4,6 +4,7 @@ from backend.launchers.native_launcher import NativeLauncher, track_process
 from backend.plugins.plugin_manager import PluginManager
 from backend.emulators.emulator_manager import EmulatorManager
 from backend.services.playtime_service import PlaytimeService
+from backend.profiles import ProfileService
 
 
 class RomLauncher(BaseLauncher):
@@ -20,10 +21,11 @@ class RomLauncher(BaseLauncher):
             raise FileNotFoundError(f"ROM não encontrada: {rom}")
         executable = self.emulators.ensure_installed(plugin["manifest"]["id"])
         process = plugin["adapter"].launch(executable, str(rom))
+        profile_id = ProfileService().resolved_id()
         start = PlaytimeService().mark_started(game)
         if process is not None:
             threading.Thread(
-                target=track_process, args=(process, dict(game), start), daemon=True
+                target=track_process, args=(process, dict(game), start, profile_id), daemon=True
             ).start()
         return process
 
