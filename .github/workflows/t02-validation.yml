@@ -14,8 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
-      PYTHONPYCACHEPREFIX: ${{ runner.temp }}/launcher-pycache
-      RASPBERRY_LAUNCHER_HOME: ${{ runner.temp }}/launcher-runtime
+      PYTHONPYCACHEPREFIX: /tmp/raspberry-pycache
+      RASPBERRY_LAUNCHER_HOME: /tmp/raspberry-launcher-t02
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
