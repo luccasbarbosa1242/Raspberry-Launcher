@@ -37,6 +37,10 @@ class LauncherService:
     def __init__(self):
         self.profiles = ProfileService()
 
+    def execute_for_profile(self, profile_id, work):
+        with profile_scope(profile_id):
+            return work()
+
     def list_profiles(self):
         return self.profiles.list_profiles()
 
