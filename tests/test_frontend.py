@@ -197,6 +197,38 @@ class GraphicalIntegrationTests(BackendCase):
             time.sleep(0.01)
         self.fail("A interface não chegou ao estado esperado.")
 
+    def test_create_select_and_persist_profile_through_settings_widgets(self):
+        self.controller.navigate("settings")
+        self.window.root.update()
+        entry = next(
+            widget for widget in descendants(self.window.page)
+            if isinstance(widget, ctk.CTkEntry)
+        )
+        entry.insert(0, "Jogador 2")
+        buttons(self.window.page, "Criar perfil")[0].invoke()
+        self.window.root.update()
+        second_id = self.service.active_profile_id()
+        self.assertNotEqual(second_id, "default")
+        self.assertEqual(self.service.profile_settings().profiles[-1].name, "Jogador 2")
+        menus = [widget for widget in descendants(self.window.page)
+                 if isinstance(widget, ctk.CTkOptionMenu)]
+        self.assertEqual(len(menus), 2)
+        menus[1]._command("light")
+        self.window.root.update()
+        self.assertEqual(self.service.profile_settings().theme, "light")
+        self.assertEqual(ctk.get_appearance_mode(), "Light")
+        menus = [widget for widget in descendants(self.window.page)
+                 if isinstance(widget, ctk.CTkOptionMenu)]
+        menus[0]._command("Padrão (defaul)")
+        self.window.root.update()
+        self.assertEqual(self.service.active_profile_id(), "default")
+        self.assertEqual(self.service.profile_settings().theme, "dark")
+        self.service.select_profile(second_id)
+        self.controller.navigate("settings")
+        self.window.root.update()
+        self.assertEqual(self.service.profile_settings().theme, "light")
+        self.assertEqual(self.errors, [])
+
     def test_install_favorite_search_and_uninstall_through_widgets(self):
         self.archive()
         self.add_game()
