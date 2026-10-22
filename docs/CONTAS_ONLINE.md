@@ -40,7 +40,7 @@ não habilite upgrades automáticos nem serviços pagos sem autorização.
 
 1. Clique em Conta online na barra lateral.
 2. Cadastre e-mail, senha de pelo menos 8 caracteres e um nome de jogador.
-3. Confirme o e-mail recebido, se solicitado, e então faça login.
+3. Confirme o e-mail recebido, se solicitado, e então faça login. Marque **Lembrar de mim** se quiser manter a sessão nos próximos inícios do aplicativo.
 4. Suas estatísticas são vinculadas ao identificador remoto da conta, e não ao nome de exibição. Cada login ativa o perfil correspondente no SQLite local.
 5. Os dados pessoais são atualizados primeiro no SQLite. Uma fila de eventos imutáveis registra favoritos, tempo jogado, última execução e preferências de tema/volume.
 6. Clique em Sincronizar agora para enviar os eventos e baixar os dados da conta. Enquanto houver login e o perfil online estiver ativo, também há uma tentativa automática aproximadamente a cada 60 segundos.
@@ -53,7 +53,10 @@ não habilite upgrades automáticos nem serviços pagos sem autorização.
 - Favoritos e preferências editados em computadores diferentes obedecem à última alteração processada no servidor; não existe interface de resolução de conflitos neste escopo.
 - Mudanças novas que surgem durante uma consulta remota permanecem no outbox e não são sobrescritas pelo download.
 - A importação de histórico local é idempotente por computador/perfil. Importar cópias independentes do mesmo histórico em vários PCs pode duplicar os segundos antigos: faça a importação uma única vez a partir de uma origem escolhida.
-- Os tokens de login ficam somente na memória. Ao reiniciar o aplicativo é necessário entrar novamente. Nem senhas nem tokens são gravados no SQLite; a cache local de estatísticas **não é criptografada**.
+- **Lembrar de mim (opcional):** ao entrar com essa opção marcada, o aplicativo guarda o e-mail e **somente o refresh token do Supabase** no cofre seguro do sistema operacional, usando `keyring==25.7.0`. No Windows usa o Gerenciador de Credenciais, no macOS o Keychain, e no Linux usa um cofre Secret Service/KWallet compatível. O launcher restaura/renova a sessão automaticamente na inicialização; não salva, recupera nem preenche a senha.
+- **Não marcar:** não armazena credenciais persistentes. **Sair da conta:** revoga a sessão no Supabase quando houver rede, limpa a sessão local e remove a credencial do cofre. Se o cofre estiver indisponível, o aplicativo informa a limitação e permite entrar sem lembrar.
+- Se a rede cair durante a restauração, o token salvo é mantido para nova tentativa. Se o servidor rejeitar o token expirado/revogado, ele é removido (o e-mail continua para facilitar o login manual).
+- Embora credenciais estejam no cofre do sistema, os dados locais de perfis e estatísticas **não são criptografados**. Em computadores compartilhados, use contas separadas do sistema operacional.
 - Ao sair da conta, o perfil local padrão volta a ser selecionado; os eventos pendentes da conta permanecem no banco para envio depois do próximo login.
 - A sincronização não inclui instalações, executáveis, emuladores, caminhos de ROM, catálogo global, arquivos de saves nem pontuação externa. Esses elementos continuam locais.
 - Não desative RLS nem incorpore chaves administrativas no desktop.
