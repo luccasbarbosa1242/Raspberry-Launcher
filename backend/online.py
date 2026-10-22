@@ -276,9 +276,13 @@ class OnlineService:
             try:
                 account = self.client.restore(token)
             except OnlineAuthError:
-                # Revoked / invalid token: keep the e-mail but require password.
+                # Revoked / invalid token: keep e-mail but require password.
                 self._remember = False
-                self.vault.clear(keep_email=True)
+                try:
+                    self.vault.clear(keep_email=True)
+                except VaultUnavailable as error:
+                    self.session_notice = str(error)
+                    return False
                 self.session_notice = "Sua sessão expirou. Entre novamente."
                 return False
             except OnlineError as error:
@@ -292,6 +296,7 @@ class OnlineService:
                 self.session_notice = "A conta salva não corresponde à sessão recuperada."
                 return False
             self._remember = True
+            self.session_notice = None
             self._save_rotated_token(self.client.refresh_token())
             self._ensure_profile()
             try:
