@@ -301,6 +301,9 @@ class LauncherController:
         self._scores_pending = False
         self.view.apply_theme(self.backend.profile_settings().theme)
         self.navigate("home")
+        status = self.backend.online_status()
+        if status.session_notice:
+            self.view.show_error(status.session_notice)
 
     def online_signup(self, email, password, display_name):
         def complete(signed_in):
