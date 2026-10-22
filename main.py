@@ -19,7 +19,7 @@ def main():
     ))
     controller.attach_view(window)
     window.start_polling(controller.poll)
-    controller.navigate("home")
+    controller.navigate("account" if backend.online_enabled() else "home")
     try:
         window.run()
     finally:
