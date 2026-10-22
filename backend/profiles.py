@@ -2,6 +2,7 @@
 
 from contextlib import contextmanager
 from contextvars import ContextVar
+import json
 from uuid import uuid4
 
 from contracts.models import ProfileInfo, ProfilePreferences
@@ -22,6 +23,29 @@ def profile_scope(profile_id):
 
 
 class ProfileService:
+    @staticmethod
+    def _queue_event(connection, profile_id, kind, game_id, payload):
+        """Persist an online event in the SAME SQLite transaction as its local change."""
+        if not profile_id.startswith("cloud_"):
+            return
+        seconds = payload.get("seconds") if kind == "played" else None
+        chunks = []
+        if seconds is not None:
+            remaining = int(seconds)
+            while remaining > 0:
+                step = min(remaining, 86400)
+                chunks.append({"seconds": step})
+                remaining -= step
+        else:
+            chunks.append(payload)
+        for item in chunks:
+            connection.execute(
+                """INSERT INTO online_outbox(id,profile_id,kind,game_id,payload_json)
+                   VALUES(?,?,?,?,?)""",
+                (str(uuid4()), profile_id, kind, game_id,
+                 json.dumps(item, separators=(",", ":"))),
+            )
+
     @scoped
     def active_id(self):
         db = Database()
@@ -122,6 +146,13 @@ class ProfileService:
                     "UPDATE profile_preferences SET music_volume=? WHERE profile_id=?",
                     (music_volume, selected),
                 )
+            if theme is not None or music_volume is not None:
+                data = {}
+                if theme is not None:
+                    data["theme"] = theme
+                if music_volume is not None:
+                    data["music_volume"] = music_volume
+                self._queue_event(db.connection, selected, "preferences", None, data)
         return self.settings(selected)
 
     @scoped
@@ -153,6 +184,10 @@ class ProfileService:
                     "UPDATE games SET favorite=? WHERE id=?",
                     (int(bool(favorite)), game_id),
                 )
+            self._queue_event(
+                db.connection, selected, "favorite", game_id,
+                {"favorite": bool(favorite)},
+            )
 
     @scoped
     def toggle_favorite(self, game_id, profile_id=None):
@@ -173,6 +208,14 @@ class ProfileService:
                     ) WHERE id=?""",
                     (selected, game_id, game_id),
                 )
+            favorite = db.connection.execute(
+                "SELECT favorite FROM profile_game_state WHERE profile_id=? AND game_id=?",
+                (selected, game_id),
+            ).fetchone()[0]
+            self._queue_event(
+                db.connection, selected, "favorite", game_id,
+                {"favorite": bool(favorite)},
+            )
 
     @scoped
     def mark_last_played(self, game_id, profile_id=None):
@@ -189,6 +232,7 @@ class ProfileService:
                 db.connection.execute(
                     "UPDATE games SET last_played=datetime('now') WHERE id=?", (game_id,)
                 )
+            self._queue_event(db.connection, selected, "started", game_id, {})
 
     @scoped
     def add_play_time(self, game_id, seconds, profile_id=None):
@@ -212,3 +256,6 @@ class ProfileService:
                     ), last_played=datetime('now') WHERE id=?""",
                     (selected, game_id, game_id),
                 )
+            self._queue_event(
+                db.connection, selected, "played", game_id, {"seconds": seconds}
+            )
