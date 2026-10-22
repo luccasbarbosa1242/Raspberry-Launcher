@@ -277,11 +277,23 @@ class LauncherController:
 
         self.runner.submit(work, success, failure)
 
-    def online_login(self, email, password):
+    def online_login(self, email, password, remember=False):
         self._account_task(
-            lambda: self.backend.online_login(email, password),
+            lambda: self.backend.online_login(email, password, remember=remember),
             lambda account: self._online_authenticated(),
         )
+
+    def restore_online_session(self):
+        if not self.backend.online_enabled():
+            return
+
+        def finished(restored):
+            if restored:
+                self._online_authenticated()
+            else:
+                self.navigate("account")
+
+        self._account_task(self.backend.online_restore_session, finished)
 
     def _online_authenticated(self):
         self._last_online_sync = time.monotonic()
