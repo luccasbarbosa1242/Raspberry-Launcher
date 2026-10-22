@@ -15,6 +15,7 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 from backend.database.database import Database, scoped
+from backend.online_defaults import PROJECT_URL, PUBLISHABLE_KEY
 from backend.profiles import ProfileService
 from contracts.models import OnlineAccount
 
@@ -166,10 +167,11 @@ class OnlineService:
     """Coordinates a cloud identity with its own persistent local profile."""
 
     def __init__(self, client=None):
-        url = os.environ.get("RASPBERRY_SUPABASE_URL", "")
-        key = os.environ.get("RASPBERRY_SUPABASE_PUBLISHABLE_KEY", "")
+        url = os.environ.get("RASPBERRY_SUPABASE_URL", PROJECT_URL)
+        key = os.environ.get("RASPBERRY_SUPABASE_PUBLISHABLE_KEY", PUBLISHABLE_KEY)
+        disabled = os.environ.get("RASPBERRY_ONLINE_DISABLED", "").lower() in ("1", "true", "yes")
         self.client = client if client is not None else (
-            SupabaseClient(url, key) if url and key else None
+            SupabaseClient(url, key) if url and key and not disabled else None
         )
         self._sync_lock = threading.RLock()
         self.last_error = None
