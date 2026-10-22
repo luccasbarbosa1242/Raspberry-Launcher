@@ -11,9 +11,7 @@ create or replace function public.launcher_apply_events(p_events jsonb)
 returns integer
 language sql security invoker
 set search_path = ''
-as $$
-  select launcher_private.launcher_apply_events(p_events);
-$$;
+as 'select launcher_private.launcher_apply_events(p_events);';
 revoke execute on function public.launcher_apply_events(jsonb) from public, anon;
 grant execute on function public.launcher_apply_events(jsonb) to authenticated;
 COMMIT;
