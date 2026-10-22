@@ -172,6 +172,7 @@ class OnlineService:
             SupabaseClient(url, key) if url and key else None
         )
         self._sync_lock = threading.RLock()
+        self.last_error = None
 
     @property
     def enabled(self):
@@ -217,8 +218,8 @@ class OnlineService:
         # Fetch+flush failures never invalidate valid credentials or local data.
         try:
             self.sync()
-        except OnlineError:
-            pass
+        except OnlineError as error:
+            self.last_error = str(error)
         return account
 
     def _validate(self, email, password, display_name):
@@ -272,7 +273,7 @@ class OnlineService:
             while True:
                 rows = db.connection.execute(
                     """SELECT id,kind,game_id,payload_json FROM online_outbox
-                       WHERE profile_id=? ORDER BY created_at,id LIMIT 50""",
+                       WHERE profile_id=? ORDER BY rowid ASC LIMIT 50""",
                     (profile_id,),
                 ).fetchall()
                 if not rows:
@@ -332,6 +333,7 @@ class OnlineService:
                                WHERE profile_id=?""",
                             (theme, volume, profile_id),
                         )
+            self.last_error = None
             return len(stats)
 
     def import_local_profile(self, source_id="default", expected_profile_id=None):
@@ -364,7 +366,7 @@ class OnlineService:
                 if row["play_time"] > 0:
                     ProfileService()._queue_event(
                         db.connection, account.profile_id, "played", row["game_id"],
-                        {"seconds": int(row["play_time"])},
+                        {"seconds": int(row["play_time"]), "occurred_at": row["last_played"]},
                     )
                 if row["favorite"]:
                     ProfileService()._queue_event(
@@ -373,7 +375,8 @@ class OnlineService:
                     )
                 if row["last_played"] and not row["play_time"]:
                     ProfileService()._queue_event(
-                        db.connection, account.profile_id, "started", row["game_id"], {},
+                        db.connection, account.profile_id, "started", row["game_id"],
+                        {"occurred_at": row["last_played"]},
                     )
             db.connection.execute(
                 "INSERT INTO online_imports(profile_id,source_profile_id) VALUES (?,?)",
