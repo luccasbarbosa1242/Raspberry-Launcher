@@ -10,6 +10,7 @@ from frontend.views.details import render_details
 from frontend.views.platform import render_platform
 from frontend.views.registry import CatalogForm, render_registry
 from frontend.views.settings import render_settings
+from frontend.views.account import render_account
 from frontend import theme
 
 
@@ -73,11 +74,15 @@ class LauncherWindow:
         """Apply a persisted preference to every existing CustomTkinter widget."""
         ctk.set_appearance_mode(selected)
 
-    def show_settings(self, preferences=None):
+    def show_settings(self, preferences=None, online=None):
         if preferences is not None:
             self.apply_theme(preferences.theme)
         self._clear()
-        render_settings(self.page, self.actions, preferences)
+        render_settings(self.page, self.actions, preferences, online)
+
+    def show_account(self, status):
+        self._clear()
+        render_account(self.page, self.actions, status)
 
     def show_registry(self, kind, entries):
         self._clear()
