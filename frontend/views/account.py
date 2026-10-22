@@ -25,6 +25,11 @@ def render_account(parent, actions, status):
         return
 
     if status.account:
+        if status.sync_error:
+            ctk.CTkLabel(
+                parent, text="Sincronização pendente: " + status.sync_error,
+                text_color=theme.ERROR, wraplength=650,
+            ).pack(anchor="w", padx=20, pady=5)
         ctk.CTkLabel(
             parent, text=f"Conectado: {status.account.display_name} — {status.account.email}",
             text_color=theme.TEXT,
