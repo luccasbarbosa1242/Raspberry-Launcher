@@ -12,6 +12,7 @@ from contracts.models import (
     Phase,
     PlatformInfo,
     UiResources,
+    OnlineStatus,
     VersionInfo,
 )
 from contracts.ports import Actions
@@ -80,6 +81,28 @@ class FrontendTests(unittest.TestCase):
         window.root.update()
         window.show_placeholder("genre")
         window.root.update()
+        self.assertEqual(self.errors, [])
+
+    def test_online_login_and_signup_buttons_emit_plain_credentials(self):
+        self.window.show_account(OnlineStatus(True, None))
+        self.window.root.update()
+        entries = [
+            widget for widget in descendants(self.window.page)
+            if isinstance(widget, ctk.CTkEntry)
+        ]
+        self.assertEqual(len(entries), 3)
+        self.assertEqual(entries[1].cget("show"), "•")
+        entries[0].insert(0, "jogador@example.test")
+        entries[1].insert(0, "not-a-real-password")
+        entries[2].insert(0, "Jogador")
+        buttons(self.window.page, "Entrar")[0].invoke()
+        self.actions.online_login.assert_called_once_with(
+            "jogador@example.test", "not-a-real-password"
+        )
+        buttons(self.window.page, "Criar conta")[0].invoke()
+        self.actions.online_signup.assert_called_once_with(
+            "jogador@example.test", "not-a-real-password", "Jogador"
+        )
         self.assertEqual(self.errors, [])
 
     def test_light_mode_updates_real_surfaces_and_preserves_dark_mode(self):
@@ -235,6 +258,30 @@ class GraphicalIntegrationTests(BackendCase):
                 return
             time.sleep(0.01)
         self.fail("A interface não chegou ao estado esperado.")
+
+    def test_online_registration_and_settings_render_via_real_controller(self):
+        from backend.online import OnlineService
+        from tests.test_online import FakeClient, FakeServer
+
+        self.service.online = OnlineService(client=FakeClient(FakeServer()))
+        self.controller.navigate("account")
+        self.window.root.update()
+        entries = [
+            widget for widget in descendants(self.window.page)
+            if isinstance(widget, ctk.CTkEntry)
+        ]
+        self.assertEqual(len(entries), 3)
+        entries[0].insert(0, "one@example.test")
+        entries[1].insert(0, "test-password")
+        entries[2].insert(0, "Jogador Web")
+        buttons(self.window.page, "Criar conta")[0].invoke()
+        self.pump_until(lambda: self.controller.route[0] == "home")
+        self.assertIsNotNone(self.service.online_status().account)
+        self.controller.navigate("settings")
+        self.window.root.update()
+        self.assertTrue(buttons(self.window.page, "Sincronizar agora"))
+        self.assertTrue(buttons(self.window.page, "Sair da conta"))
+        self.assertEqual(self.errors, [])
 
     def test_create_select_and_persist_profile_through_settings_widgets(self):
         self.controller.navigate("settings")
