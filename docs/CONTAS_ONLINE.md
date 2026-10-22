@@ -20,6 +20,22 @@ Para usar outro projeto Supabase, as variáveis `RASPBERRY_SUPABASE_URL` e `RASP
 
 A configuração hospedada depende da disponibilidade do plano gratuito Supabase; os limites e a possível pausa por inatividade são responsabilidade do serviço.
 
+## Verificação de e-mail no plano gratuito
+
+**Atenção:** o SMTP padrão do Supabase só envia confirmações para endereços
+pré-autorizados da equipe do projeto. Isso permite testar inicialmente com
+endereços da organização, mas não constitui um cadastro público funcional.
+
+Para liberar confirmações de e-mail para jogadores externos **sem contratar
+plano pago**, configure um remetente verificado e SMTP de um serviço com
+plano gratuito, como Brevo (300 envios por dia no plano grátis, sujeito às
+regras de utilização do fornecedor). A criação/verificação da conta do
+provedor de e-mail é separada do Supabase e ainda não foi realizada. Não
+desabilite a confirmação de e-mail para disfarçar essa restrição.
+
+O Supabase foi criado no plano gratuito com custo cotado de US$ 0/mês;
+não habilite upgrades automáticos nem serviços pagos sem autorização.
+
 ## 3. Cadastro e uso
 
 1. Clique em Conta online na barra lateral.
