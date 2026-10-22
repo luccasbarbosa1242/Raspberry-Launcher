@@ -43,9 +43,14 @@ drop policy if exists launcher_preferences_owner_read on public.launcher_prefere
 create policy launcher_preferences_owner_read on public.launcher_preferences
   for select to authenticated using ((select auth.uid()) = user_id);
 
+-- Keep the privileged event writer in an unexposed schema.
+create schema if not exists launcher_private;
+revoke all on schema launcher_private from public, anon;
+grant usage on schema launcher_private to authenticated;
+
 -- Event receipts are internal and never directly exposed to clients.
 -- All writes are atomic and idempotent even if the client retries after a timeout.
-create or replace function public.launcher_apply_events(p_events jsonb)
+create or replace function launcher_private.launcher_apply_events(p_events jsonb)
 returns integer
 language plpgsql security definer
 set search_path = ''
@@ -151,6 +156,19 @@ begin
   return count_applied;
 end;
 $$;
+
+revoke execute on function launcher_private.launcher_apply_events(jsonb) from public, anon;
+grant execute on function launcher_private.launcher_apply_events(jsonb) to authenticated;
+
+-- The exposed RPC has no elevated privileges; it only invokes the writer
+-- after the caller has been authenticated, and cannot impersonate auth.uid().
+create or replace function public.launcher_apply_events(p_events jsonb)
+returns integer
+language sql security invoker
+set search_path = ''
+as $
+  select launcher_private.launcher_apply_events(p_events);
+$;
 
 revoke execute on function public.launcher_apply_events(jsonb) from public, anon;
 grant execute on function public.launcher_apply_events(jsonb) to authenticated;
