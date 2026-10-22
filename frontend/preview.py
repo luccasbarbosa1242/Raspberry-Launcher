@@ -4,7 +4,7 @@ from pathlib import Path
 
 from contracts.catalog import CatalogEntry
 from contracts.models import (
-    ProfileInfo, ProfilePreferences,
+    ProfileInfo, ProfilePreferences, OnlineStatus,
     GameAction,
     GameDetails,
     GameSummary,
@@ -62,6 +62,8 @@ class PreviewActions:
     def navigate(self, page):
         if page == "settings":
             self.view.show_settings(ProfilePreferences((ProfileInfo('default', 'Padrão'),), 'default', 'dark', 50))
+        elif page == "account":
+            self.view.show_account(OnlineStatus(False, None))
         elif page == "search":
             self.view.show_search()
             self.view.show_search_results((SAMPLE,))
@@ -124,6 +126,21 @@ class PreviewActions:
         self._notice()
 
     def update_profile_preferences(self, *, theme=None, music_volume=None):
+        self._notice()
+
+    def online_login(self, email, password):
+        self._notice()
+
+    def online_signup(self, email, password, display_name):
+        self._notice()
+
+    def online_logout(self):
+        self._notice()
+
+    def online_sync(self):
+        self._notice()
+
+    def online_import_default(self):
         self._notice()
 
     def close(self):
