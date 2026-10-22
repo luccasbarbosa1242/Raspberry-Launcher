@@ -3,6 +3,7 @@
 import os
 from pathlib import Path
 import sqlite3
+import threading
 import tempfile
 from unittest.mock import patch
 
@@ -31,6 +32,7 @@ class FakeClient:
         self.fail_before = False
         self.fail_after = False
         self.before_snapshot = None
+        self.before_apply = None
 
     def login(self, email, password):
         if not password or email not in self.server.users:
@@ -52,6 +54,8 @@ class FakeClient:
         self.current = None
 
     def apply_events(self, events):
+        if self.before_apply:
+            self.before_apply()
         if self.fail_before:
             raise OnlineError("sem conexão")
         if not self.current:
@@ -239,6 +243,82 @@ class OnlineTests(BackendCase):
             SupabaseClient("http://example.test", "public")
         with self.assertRaises(ValueError):
             SupabaseClient("https://example.test", "sb_secret_do-not-distribute")
+
+    def test_same_second_favorite_events_preserve_last_choice(self):
+        self.add_game("snake")
+        owner = self._login()
+        self.service.toggle_favorite("snake")
+        self.service.toggle_favorite("snake")
+        self.assertFalse(self.service.list_games("favorites"))
+        self.service.online_sync()
+        self.assertFalse(self.remote.stats[(owner, "snake")]["favorite"])
+
+    def test_sync_is_refused_if_login_was_switched_after_queuing(self):
+        self.add_game("snake")
+        owner = self._login()
+        ProfileService().add_play_time("snake", 11)
+        wrong = "cloud_" + self.remote.users["two@example.test"]
+        with self.assertRaises(OnlineError):
+            self.service.online_sync(wrong)
+        self.assertEqual(self.service.online_status().pending_events, 1)
+        self.assertNotIn((wrong, "snake"), self.remote.stats)
+        self.service.online_sync(owner)
+        self.assertEqual(self.remote.stats[(owner, "snake")]["play_time"], 11)
+
+    def test_login_cannot_swap_identity_mid_sync(self):
+        self.add_game("snake")
+        first = self._login()
+        ProfileService().add_play_time("snake", 11)
+        entered = threading.Event()
+        release = threading.Event()
+        logged_in = threading.Event()
+        failures = []
+
+        def pause():
+            entered.set()
+            if not release.wait(4):
+                raise RuntimeError("sync timeout")
+
+        self.client.before_apply = pause
+
+        def sync():
+            try:
+                self.service.online_sync(first)
+            except Exception as error:
+                failures.append(error)
+
+        def login_other():
+            try:
+                self.service.online_login("two@example.test", "password123")
+            except Exception as error:
+                failures.append(error)
+            logged_in.set()
+
+        first_thread = threading.Thread(target=sync)
+        second_thread = threading.Thread(target=login_other)
+        first_thread.start()
+        self.assertTrue(entered.wait(3))
+        second_thread.start()
+        self.assertFalse(logged_in.wait(0.1), "Login não pode alterar a sessão durante upload")
+        release.set()
+        first_thread.join(5)
+        second_thread.join(5)
+        self.assertFalse(first_thread.is_alive())
+        self.assertFalse(second_thread.is_alive())
+        self.assertEqual(failures, [])
+        self.assertEqual(self.remote.stats[(first, "snake")]["play_time"], 11)
+        second = "cloud_" + self.remote.users["two@example.test"]
+        self.assertNotIn((second, "snake"), self.remote.stats)
+        self.assertEqual(self.service.active_profile_id(), second)
+
+    def test_login_reports_online_unavailability_but_keeps_local_cache(self):
+        self.client.snapshot = lambda: (_ for _ in ()).throw(
+            OnlineError("temporariamente indisponível")
+        )
+        account_id = self._login()
+        status = self.service.online_status()
+        self.assertEqual(status.account.profile_id, account_id)
+        self.assertIn("indisponível", status.sync_error)
 
     def test_auth_transport_keeps_tokens_only_in_memory(self):
         with patch.object(SupabaseClient, "_request") as request:
