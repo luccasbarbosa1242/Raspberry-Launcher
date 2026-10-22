@@ -3,7 +3,6 @@ name: Online accounts validation
 on:
   push:
     branches:
-      - codex/phase-2-online-accounts
       - main
   workflow_dispatch:
 
@@ -65,50 +64,3 @@ jobs:
           python -m backend init
           python -m backend.tools.create_recovery_point --home /tmp/raspberry-online-ci-runtime --destination /tmp/online-recovery-point
           python -m backend.tools.restore_recovery_point --recovery-point /tmp/online-recovery-point --destination /tmp/online-restored-runtime
-
-  cleanup-merged-branches:
-    name: Remove merged development branches
-    needs: online-validation
-    if: >-
-      github.event_name == 'push' && github.ref == 'refs/heads/main' &&
-      contains(github.event.head_commit.message, 'chore: consolidate all development branches')
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Verify every branch was merged before deleting any
-        env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          branches=(
-            'codex/phase-1-catalogs'
-            'codex/phase-2-local-profiles'
-            'codex/phase-2-online-accounts'
-            'master'
-          )
-          git fetch --no-tags origin '+refs/heads/*:refs/remotes/origin/*'
-          for branch in "${branches[@]}"; do
-            remote_sha="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/${branch}" --jq '.object.sha')"
-            git cat-file -e "${remote_sha}^{commit}"
-            if ! git merge-base --is-ancestor "$remote_sha" HEAD; then
-              echo "::error::Refusing to delete $branch: $remote_sha is not part of main"
-              exit 1
-            fi
-            echo "Preserved in main history: $branch @ $remote_sha"
-          done
-          for branch in "${branches[@]}"; do
-            gh api -X DELETE "repos/${GITHUB_REPOSITORY}/git/refs/heads/${branch}"
-            echo "Deleted merged branch: $branch"
-          done
-          remaining="$(gh api --paginate "repos/${GITHUB_REPOSITORY}/branches?per_page=100" --jq '.[].name')"
-          if [[ "$remaining" != "main" ]]; then
-            echo "::error::Unexpected remaining branches: $remaining"
-            exit 1
-          fi
-          echo 'Only main remains; all retired branch commits are in main history.'
