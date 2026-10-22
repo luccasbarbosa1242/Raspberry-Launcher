@@ -1,0 +1,44 @@
+name: Online accounts validation
+
+on:
+  push:
+    branches:
+      - codex/phase-2-online-accounts
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  online-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      PYTHONPYCACHEPREFIX: /tmp/raspberry-pycache-online
+      RASPBERRY_LAUNCHER_HOME: /tmp/raspberry-online-ci-runtime
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install Tk and Xvfb
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y xvfb xauth python3-tk
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt ruff
+          python -m pip check
+      - name: Compile and lint
+        run: |
+          python -m compileall -q backend frontend application contracts tests main.py
+          ruff check .
+      - name: Full suite (real CustomTkinter)
+        run: xvfb-run -a python -m unittest discover -s tests -v
+      - name: Rehearse point and restore in fresh folders
+        run: |
+          python -m backend init
+          python -m backend.tools.create_recovery_point --home /tmp/raspberry-online-ci-runtime --destination /tmp/online-recovery-point
+          python -m backend.tools.restore_recovery_point --recovery-point /tmp/online-recovery-point --destination /tmp/online-restored-runtime
