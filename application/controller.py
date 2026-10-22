@@ -30,6 +30,8 @@ class LauncherController:
         self._last_scores = 0
         self._scores_pending = False
         self._catalog_saves = set()
+        self._last_online_sync = time.monotonic()
+        self._online_pending = False
 
     def attach_view(self, view: View):
         self.view = view
@@ -72,7 +74,14 @@ class LauncherController:
         else:
             self._generation += 1
             if page == "settings":
-                self.view.show_settings(self.backend.profile_settings())
+                if self.backend.online_enabled() is True:
+                    self.view.show_settings(
+                        self.backend.profile_settings(), self.backend.online_status()
+                    )
+                else:
+                    self.view.show_settings(self.backend.profile_settings())
+            elif page == "account":
+                self.view.show_account(self.backend.online_status())
             else:
                 self.view.show_placeholder(page)
 
@@ -222,6 +231,15 @@ class LauncherController:
             return
         self.runner.drain()
         now = time.monotonic()
+        if (
+            self.backend.online_enabled() is True
+            and now - self._last_online_sync >= 60
+            and not self._online_pending
+        ):
+            self._last_online_sync = now
+            status = self.backend.online_status()
+            if status.account and status.account.profile_id == self.backend.active_profile_id():
+                self.online_sync()
         if not self._scores_pending and now - self._last_scores >= 1:
             self._scores_pending = True
             self._last_scores = now
@@ -241,6 +259,95 @@ class LauncherController:
                 failure,
             )
 
+    def _account_task(self, work, complete):
+        if self._closed:
+            return
+        self._generation += 1
+        generation = self._generation
+        self.view.show_loading()
+
+        def success(result):
+            if not self._closed and generation == self._generation:
+                complete(result)
+
+        def failure(error):
+            if not self._closed and generation == self._generation:
+                self.navigate("account")
+                self.view.show_error(str(error))
+
+        self.runner.submit(work, success, failure)
+
+    def online_login(self, email, password):
+        self._account_task(
+            lambda: self.backend.online_login(email, password),
+            lambda account: self._online_authenticated(),
+        )
+
+    def _online_authenticated(self):
+        self._last_online_sync = time.monotonic()
+        self.view.apply_theme(self.backend.profile_settings().theme)
+        self.navigate("home")
+
+    def online_signup(self, email, password, display_name):
+        def complete(signed_in):
+            if signed_in:
+                self._online_authenticated()
+            else:
+                self.navigate("account")
+                self.view.show_error("Cadastro recebido. Confirme seu e-mail antes de entrar.")
+
+        self._account_task(
+            lambda: self.backend.online_signup(email, password, display_name),
+            complete,
+        )
+
+    def online_logout(self):
+        self._account_task(
+            self.backend.online_logout, lambda result: self._online_signed_out()
+        )
+
+    def _online_signed_out(self):
+        self._last_online_sync = time.monotonic()
+        self.view.apply_theme(self.backend.profile_settings().theme)
+        self.navigate("account")
+
+    def online_sync(self):
+        if self._online_pending or self._closed:
+            return
+        status = self.backend.online_status()
+        if not status.account:
+            self.navigate("account")
+            return
+        self._online_pending = True
+        owner = status.account.profile_id
+
+        def success(result):
+            self._online_pending = False
+            if not self._closed and owner == self.backend.active_profile_id():
+                self.view.apply_theme(self.backend.profile_settings().theme)
+                self._refresh()
+
+        def failure(error):
+            self._online_pending = False
+            if not self._closed and owner == self.backend.active_profile_id():
+                self.view.show_error(str(error))
+
+        self.runner.submit(self.backend.online_sync, success, failure)
+
+    def online_import_default(self):
+        self._account_task(
+            self.backend.online_import_default,
+            lambda imported: self._online_import_finished(imported),
+        )
+
+    def _online_import_finished(self, imported):
+        if imported:
+            self.navigate("settings")
+            self.online_sync()
+        else:
+            self.navigate("settings")
+            self.view.show_error("O histórico local já foi importado para esta conta.")
+
     def create_profile(self, name):
         try:
             created = self.backend.create_profile(name)
@@ -251,7 +358,7 @@ class LauncherController:
     def select_profile(self, profile_id):
         try:
             self.backend.select_profile(profile_id)
-        except (LookupError, ValueError) as error:
+        except (LookupError, ValueError, PermissionError) as error:
             self.view.show_error(str(error))
             return
         self._generation += 1
