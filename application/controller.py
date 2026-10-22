@@ -285,6 +285,8 @@ class LauncherController:
 
     def _online_authenticated(self):
         self._last_online_sync = time.monotonic()
+        self._busy.clear()
+        self._scores_pending = False
         self.view.apply_theme(self.backend.profile_settings().theme)
         self.navigate("home")
 
@@ -308,6 +310,8 @@ class LauncherController:
 
     def _online_signed_out(self):
         self._last_online_sync = time.monotonic()
+        self._busy.clear()
+        self._scores_pending = False
         self.view.apply_theme(self.backend.profile_settings().theme)
         self.navigate("account")
 
@@ -332,11 +336,16 @@ class LauncherController:
             if not self._closed and owner == self.backend.active_profile_id():
                 self.view.show_error(str(error))
 
-        self.runner.submit(self.backend.online_sync, success, failure)
+        self.runner.submit(lambda: self.backend.online_sync(owner), success, failure)
 
     def online_import_default(self):
+        status = self.backend.online_status()
+        if not status.account:
+            self.navigate("account")
+            return
+        owner = status.account.profile_id
         self._account_task(
-            self.backend.online_import_default,
+            lambda: self.backend.online_import_default(owner),
             lambda imported: self._online_import_finished(imported),
         )
 
