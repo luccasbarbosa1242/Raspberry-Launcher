@@ -97,11 +97,35 @@ class FrontendTests(unittest.TestCase):
         entries[2].insert(0, "Jogador")
         buttons(self.window.page, "Entrar")[0].invoke()
         self.actions.online_login.assert_called_once_with(
-            "jogador@example.test", "not-a-real-password"
+            "jogador@example.test", "not-a-real-password", remember=False
         )
         buttons(self.window.page, "Criar conta")[0].invoke()
         self.actions.online_signup.assert_called_once_with(
             "jogador@example.test", "not-a-real-password", "Jogador"
+        )
+        self.assertEqual(self.errors, [])
+
+    def test_remember_me_prefills_email_but_never_password(self):
+        self.window.show_account(OnlineStatus(
+            True, None, remembered_email="saved@example.test", remembered=True,
+        ))
+        self.window.root.update()
+        entries = [
+            widget for widget in descendants(self.window.page)
+            if isinstance(widget, ctk.CTkEntry)
+        ]
+        self.assertEqual(entries[0].get(), "saved@example.test")
+        self.assertEqual(entries[1].get(), "")
+        checkboxes = [
+            widget for widget in descendants(self.window.page)
+            if isinstance(widget, ctk.CTkCheckBox)
+        ]
+        self.assertEqual(len(checkboxes), 1)
+        self.assertEqual(checkboxes[0].get(), 1)
+        entries[1].insert(0, "never-persist-password")
+        buttons(self.window.page, "Entrar")[0].invoke()
+        self.actions.online_login.assert_called_once_with(
+            "saved@example.test", "never-persist-password", remember=True
         )
         self.assertEqual(self.errors, [])
 
