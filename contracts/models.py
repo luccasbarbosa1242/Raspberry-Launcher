@@ -110,3 +110,18 @@ class ProfilePreferences:
     active_profile_id: str
     theme: str
     music_volume: int
+
+
+@dataclass(frozen=True)
+class OnlineAccount:
+    """Cloud user identity; never contains credentials or session tokens."""
+    profile_id: str
+    email: str
+    display_name: str
+
+
+@dataclass(frozen=True)
+class OnlineStatus:
+    configured: bool
+    account: OnlineAccount | None
+    pending_events: int = 0
