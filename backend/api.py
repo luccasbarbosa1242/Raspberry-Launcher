@@ -99,11 +99,11 @@ class LauncherService:
     def online_logout(self):
         self.online.logout()
 
-    def online_sync(self):
-        return self.online.sync()
+    def online_sync(self, expected_profile_id=None):
+        return self.online.sync(expected_profile_id)
 
-    def online_import_default(self):
-        return self.online.import_local_profile("default")
+    def online_import_default(self, expected_profile_id=None):
+        return self.online.import_local_profile("default", expected_profile_id)
 
 
     def _get_game(self, game_id):
