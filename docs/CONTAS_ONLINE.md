@@ -12,7 +12,7 @@ O launcher pode usar Supabase Auth (cadastro com e-mail/senha) e PostgreSQL para
 
 ## 2. Conexão dos computadores
 
-A versão desta branch já distribui **a URL do projeto e uma publishable key pública** em `backend/online_defaults.py`. Isso não é uma credencial administrativa; a autenticação de cada usuário e as políticas RLS protegem as estatísticas. Nenhuma senha ou token de usuário é embutido no aplicativo.
+A versão na **`main`** distribui **a URL do projeto e uma publishable key pública** em `backend/online_defaults.py`. Isso não é uma credencial administrativa; a autenticação de cada usuário e as políticas RLS protegem as estatísticas. Nenhuma senha ou token de usuário é embutido no aplicativo.
 
 Ao iniciar o launcher, abra **Conta online** para entrar ou cadastrar. Um mesmo usuário pode acessar o serviço a partir de computadores diferentes sem configurar o servidor manualmente.
 
@@ -26,12 +26,7 @@ A configuração hospedada depende da disponibilidade do plano gratuito Supabase
 pré-autorizados da equipe do projeto. Isso permite testar inicialmente com
 endereços da organização, mas não constitui um cadastro público funcional.
 
-Para liberar confirmações de e-mail para jogadores externos **sem contratar
-plano pago**, configure um remetente verificado e SMTP de um serviço com
-plano gratuito, como Brevo (300 envios por dia no plano grátis, sujeito às
-regras de utilização do fornecedor). A criação/verificação da conta do
-provedor de e-mail é separada do Supabase e ainda não foi realizada. Não
-desabilite a confirmação de e-mail para disfarçar essa restrição.
+O projeto hospedado utilizado pelo Raspberry-Launcher já foi configurado com **Brevo SMTP**, e o cadastro com confirmação de e-mail e login foram testados na prática. Para implantações próprias, configure um remetente verificado e o SMTP de um provedor com opção gratuita, respeitando seus limites e regras. **Não copie senhas SMTP para o código, não habilite planos pagos sem autorização e não desative a confirmação de e-mail.** O envio gratuito pode ter limites e atrasos de entrega.
 
 O Supabase foi criado no plano gratuito com custo cotado de US$ 0/mês;
 não habilite upgrades automáticos nem serviços pagos sem autorização.
@@ -68,6 +63,6 @@ não habilite upgrades automáticos nem serviços pagos sem autorização.
     ruff check .
     python -m pip check
 
-Os testes do servidor remoto utilizam um fake determinístico: eles validam múltiplos clientes, falha de rede, reenvio, isolamento e importação sem credenciais reais. Isso não substitui um teste final com o seu próprio projeto Supabase ativo.
+Os **143 testes automatizados** da [`main`](https://github.com/luccasbarbosa1242/Raspberry-Launcher/actions/runs/39707210299) passaram, incluindo cliente remoto simulado para isolamento entre contas, falha de rede, reenvio, renovação de sessão e importação. Os testes automatizados não substituem a homologação de sincronização entre **dois computadores físicos**, ainda pendente. O fluxo real de cadastro, confirmação via Brevo, login e sessão lembrada já foi verificado manualmente.
 
 **Antes de migrar um banco real**, identifique o runtime correto e faça backup consistente com ensaio de restauração conforme docs/RECUPERACAO.md. A migração local 013_online_accounts.sql é incremental e não apaga jogos ou perfis anteriores.
