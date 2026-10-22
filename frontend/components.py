@@ -63,6 +63,15 @@ def create_sidebar(parent, actions: Actions, resources: UiResources):
     ctk.CTkLabel(text, text="v1.0.0", text_color=theme.MUTED, font=("Arial", 11)).pack(anchor="w")
     ctk.CTkButton(
         footer,
+        text="Conta online",
+        fg_color="transparent",
+        hover_color=theme.HOVER,
+        text_color=theme.TEXT,
+        anchor="w",
+        command=lambda: actions.navigate("account"),
+    ).pack(fill="x", padx=10, pady=5)
+    ctk.CTkButton(
+        footer,
         text="⚙ Configurações",
         fg_color="transparent",
         hover_color=theme.HOVER,
