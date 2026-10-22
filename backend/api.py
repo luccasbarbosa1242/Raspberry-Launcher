@@ -89,13 +89,19 @@ class LauncherService:
             account=self.online.account(),
             pending_events=self.online.pending_count(),
             sync_error=self.online.last_error,
+            remembered_email=self.online.remembered_email,
+            remembered=self.online._remember,
+            session_notice=self.online.session_notice,
         )
 
     def online_signup(self, email, password, display_name):
         return self.online.signup(email, password, display_name)
 
-    def online_login(self, email, password):
-        return self.online.login(email, password)
+    def online_login(self, email, password, remember=False):
+        return self.online.login(email, password, remember=remember)
+
+    def online_restore_session(self):
+        return self.online.restore_session()
 
     def online_logout(self):
         self.online.logout()
