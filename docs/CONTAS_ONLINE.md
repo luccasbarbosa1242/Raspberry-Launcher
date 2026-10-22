@@ -10,17 +10,15 @@ O launcher pode usar Supabase Auth (cadastro com e-mail/senha) e PostgreSQL para
 4. Habilite a Data API e confirme, com duas contas de teste independentes, que cada uma só consegue ler suas próprias estatísticas.
 5. Na configuração do cliente, utilize apenas a URL HTTPS e a chave **publishable/anon pública** do projeto. Nunca distribua chave secret/service_role, senha do banco ou connection string administrativa.
 
-## 2. Configurar cada computador
+## 2. Conexão dos computadores
 
-Exemplo em PowerShell (substitua os valores da sua instalação):
+A versão desta branch já distribui **a URL do projeto e uma publishable key pública** em `backend/online_defaults.py`. Isso não é uma credencial administrativa; a autenticação de cada usuário e as políticas RLS protegem as estatísticas. Nenhuma senha ou token de usuário é embutido no aplicativo.
 
-    $env:RASPBERRY_SUPABASE_URL = "https://SEU-PROJETO.supabase.co"
-    $env:RASPBERRY_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_..."
-    python main.py
+Ao iniciar o launcher, abra **Conta online** para entrar ou cadastrar. Um mesmo usuário pode acessar o serviço a partir de computadores diferentes sem configurar o servidor manualmente.
 
-No Linux, exporte as duas variáveis antes de iniciar o aplicativo. A chave pública não é uma identidade; cada usuário se autentica com e-mail/senha e o token resultante é protegido pelas políticas RLS.
+Para usar outro projeto Supabase, as variáveis `RASPBERRY_SUPABASE_URL` e `RASPBERRY_SUPABASE_PUBLISHABLE_KEY` substituem o destino público padrão, sem editar código. Para usar exclusivamente perfis locais, defina `RASPBERRY_ONLINE_DISABLED=1` antes de iniciar.
 
-Sem configuração completa do serviço, a seção Conta online mostra as instruções e os perfis locais continuam funcionando.
+A configuração hospedada depende da disponibilidade do plano gratuito Supabase; os limites e a possível pausa por inatividade são responsabilidade do serviço.
 
 ## 3. Cadastro e uso
 
