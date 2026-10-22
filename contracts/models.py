@@ -125,3 +125,4 @@ class OnlineStatus:
     configured: bool
     account: OnlineAccount | None
     pending_events: int = 0
+    sync_error: str | None = None
