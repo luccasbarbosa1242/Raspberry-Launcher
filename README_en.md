@@ -13,7 +13,7 @@ Centralize native games and ROMs into a single library.
 
 ### 📈 Development Status
 
-> **Phase 1 — T00, T01, T03 and T05 • Shared Catalog Editing • UI and Application Logic Separated**
+> **Phases 1 and 2 completed • Local profiles and online accounts available • Phase 3: Downloads, Emulators and ROMs next**
 
 <img src="https://img.shields.io/badge/Python-3.x-blue?style=for-the-badge" />
 <img src="https://img.shields.io/badge/CustomTkinter-UI-green?style=for-the-badge" />
@@ -30,7 +30,7 @@ Centralize native games and ROMs into a single library.
 
 # 📖 About the Project
 
-**Launcher PI** is a game launcher built with **Python**, using **CustomTkinter** for the graphical interface and **SQLite** as its primary database.
+**Launcher PI** is a game launcher built with **Python**, using **CustomTkinter** for the graphical interface and **SQLite** for local data and **Supabase Auth + PostgreSQL** for optional online accounts and personal-stat synchronization.
 
 The project aims to centralize different types of games into a single library, allowing users to install, organize and launch their games through a modern and intuitive interface.
 
@@ -66,13 +66,13 @@ The long-term goal is to allow new games to be added simply by inserting records
 >
 > ## 🔴 PROTECT YOUR DATA BEFORE MIGRATING
 >
-> **Phase 1 (T00, T01, T03 and T05)** consolidates catalog records in SQLite and connects desktop forms and terminal tools to shared services.
+> **Phase 1 (T00, T01, T03 and T05)** consolidated catalog data in SQLite. **Phase 2** added local profiles, persistent preferences, authentication and optional account synchronization.
 >
 > `games.py` is already absent from execution. JSON files remain for initial data, import/export and plugin descriptors.
 >
 > Migrations preserve existing records; do not recreate an empty database to update. HTML/browser games are archived and removed from the active catalog. Google Drive and `gdown` remain available for downloads.
 >
-> Read the [Phase 1 delivery](docs/FASE1.md) and [recovery procedure](docs/RECUPERACAO.md) before changing data. These detailed documents are in Portuguese.
+> Before changing data, read [Phase 1](docs/FASE1.md), [Phase 2](docs/FASE2.md), [Online accounts](docs/CONTAS_ONLINE.md) and [Recovery](docs/RECUPERACAO.md). These detailed documents are in Portuguese. Online synchronization **does not** back up ROMs, saves or installations.
 
 ---
 
@@ -84,7 +84,19 @@ The long-term goal is to allow new games to be added simply by inserting records
 
 # 🔴 Highest Priority
 
-## Database — Phase 1
+## Phase 3 — Downloads, Emulators and ROMs (next phase)
+
+* [x] Existing download, installation, version and plugin infrastructure preserved
+* [x] Emulator and package catalogs managed through SQLite
+* [x] Existing automated download, installation and uninstall tests
+* [ ] Verify real emulator packages per operating system and architecture
+* [ ] Complete emulator detection, installation and automatic configuration
+* [ ] Validate end-to-end ROM launching, one adapter at a time
+* [ ] Cover download integrity, failures, recovery and real compatibility
+
+---
+
+## Database — Phase 1 (completed)
 
 * [x] SQLite structure
 * [x] Migration system
@@ -120,7 +132,7 @@ The long-term goal is to allow new games to be added simply by inserting records
 
 ---
 
-## Emulators (65%)
+## Emulators (65% — existing infrastructure; Phase 3 integration pending)
 
 * [x] Core architecture
 * [x] EmulatorManager
@@ -205,20 +217,23 @@ The long-term goal is to allow new games to be added simply by inserting records
 
 ## Settings
 
-* [ ] Light theme
-* [ ] Dark theme
+* [x] Light and dark themes, with an option to follow the system
+* [x] Per-profile persistent theme preference
 * [ ] Background music
-* [ ] Volume control
+* [x] Music volume **preference** (not actual audio playback or system volume control)
 * [ ] Brightness control
 
 ---
 
 ## Users
 
-* [ ] User profiles
-* [ ] Individual statistics
-* [ ] Gameplay history
-* [ ] Configuration backup
+* [x] Independent local profiles and optional online accounts
+* [x] Per-profile favorites, play time and recently played games
+* [x] Account statistics and preference synchronization
+* [x] Supabase/Brevo email signup, confirmation and login
+* [x] **Remember me** through the OS credential vault; no saved password
+* [ ] End-to-end synchronization check on two physical computers
+* [ ] Full cloud backup of files and settings
 
 ---
 
@@ -235,7 +250,7 @@ The long-term goal is to allow new games to be added simply by inserting records
 
 * [ ] Achievement system
 * [ ] Cloud backup
-* [ ] Cross-device synchronization
+* [x] Personal stats/preference sync implemented (two-computer physical test pending)
 * [ ] Theme marketplace
 * [ ] Mod support
 * [ ] Assisted local multiplayer
@@ -288,6 +303,20 @@ Google Drive and `gdown` remain available for file downloads. The removal applie
 
 ---
 
+## 👤 Local Profiles and Online Accounts — Phase 2
+
+* Separate local profiles with independent favorites, play time, recent games and themes
+* Supabase Auth, Brevo SMTP email verification and real user login tested
+* Manual and periodic automatic personal-stat/preference syncing with a local offline queue and idempotent retries
+* Optional one-time import from the default local profile without deleting its data
+* Optional **Remember me** using a renewable session token in the OS credential vault; passwords are never stored
+* Installed games, emulator binaries, ROMs, saves and catalogs remain **local**
+* Automated multi-device simulation passed; validation on two physical computers is still pending
+
+Documentation: [Local profiles](docs/FASE2.md) and [Online accounts](docs/CONTAS_ONLINE.md) (in Portuguese).
+
+---
+
 ## 🖼️ Assets
 
 * AssetManager
@@ -301,11 +330,11 @@ Google Drive and `gdown` remain available for file downloads. The removal applie
 
 ---
 
-# 🆕 Latest Update — Separate UI and Application Logic
+# 🆕 Project Updates — Phases 1 and 2
 
-> **Phase 1: recoverable baseline • Consolidated catalog • Shared desktop and CLI services**
+> **Phase 1: recoverable baseline and consolidated catalog • Phase 2: profiles, online accounts and sync • Phase 3: preparation**
 
-## ✅ Delivered in This Update
+## ✅ Phase 1 Deliverables (preserved)
 
 * [x] **T00:** identified baseline, consistent backup and temporary restore rehearsal
 * [x] **T01:** consolidated database catalog, versioned migrations and separate local installations
@@ -325,6 +354,16 @@ Google Drive and `gdown` remain available for file downloads. The removal applie
 * [x] Provided SQLite database, covers, banners, scores and configuration preserved
 * [x] Tests covering architecture, backend, application, downloads, UI and administrative tools
 
+## ✅ Phase 2 Deliverables
+
+* [x] `012_local_profiles.sql` and `013_online_accounts.sql` migrations without deleting existing data
+* [x] Per-profile favorites, play time, recent games, preferences and themes
+* [x] Supabase Auth signup/login, PostgreSQL RLS policies and Brevo email confirmation
+* [x] Manual/periodic sync, offline queue, idempotent events and optional local-history import
+* [x] Optional persistent session with `keyring` and explicit logout
+* [x] 143 passing tests on `main`, including GUI, PostgreSQL and backup restoration
+* [ ] Validate synchronization on two physical computers
+
 ---
 
 ## 📂 Layer Responsibilities
@@ -332,11 +371,12 @@ Google Drive and `gdown` remain available for file downloads. The removal applie
 | Folder / File | Responsibility |
 | --------------- | ----------------------- |
 | `frontend/` | Windows, screens, cards, styles, rendered images and widget state |
-| `backend/` | Application rules, SQLite, downloads, installation, uninstallation, launching and emulators |
+| `backend/` | Application rules, SQLite, profiles, online accounts, synchronization, downloads, installation, uninstallation, launching and emulators |
 | `application/` | Action coordination, navigation, background tasks and UI updates |
 | `contracts/` | Shared data and public interfaces used by the layers |
 | `main.py` | Application startup and wiring of concrete implementations |
 | `backend/tools/` | Administrative command-line tools |
+| `backend/online.py`, `backend/secure_session.py` | Authentication, personal sync and optional OS-vault session persistence |
 | `ASSETS/`, `DATA/`, `USERDATA/` | Project resources and data |
 
 The interface sends actions containing identifiers and receives data ready for display. Widgets are never passed to the backend, and screens do not run SQL queries, downloads or installations.
@@ -355,62 +395,64 @@ The interface sends actions containing identifiers and receives data ready for d
 
 ## ▶️ Running Each Layer
 
-Complete application, from this environment's checkout:
+From the project directory, using Python 3.12 and the required dependencies.
+
+**Linux:**
 
 ```bash
-cd /workspace/Raspberry-Launcher
 python3 -m venv .venv
-.venv/bin/python -m pip install -r requirements.txt
-source /workspace/.launcher-cloud/env.sh
+source .venv/bin/activate
+python -m pip install -r requirements.txt
 python main.py
 ```
 
-The cloud setup's `env.sh` activates the virtual environment and uses `/workspace/.launcher-cloud/runtime` for writable data, preserving the supplied checkout database. Without a graphical display, run `xvfb-run -a python main.py`. On a local installation with a display, activate your virtual environment and run `python main.py`; set `RASPBERRY_LAUNCHER_HOME` outside the checkout to choose a separate data directory.
+**Windows (PowerShell):**
 
-UI preview using demonstration data without loading the backend:
-
-```bash
-cd /workspace/Raspberry-Launcher
-source /workspace/.launcher-cloud/env.sh
-xvfb-run -a python -m frontend.preview
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python main.py
 ```
 
-Backend and shared catalog tools from the terminal:
+If PowerShell blocks activation, adjust the execution policy for the **current process only**. Use the activated environment's Python instead of mixing incompatible Python installations. Set `RASPBERRY_LAUNCHER_HOME` to a separate data directory if desired; **do not overwrite the existing database**.
+
+Online accounts use the project's HTTPS URL and public Supabase key in `backend/online_defaults.py`. Set `RASPBERRY_ONLINE_DISABLED=1` to use local profiles only. **Remember me** requires an available secure OS credential vault. Never commit user passwords, SMTP secrets or service-role keys.
+
+Independent UI preview and administrative CLI:
 
 ```bash
-cd /workspace/Raspberry-Launcher
-source /workspace/.launcher-cloud/env.sh
+python -m frontend.preview
 python -m backend --help
 python -m backend list
-python -m backend catalog list game
 python -m backend catalog --help
 ```
 
-Desktop forms are in the sidebar's **Cadastros** group. Registering an emulator or package does not implement its adapter or guarantee ROM execution. Administrative tools still run as modules, for example `python -m backend.tools.add_game`; registration and editing examples are in [Phase 1](docs/FASE1.md).
+Desktop registration forms live in the sidebar's **Cadastros** section. Adding an emulator/package record does not implement its adapter or guarantee ROM execution. See [Phase 1](docs/FASE1.md).
 
-Linux validation using a virtual display:
+Linux validation with a virtual display:
 
 ```bash
-cd /workspace/Raspberry-Launcher
-source /workspace/.launcher-cloud/env.sh
 xvfb-run -a python -m unittest discover -s tests -v
 python -m compileall -q backend frontend application contracts tests main.py
 ruff check .
 ```
 
-The `env.sh` sets `PYTHONPYCACHEPREFIX` to keep caches outside tracked `.pyc` files. Before migrating or editing important data, create a recovery point and rehearse restoring it as described in [Recovery](docs/RECUPERACAO.md).
+CI also runs PostgreSQL 16 security checks and recovery rehearsals. For data migration, follow [Recovery](docs/RECUPERACAO.md).
 
 ---
 
 ## 🧪 Update Validation
 
-* [x] Backend, migration, recovery, catalog and graphical tests run on Linux; current results are in [Validation](docs/VALIDACAO.md)
-* [x] Python module compilation and static checks passed
-* [x] Historical restructuring check: 27 data/resource files compared byte for byte with the original ZIP; this does not replace current Phase 1 tests
+* [x] **143 automated tests** passed on `main` ([GitHub Actions run](https://github.com/luccasbarbosa1242/Raspberry-Launcher/actions/runs/39707210299))
+* [x] Python compilation, Ruff, dependencies, PostgreSQL 16 RLS/security and recovery rehearsal passed
+* [x] Actual email registration, Brevo confirmation and online login verified; **Remember me** tested on Windows
+* [x] Historical restructuring check: 27 data/resource files compared byte-for-byte with the original ZIP
+* [ ] Real sync test on two physical computers and end-to-end emulator/ROM validation in Phase 3
 
-Download tests used local files and controlled HTTP transport. The availability of every external catalog link was not validated, and tests were not run on Windows or with a real ROM in PCSX2.
+Multi-device synchronization and network-error tests use a deterministic simulated server. Download tests use local files and controlled HTTP; not every external link or platform has been validated.
 
-Details: [Architecture](docs/ARQUITETURA.md), [Analysis and changes](docs/ANALISE_E_MUDANCAS.md) and [Validation](docs/VALIDACAO.md). These detailed documents are currently in Portuguese.
+Details: [Architecture](docs/ARQUITETURA.md), [Analysis](docs/ANALISE_E_MUDANCAS.md), [Phase 2](docs/FASE2.md) and [Online accounts](docs/CONTAS_ONLINE.md) (in Portuguese).
 
 ---
 
@@ -912,7 +954,7 @@ The long-term vision is to make Launcher PI entirely database-driven, allowing n
 
 ## ✅ Phase 1 — Baseline, Catalog Editing and Supported Games
 
-The current delivery covers **T00, T01, T03 and T05** on the existing modular architecture:
+Phase 1 was completed with **T00, T01, T03 and T05** on the existing modular architecture:
 
 * Identified baseline, consistent recovery point and temporary restore rehearsal
 * Safe migrations and consolidated game, platform, emulator and package records
@@ -926,21 +968,21 @@ The current delivery covers **T00, T01, T03 and T05** on the existing modular ar
 
 ---
 
-## ⏳ Phase 2 — Profiles and Persistent Preferences
+## ✅ Phase 2 — Profiles, Preferences and Online Accounts (Completed)
 
-Local profile selection, personal state and preferences belong to a later phase. Phase 1 prepares only their database structures and contracts.
+Delivered independent local profiles, individual favorites/play time, persistent preferences, Supabase Auth login with Brevo email verification, optional personal-stat synchronization, offline event queue, local-history import and secure **Remember me**. Real signup/login and session persistence were verified, and **143 automated tests** passed on `main`. **Pending acceptance test:** synchronize between two physical computers. See [Phase 2](docs/FASE2.md) and [Online accounts](docs/CONTAS_ONLINE.md).
 
 ---
 
-## ⏳ Phase 3 — Downloads, Emulators and ROMs
+## 🚧 Phase 3 — Downloads, Emulators and ROMs (Next Phase)
 
-Complete installation and launching by operating system, architecture and adapter, validating one supported platform at a time. A registered emulator is not automatically compatible or ready to run ROMs.
+Build on existing download/installation/version/plugin infrastructure to finish real emulator packages, OS/architecture detection, configuration, failure recovery and end-to-end ROM launching, validating each platform and adapter separately. Registering an emulator alone does **not** guarantee compatibility.
 
 ---
 
 ## 🚀 Phase 4 — RGSX Integration
 
-Query and synchronize an external catalog, then connect downloads and ROM launching on supported platforms. No RGSX integration is implemented in Phase 1. Richer library pages, statistics, version recovery, themes, music, achievements and system controls remain future phases.
+Query and synchronize the **external RGSX catalog**, then connect downloads and ROM launching on supported platforms. **Account/statistics synchronization** is already part of Phase 2 and is separate from RGSX. Local profiles, personal statistics and basic themes are complete; actual music playback, achievements, advanced library pages and system controls remain future work.
 
 ---
 
@@ -976,7 +1018,7 @@ The database also stores:
 * Collections
 * Local game and emulator installations
 
-Profile and external-source structures are prepared for later phases; full profiles and external synchronization are not implemented in Phase 1.
+Local profiles, online accounts and personal-stat/preference synchronization were implemented in Phase 2. External **RGSX catalog** integration remains planned for Phase 4.
 
 The objective is to make the database the single source of truth.
 
