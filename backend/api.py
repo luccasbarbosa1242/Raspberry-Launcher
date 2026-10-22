@@ -8,6 +8,7 @@ import json
 
 from backend.assets.asset_manager import AssetManager
 from backend.profiles import ProfileService, profile_scope
+from backend.online import OnlineService
 from backend.assets.platform_asset_manager import PlatformAssetManager
 from backend.database.database import scoped
 from backend.database.migrations import initialize_database
@@ -30,27 +31,41 @@ from contracts.models import (
     Phase,
     PlatformInfo,
     VersionInfo,
+    OnlineStatus,
 )
 
 
 class LauncherService:
     def __init__(self):
         self.profiles = ProfileService()
+        self.online = OnlineService()
 
     def execute_for_profile(self, profile_id, work):
         with profile_scope(profile_id):
             return work()
 
     def list_profiles(self):
-        return self.profiles.list_profiles()
+        account = self.online.account()
+        return tuple(
+            profile for profile in self.profiles.list_profiles()
+            if not profile.id.startswith("cloud_")
+            or (account and account.profile_id == profile.id)
+        )
 
     def profile_settings(self, profile_id=None):
-        return self.profiles.settings(profile_id)
+        from dataclasses import replace
+
+        settings = self.profiles.settings(profile_id)
+        return replace(settings, profiles=self.list_profiles())
 
     def create_profile(self, name):
         return self.profiles.create(name)
 
     def select_profile(self, profile_id):
+        if profile_id.startswith("cloud_"):
+            account = self.online.account()
+            if not account or account.profile_id != profile_id:
+                raise PermissionError("Faça login para acessar esta conta online.")
         self.profiles.select(profile_id)
 
     def update_profile_preferences(self, *, theme=None, music_volume=None, profile_id=None):
@@ -62,6 +77,34 @@ class LauncherService:
     def initialize(self):
         PathResolver.ensure_runtime_directories()
         initialize_database()
+        if self.profiles.active_id().startswith("cloud_") and not self.online.account():
+            self.profiles.select("default")
+
+    def online_enabled(self):
+        return self.online.enabled
+
+    def online_status(self):
+        return OnlineStatus(
+            configured=self.online.enabled,
+            account=self.online.account(),
+            pending_events=self.online.pending_count(),
+        )
+
+    def online_signup(self, email, password, display_name):
+        return self.online.signup(email, password, display_name)
+
+    def online_login(self, email, password):
+        return self.online.login(email, password)
+
+    def online_logout(self):
+        self.online.logout()
+
+    def online_sync(self):
+        return self.online.sync()
+
+    def online_import_default(self):
+        return self.online.import_local_profile("default")
+
 
     def _get_game(self, game_id):
         game = LibraryManager().get_game(game_id)
