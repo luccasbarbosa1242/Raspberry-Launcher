@@ -3,6 +3,7 @@
 from contextlib import contextmanager
 from contextvars import ContextVar
 import json
+from datetime import datetime, timezone
 from uuid import uuid4
 
 from contracts.models import ProfileInfo, ProfilePreferences
@@ -39,6 +40,8 @@ class ProfileService:
         else:
             chunks.append(payload)
         for item in chunks:
+            if kind in ("played", "started") and not item.get("occurred_at"):
+                item["occurred_at"] = datetime.now(timezone.utc).isoformat()
             connection.execute(
                 """INSERT INTO online_outbox(id,profile_id,kind,game_id,payload_json)
                    VALUES(?,?,?,?,?)""",
