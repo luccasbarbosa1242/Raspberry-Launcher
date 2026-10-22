@@ -282,12 +282,21 @@ class OnlineService:
             stats, preferences = self.client.snapshot()
             if self.account() != account:
                 raise OnlineError("Conta alterada durante a sincronização.")
+            # New local changes can arrive while the HTTP snapshot is in flight.
+            # Do not overwrite any game/preference that has unsent local events.
+            unsent = db.connection.execute(
+                "SELECT kind,game_id FROM online_outbox WHERE profile_id=?",
+                (profile_id,),
+            ).fetchall()
+            pending_games = {row["game_id"] for row in unsent if row["game_id"]}
+            pending_preferences = any(row["kind"] == "preferences" for row in unsent)
             # Never copy another user's data or global installations.
-            # Imported rows are only those in the local catalog; unknown remote
-            # IDs remain in the cloud until that game is present locally.
+            # Unknown remote IDs stay in the cloud until present locally.
             with db.connection:
                 for row in stats:
                     game_id = row.get("game_id")
+                    if game_id in pending_games:
+                        continue
                     if not isinstance(game_id, str) or not db.connection.execute(
                         "SELECT 1 FROM games WHERE id=?", (game_id,)
                     ).fetchone():
@@ -302,7 +311,7 @@ class OnlineService:
                         (profile_id, game_id, int(bool(row.get("favorite"))),
                          max(0, int(row.get("play_time") or 0)), row.get("last_played")),
                     )
-                if preferences:
+                if preferences and not pending_preferences:
                     pref = preferences[0]
                     theme = pref.get("theme")
                     volume = pref.get("music_volume")
