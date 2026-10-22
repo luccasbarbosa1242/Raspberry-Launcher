@@ -5,11 +5,44 @@ from frontend.components import heading
 from frontend import theme
 
 
-def render_settings(parent, actions=None, preferences=None):
+def render_settings(parent, actions=None, preferences=None, online=None):
     heading(parent, "Configurações")
     if preferences is None or actions is None:
         ctk.CTkLabel(parent, text="Prévia de configurações", text_color=theme.MUTED).pack(padx=20, pady=10)
         return
+    if online is not None:
+        card = ctk.CTkFrame(
+            parent, fg_color=theme.CARD,
+            border_color=theme.BORDER, border_width=1,
+        )
+        card.pack(fill="x", padx=20, pady=10)
+        if online.account:
+            ctk.CTkLabel(
+                card, text=f"Conta online: {online.account.display_name} ({online.account.email})",
+                text_color=theme.TEXT,
+            ).pack(anchor="w", padx=12, pady=8)
+            ctk.CTkLabel(
+                card, text=f"Alterações aguardando envio: {online.pending_events}",
+                text_color=theme.MUTED,
+            ).pack(anchor="w", padx=12)
+            ctk.CTkButton(
+                card, text="Sincronizar agora", command=actions.online_sync
+            ).pack(anchor="w", padx=12, pady=6)
+            ctk.CTkButton(
+                card, text="Importar histórico local (uma vez)",
+                command=actions.online_import_default,
+            ).pack(anchor="w", padx=12, pady=6)
+            ctk.CTkButton(
+                card, text="Sair da conta", command=actions.online_logout
+            ).pack(anchor="w", padx=12, pady=(6, 12))
+        else:
+            ctk.CTkLabel(
+                card, text="Nenhuma conta online conectada."
+            ).pack(anchor="w", padx=12, pady=8)
+            ctk.CTkButton(
+                card, text="Entrar ou cadastrar conta",
+                command=lambda: actions.navigate("account"),
+            ).pack(anchor="w", padx=12, pady=(4, 12))
     ctk.CTkLabel(parent, text="Perfil ativo", font=("Arial", 16, "bold")).pack(
         anchor="w", padx=20, pady=(15, 5)
     )
