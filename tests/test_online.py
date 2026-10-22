@@ -8,7 +8,8 @@ import tempfile
 from unittest.mock import patch
 
 from backend.api import LauncherService
-from backend.online import OnlineError, OnlineService, SupabaseClient
+from backend.online import OnlineAuthError, OnlineError, OnlineService, SupabaseClient
+from backend.secure_session import SessionVault, VaultUnavailable
 from backend.profiles import ProfileService, profile_scope
 from contracts.models import OnlineAccount
 from tests.support import BackendCase
@@ -33,6 +34,8 @@ class FakeClient:
         self.fail_after = False
         self.before_snapshot = None
         self.before_apply = None
+        self.on_refresh = None
+        self.restore_error = None
 
     def login(self, email, password):
         if not password or email not in self.server.users:
@@ -41,6 +44,16 @@ class FakeClient:
             "cloud_" + self.server.users[email], email, "Jogador"
         )
         return self.current
+
+    def restore(self, refresh_token):
+        if self.restore_error:
+            raise self.restore_error
+        if not refresh_token.startswith("refresh:"):
+            raise OnlineAuthError("Sessão revogada")
+        return self.login(refresh_token.split(":", 1)[1], "saved-token")
+
+    def refresh_token(self):
+        return "refresh:" + self.current.email if self.current else None
 
     def signup(self, email, password, display_name):
         self.login(email, password)
@@ -101,6 +114,34 @@ class FakeClient:
             ([dict(self.server.preferences[owner])]
              if owner in self.server.preferences else []),
         )
+
+
+class MemoryVault:
+    def __init__(self):
+        self.email = ""
+        self.token = ""
+        self.fail_read = False
+        self.fail_write = False
+
+    def load(self):
+        if self.fail_read:
+            raise VaultUnavailable("cofre bloqueado")
+        return self.email, self.token
+
+    def save(self, email, token):
+        if self.fail_write:
+            raise VaultUnavailable("cofre bloqueado")
+        self.email, self.token = email, token
+
+    def update_token(self, token):
+        if self.fail_write:
+            raise VaultUnavailable("cofre bloqueado")
+        self.token = token
+
+    def clear(self, *, keep_email=False):
+        self.token = ""
+        if not keep_email:
+            self.email = ""
 
 
 class OnlineTests(BackendCase):
@@ -319,6 +360,109 @@ class OnlineTests(BackendCase):
         status = self.service.online_status()
         self.assertEqual(status.account.profile_id, account_id)
         self.assertIn("indisponível", status.sync_error)
+
+    def test_remembered_session_auto_login_after_restart_and_reconnect(self):
+        self.add_game("snake")
+        vault = MemoryVault()
+        self.service.online = OnlineService(client=FakeClient(self.remote), vault=vault)
+        account = self.service.online_login("one@example.test", "password123", remember=True)
+        self.assertEqual(vault.email, account.email)
+        self.assertEqual(vault.token, "refresh:one@example.test")
+        ProfileService().add_play_time("snake", 12)
+        self.service.online_sync()
+        self.service.online = OnlineService(client=FakeClient(self.remote), vault=vault)
+        self.service.initialize()
+        self.assertEqual(self.service.active_profile_id(), "default")
+        self.assertTrue(self.service.online_restore_session())
+        self.assertEqual(self.service.active_profile_id(), account.profile_id)
+        self.assertEqual(self.service.list_games()[0].play_time, 12)
+        self.assertEqual(self.service.online_status().remembered_email, account.email)
+        self.assertTrue(self.service.online_status().remembered)
+
+    def test_unchecked_login_never_persists_token_and_clears_previous(self):
+        vault = MemoryVault()
+        self.service.online = OnlineService(client=FakeClient(self.remote), vault=vault)
+        self.service.online_login("one@example.test", "password123", remember=True)
+        self.service.online_login("two@example.test", "password123", remember=False)
+        self.assertEqual(vault.load(), ("", ""))
+        self.service.online = OnlineService(client=FakeClient(self.remote), vault=vault)
+        self.assertFalse(self.service.online_restore_session())
+        self.assertIsNone(self.service.online_status().account)
+
+    def test_explicit_logout_clears_remembered_email_and_refresh_token(self):
+        vault = MemoryVault()
+        self.service.online = OnlineService(client=FakeClient(self.remote), vault=vault)
+        self.service.online_login("one@example.test", "password123", remember=True)
+        self.service.online_logout()
+        self.assertEqual(vault.load(), ("", ""))
+        self.assertFalse(self.service.online_restore_session())
+        self.assertIsNone(self.service.online_status().account)
+
+    def test_invalid_saved_token_keeps_only_email_for_form(self):
+        vault = MemoryVault()
+        vault.save("one@example.test", "revoked")
+        self.service.online = OnlineService(client=FakeClient(self.remote), vault=vault)
+        self.assertFalse(self.service.online_restore_session())
+        self.assertEqual(vault.load(), ("one@example.test", ""))
+        status = self.service.online_status()
+        self.assertEqual(status.remembered_email, "one@example.test")
+        self.assertIn("expirou", status.session_notice)
+
+    def test_network_outage_preserves_saved_session_for_later_retry(self):
+        vault = MemoryVault()
+        vault.save("one@example.test", "refresh:one@example.test")
+        fake = FakeClient(self.remote)
+        fake.restore_error = OnlineError("sem internet")
+        self.service.online = OnlineService(client=fake, vault=vault)
+        self.assertFalse(self.service.online_restore_session())
+        self.assertEqual(vault.token, "refresh:one@example.test")
+        self.assertEqual(self.service.online_status().remembered_email, "one@example.test")
+        fake.restore_error = None
+        self.assertTrue(self.service.online_restore_session())
+
+    def test_unavailable_os_vault_does_not_block_manual_login(self):
+        vault = MemoryVault()
+        vault.fail_write = True
+        self.service.online = OnlineService(client=FakeClient(self.remote), vault=vault)
+        self.service.online_login("one@example.test", "password123", remember=True)
+        self.assertIsNotNone(self.service.online_status().account)
+        self.assertFalse(self.service.online_status().remembered)
+        self.assertEqual(vault.token, "")
+        self.assertIn("cofre bloqueado", self.service.online_status().session_notice)
+
+    def test_rotated_refresh_token_is_saved_back_to_vault(self):
+        token = "refresh-one"
+        second = "refresh-two"
+        user = {"id": self.remote.users["one@example.test"],
+                "email": "one@example.test"}
+        def response(method, path, payload=None, **kwargs):
+            if "grant_type=refresh_token" in path:
+                self.assertIn(payload["refresh_token"], (token, second))
+                return {"user": user, "access_token": "access", "refresh_token": second,
+                        "expires_in": 3600}
+            if path.startswith("/rest/v1/"):
+                return []
+            raise AssertionError(path)
+
+        vault = MemoryVault()
+        vault.save("one@example.test", token)
+        client = SupabaseClient("https://project.supabase.co", "sb_publishable_test")
+        with patch.object(client, "_request", side_effect=response):
+            service = OnlineService(client=client, vault=vault)
+            # Preserve local database isolation and use only the authenticated identity.
+            self.service.online = service
+            self.assertTrue(self.service.online_restore_session())
+        self.assertEqual(vault.token, second)
+
+    def test_null_keyring_backend_is_rejected_instead_of_using_plaintext(self):
+        import sys
+        from types import SimpleNamespace
+        vault = SessionVault("https://project.supabase.co")
+        insecure_backend = type("Keyring", (), {})()
+        fake = SimpleNamespace(get_keyring=lambda: insecure_backend)
+        with patch.dict(sys.modules, {"keyring": fake}):
+            with self.assertRaises(VaultUnavailable):
+                vault.load()
 
     def test_auth_transport_keeps_tokens_only_in_memory(self):
         with patch.object(SupabaseClient, "_request") as request:
