@@ -128,7 +128,7 @@ class PreviewActions:
     def update_profile_preferences(self, *, theme=None, music_volume=None):
         self._notice()
 
-    def online_login(self, email, password):
+    def online_login(self, email, password, remember=False):
         self._notice()
 
     def online_signup(self, email, password, display_name):
