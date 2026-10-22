@@ -192,6 +192,10 @@ class OnlineService:
         ).fetchone()[0]
 
     def signup(self, email, password, display_name):
+        with self._sync_lock:
+            return self._signup_locked(email, password, display_name)
+
+    def _signup_locked(self, email, password, display_name):
         self._require_config()
         self._validate(email, password, display_name)
         complete = self.client.signup(email, password, display_name)
@@ -201,6 +205,10 @@ class OnlineService:
         return complete
 
     def login(self, email, password):
+        with self._sync_lock:
+            return self._login_locked(email, password)
+
+    def _login_locked(self, email, password):
         self._require_config()
         if not email.strip() or not password:
             raise ValueError("Informe e-mail e senha.")
@@ -243,17 +251,20 @@ class OnlineService:
         ProfileService().select(account.profile_id)
 
     def logout(self):
-        if self.client:
-            self.client.logout()
-        ProfileService().select("default")
+        with self._sync_lock:
+            if self.client:
+                self.client.logout()
+            ProfileService().select("default")
 
     @scoped
-    def sync(self):
+    def sync(self, expected_profile_id=None):
         self._require_config()
         with self._sync_lock:
             account = self.account()
             if not account:
                 raise OnlineError("Entre na sua conta.")
+            if expected_profile_id and account.profile_id != expected_profile_id:
+                raise OnlineError("A conta mudou antes da sincronização.")
             profile_id = account.profile_id
             db = Database()
             # Acknowledging a batch only after a successful RPC ensures that
@@ -323,12 +334,18 @@ class OnlineService:
                         )
             return len(stats)
 
+    def import_local_profile(self, source_id="default", expected_profile_id=None):
+        with self._sync_lock:
+            return self._import_local_locked(source_id, expected_profile_id)
+
     @scoped
-    def import_local_profile(self, source_id="default"):
+    def _import_local_locked(self, source_id, expected_profile_id):
         """Opt-in, once per account+source, preserves the source without moving it."""
         account = self.account()
         if not account:
             raise OnlineError("Entre na sua conta para importar.")
+        if expected_profile_id and account.profile_id != expected_profile_id:
+            raise OnlineError("A conta mudou antes da importação.")
         if source_id.startswith("cloud_") or source_id == account.profile_id:
             raise ValueError("Selecione um perfil local para importar.")
         db = Database()
