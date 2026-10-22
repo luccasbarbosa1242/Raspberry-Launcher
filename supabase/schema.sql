@@ -68,7 +68,9 @@ begin
     or jsonb_array_length(p_events) > 50 then
     raise exception 'Expected a batch of at most 50 events';
   end if;
-  for entry in select value from jsonb_array_elements(p_events) loop
+  for entry in
+    select e.value from jsonb_array_elements(p_events)
+    with ordinality as e(value, number) order by e.number loop
     if jsonb_typeof(entry) is distinct from 'object'
        or (entry->>'id') is null
        or (entry->>'kind') not in ('favorite','played','started','preferences') then
@@ -127,13 +129,15 @@ begin
       on conflict(user_id, game_id) do update set favorite = excluded.favorite;
     elsif event_kind = 'played' then
       insert into public.launcher_game_stats(user_id, game_id, play_time, last_played)
-        values(current_user_id, game, seconds, now())
+        values(current_user_id, game, seconds,
+               coalesce((entry->>'occurred_at')::timestamptz, now()))
       on conflict(user_id, game_id) do update
         set play_time = public.launcher_game_stats.play_time + excluded.play_time,
             last_played = greatest(public.launcher_game_stats.last_played, excluded.last_played);
     elsif event_kind = 'started' then
       insert into public.launcher_game_stats(user_id, game_id, last_played)
-        values(current_user_id, game, now())
+        values(current_user_id, game,
+               coalesce((entry->>'occurred_at')::timestamptz, now()))
       on conflict(user_id, game_id) do update
         set last_played = greatest(public.launcher_game_stats.last_played, excluded.last_played);
     else
