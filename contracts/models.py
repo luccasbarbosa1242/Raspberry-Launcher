@@ -126,3 +126,6 @@ class OnlineStatus:
     account: OnlineAccount | None
     pending_events: int = 0
     sync_error: str | None = None
+    remembered_email: str = ""
+    remembered: bool = False
+    session_notice: str | None = None
