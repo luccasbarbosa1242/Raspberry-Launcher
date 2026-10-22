@@ -17,6 +17,11 @@ def render_settings(parent, actions=None, preferences=None, online=None):
         )
         card.pack(fill="x", padx=20, pady=10)
         if online.account:
+            if online.sync_error:
+                ctk.CTkLabel(
+                    card, text="Sincronização pendente: " + online.sync_error,
+                    text_color=theme.ERROR, wraplength=600,
+                ).pack(anchor="w", padx=12, pady=5)
             ctk.CTkLabel(
                 card, text=f"Conta online: {online.account.display_name} ({online.account.email})",
                 text_color=theme.TEXT,
