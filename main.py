@@ -20,6 +20,8 @@ def main():
     controller.attach_view(window)
     window.start_polling(controller.poll)
     controller.navigate("account" if backend.online_enabled() else "home")
+    if backend.online_enabled():
+        controller.restore_online_session()
     try:
         window.run()
     finally:
