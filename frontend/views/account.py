@@ -50,6 +50,11 @@ def render_account(parent, actions, status):
         ).pack(anchor="w", padx=20, pady=8)
         return
 
+    if status.session_notice:
+        ctk.CTkLabel(
+            parent, text=status.session_notice,
+            text_color=theme.ERROR, wraplength=650,
+        ).pack(anchor="w", padx=20, pady=(0, 10))
     ctk.CTkLabel(
         parent,
         text="Entre em qualquer computador para recuperar seus favoritos e estatísticas.",
@@ -61,6 +66,8 @@ def render_account(parent, actions, status):
     ctk.CTkLabel(form, text="E-mail").pack(anchor="w", padx=16, pady=(15, 2))
     email = ctk.CTkEntry(form, width=360, placeholder_text="jogador@exemplo.com")
     email.pack(anchor="w", padx=16, pady=(0, 10))
+    if status.remembered_email:
+        email.insert(0, status.remembered_email)
     ctk.CTkLabel(form, text="Senha").pack(anchor="w", padx=16, pady=(2, 2))
     password = ctk.CTkEntry(form, width=360, show="•")
     password.pack(anchor="w", padx=16, pady=(0, 10))
@@ -69,11 +76,20 @@ def render_account(parent, actions, status):
     )
     nickname = ctk.CTkEntry(form, width=360, placeholder_text="Como quer ser chamado")
     nickname.pack(anchor="w", padx=16, pady=(0, 10))
+    remember = ctk.CTkCheckBox(
+        form, text="Lembrar de mim — manter conectado neste computador",
+        text_color=theme.TEXT,
+    )
+    remember.pack(anchor="w", padx=16, pady=(6, 4))
+    if status.remembered:
+        remember.select()
     controls = ctk.CTkFrame(form, fg_color="transparent")
     controls.pack(anchor="w", padx=16, pady=(10, 16))
     ctk.CTkButton(
         controls, text="Entrar", width=140,
-        command=lambda: actions.online_login(email.get(), password.get()),
+        command=lambda: actions.online_login(
+            email.get(), password.get(), remember=bool(remember.get())
+        ),
     ).pack(side="left", padx=(0, 10))
     ctk.CTkButton(
         controls, text="Criar conta", width=140,
@@ -83,7 +99,11 @@ def render_account(parent, actions, status):
     ).pack(side="left")
     ctk.CTkLabel(
         parent,
-        text="A senha é usada apenas para autenticação HTTPS; não é salva no SQLite.",
+        text=(
+            "Lembrar de mim usa o cofre seguro do sistema. "
+            "Sua senha nunca é armazenada; a sessão é renovada automaticamente. "
+            "Sair da conta remove a sessão salva."
+        ),
         text_color=theme.MUTED, wraplength=650,
     ).pack(anchor="w", padx=20, pady=8)
     ctk.CTkButton(
