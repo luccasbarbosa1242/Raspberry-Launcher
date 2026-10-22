@@ -70,12 +70,19 @@ class SupabaseClient:
             "email": email, "password": password,
             "data": {"display_name": display_name},
         })
-        if not isinstance(result, dict) or not result.get("user"):
-            raise OnlineError("Cadastro não confirmado pelo serviço de contas.")
+        # Raw GoTrue /signup has two legitimate shapes:
+        # Confirmation required -> User object at the top level (no session);
+        # Confirmation disabled -> session with nested "user" and tokens.
+        # Supabase SDKs normalize these differently from the raw REST API.
+        if not isinstance(result, dict):
+            raise OnlineError("Resposta de cadastro inválida do serviço de contas.")
         if result.get("access_token"):
             self._accept_session(result)
             return True
-        return False  # Typical: confirm e-mail, then sign in.
+        user = result.get("user", result)
+        if not isinstance(user, dict) or not _USER_ID.fullmatch(str(user.get("id", ""))):
+            raise OnlineError("Resposta de cadastro inválida do serviço de contas.")
+        return False  # Email confirmation still required; no login session.
 
     def login(self, email, password):
         result = self._request(
