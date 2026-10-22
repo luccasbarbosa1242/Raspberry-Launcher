@@ -88,6 +88,7 @@ class LauncherService:
             configured=self.online.enabled,
             account=self.online.account(),
             pending_events=self.online.pending_count(),
+            sync_error=self.online.last_error,
         )
 
     def online_signup(self, email, password, display_name):
