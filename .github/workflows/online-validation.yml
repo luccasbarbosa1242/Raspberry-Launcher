@@ -13,7 +13,24 @@ jobs:
   online-validation:
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: local_ci_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
     env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: local_ci_only
+      PGDATABASE: postgres
       PYTHONPYCACHEPREFIX: /tmp/raspberry-pycache-online
       RASPBERRY_LAUNCHER_HOME: /tmp/raspberry-online-ci-runtime
     steps:
@@ -25,7 +42,7 @@ jobs:
       - name: Install Tk and Xvfb
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y xvfb xauth python3-tk
+          sudo apt-get install -y xvfb xauth python3-tk postgresql-client
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -35,6 +52,11 @@ jobs:
         run: |
           python -m compileall -q backend frontend application contracts tests main.py
           ruff check .
+      - name: Execute PostgreSQL security and RPC smoke tests
+        run: |
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/bootstrap.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/schema.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/rls_smoke.sql
       - name: Full suite (real CustomTkinter)
         run: xvfb-run -a python -m unittest discover -s tests -v
       - name: Rehearse point and restore in fresh folders
