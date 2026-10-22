@@ -1,4 +1,4 @@
-"""Optional hosted Supabase Auth + PostgREST client; never stores passwords/tokens.
+"""Optional Supabase Auth + PostgREST client; passwords are never persisted.
 
 All database writes continue to land in local SQLite first. An immutable
 outbox makes retries idempotent. Remote operations require a signed-in user.
@@ -17,6 +17,7 @@ from urllib.request import Request, urlopen
 from backend.database.database import Database, scoped
 from backend.online_defaults import PROJECT_URL, PUBLISHABLE_KEY
 from backend.profiles import ProfileService
+from backend.secure_session import SessionVault, VaultUnavailable
 from contracts.models import OnlineAccount
 
 _USER_ID = re.compile(r"^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$", re.I)
@@ -24,6 +25,10 @@ _USER_ID = re.compile(r"^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$", re.I)
 
 class OnlineError(Exception):
     """Safe, user-facing error; never contains a token or password."""
+
+
+class OnlineAuthError(OnlineError):
+    """Auth rejected saved credentials (as opposed to a connectivity failure)."""
 
 
 class SupabaseClient:
@@ -39,6 +44,7 @@ class SupabaseClient:
         self._session = None
         self._expires_at = 0.0
         self._lock = threading.RLock()
+        self.on_refresh = None
 
     def _request(self, method, path, payload=None, *, token=None):
         headers = {"apikey": self.key, "Accept": "application/json"}
@@ -56,7 +62,7 @@ class SupabaseClient:
             return json.loads(data.decode("utf-8")) if data else None
         except HTTPError as error:
             if error.code in (400, 401, 403):
-                raise OnlineError("Credenciais inválidas, confirmação de e-mail pendente ou sessão expirada.") from None
+                raise OnlineAuthError("Credenciais inválidas, confirmação de e-mail pendente ou sessão expirada.") from None
             if error.code == 429:
                 raise OnlineError("Muitas tentativas. Tente novamente mais tarde.") from None
             raise OnlineError("O serviço de contas não pôde concluir a solicitação.") from None
@@ -92,6 +98,19 @@ class SupabaseClient:
         self._accept_session(result)
         return self.account()
 
+    def restore(self, refresh_token):
+        """Exchange a saved refresh token; never put it in a client-side file."""
+        result = self._request(
+            "POST", "/auth/v1/token?grant_type=refresh_token",
+            {"refresh_token": refresh_token},
+        )
+        self._accept_session(result)
+        return self.account()
+
+    def refresh_token(self):
+        with self._lock:
+            return self._session["refresh_token"] if self._session else None
+
     def _accept_session(self, result):
         if not isinstance(result, dict) or not isinstance(result.get("user"), dict):
             raise OnlineError("A autenticação não retornou uma identidade válida.")
@@ -103,6 +122,9 @@ class SupabaseClient:
         with self._lock:
             self._session = result
             self._expires_at = time.monotonic() + max(0, int(result.get("expires_in", 3600)) - 60)
+            listener = self.on_refresh
+        if listener is not None:
+            listener(result["refresh_token"])
 
     def account(self):
         with self._lock:
@@ -173,7 +195,7 @@ class SupabaseClient:
 class OnlineService:
     """Coordinates a cloud identity with its own persistent local profile."""
 
-    def __init__(self, client=None):
+    def __init__(self, client=None, vault=None):
         url = os.environ.get("RASPBERRY_SUPABASE_URL", PROJECT_URL)
         key = os.environ.get("RASPBERRY_SUPABASE_PUBLISHABLE_KEY", PUBLISHABLE_KEY)
         disabled = os.environ.get("RASPBERRY_ONLINE_DISABLED", "").lower() in ("1", "true", "yes")
@@ -182,6 +204,15 @@ class OnlineService:
         )
         self._sync_lock = threading.RLock()
         self.last_error = None
+        self.session_notice = None
+        self._remember = False
+        self.remembered_email = ""
+        self.vault = vault if vault is not None else (
+            SessionVault(self.client.base_url) if self.client and isinstance(self.client, SupabaseClient)
+            else None
+        )
+        if self.client is not None and hasattr(self.client, "on_refresh"):
+            self.client.on_refresh = self._save_rotated_token
 
     @property
     def enabled(self):
@@ -214,16 +245,90 @@ class OnlineService:
             self.sync()
         return complete
 
-    def login(self, email, password):
+    def login(self, email, password, remember=False):
         with self._sync_lock:
-            return self._login_locked(email, password)
+            return self._login_locked(email, password, remember)
 
-    def _login_locked(self, email, password):
+    def _save_rotated_token(self, token):
+        if self._remember and self.vault:
+            try:
+                self.vault.update_token(token)
+            except VaultUnavailable as error:
+                self.session_notice = str(error)
+                self._remember = False
+
+    def restore_session(self):
+        """Automatically sign in only with explicit previously saved consent."""
+        self._require_config()
+        with self._sync_lock:
+            if self.account():
+                return True
+            if not self.vault:
+                return False
+            try:
+                email, token = self.vault.load()
+            except VaultUnavailable as error:
+                self.session_notice = str(error)
+                return False
+            self.remembered_email = email
+            if not email or not token:
+                return False
+            try:
+                account = self.client.restore(token)
+            except OnlineAuthError:
+                # Revoked / invalid token: keep the e-mail but require password.
+                self._remember = False
+                self.vault.clear(keep_email=True)
+                self.session_notice = "Sua sessão expirou. Entre novamente."
+                return False
+            except OnlineError as error:
+                # Network failure must NOT delete a refresh token.
+                self.session_notice = str(error)
+                return False
+            if account.email.casefold() != email.casefold():
+                self.client.logout()
+                self.vault.clear()
+                self.remembered_email = ""
+                self.session_notice = "A conta salva não corresponde à sessão recuperada."
+                return False
+            self._remember = True
+            self._save_rotated_token(self.client.refresh_token())
+            self._ensure_profile()
+            try:
+                self.sync()
+            except OnlineError as error:
+                self.last_error = str(error)
+            return True
+
+    def _login_locked(self, email, password, remember=False):
         self._require_config()
         if not email.strip() or not password:
             raise ValueError("Informe e-mail e senha.")
+        self._remember = False
+        self.session_notice = None
         account = self.client.login(email.strip(), password)
         self._ensure_profile()
+        if remember:
+            if not self.vault:
+                self.session_notice = "Cofre seguro indisponível. Será necessário entrar novamente."
+            else:
+                try:
+                    self.vault.save(account.email, self.client.refresh_token())
+                    self._remember = True
+                    self.remembered_email = account.email
+                except VaultUnavailable as error:
+                    self.session_notice = str(error)
+                    try:
+                        self.vault.clear()
+                    except VaultUnavailable:
+                        pass
+        else:
+            self.remembered_email = ""
+            if self.vault:
+                try:
+                    self.vault.clear()
+                except VaultUnavailable as error:
+                    self.session_notice = str(error)
         # Fetch+flush failures never invalidate valid credentials or local data.
         try:
             self.sync()
@@ -262,6 +367,16 @@ class OnlineService:
 
     def logout(self):
         with self._sync_lock:
+            # Clear the local credential first: even if remote logout has no
+            # network access, this device must never sign back in automatically.
+            self._remember = False
+            self.remembered_email = ""
+            self.session_notice = None
+            if self.vault:
+                try:
+                    self.vault.clear()
+                except VaultUnavailable as error:
+                    self.session_notice = str(error)
             if self.client:
                 self.client.logout()
             ProfileService().select("default")
