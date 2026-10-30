@@ -78,15 +78,26 @@ def render_settings(parent, actions=None, preferences=None, online=None):
     )
     theme_menu.set(preferences.theme)
     theme_menu.pack(anchor="w", padx=20)
-    ctk.CTkLabel(parent, text=f"Volume de música (preferência): {preferences.music_volume}%",
-                 text_color=theme.MUTED).pack(anchor="w", padx=20, pady=(20, 2))
-    ctk.CTkSlider(
-        parent, from_=0, to=100, number_of_steps=100,
-        command=lambda value: actions.update_profile_preferences(music_volume=int(value)),
-    ).pack(fill="x", padx=20, pady=10)
-    slider = parent.winfo_children()[-1]
-    slider.set(preferences.music_volume)
     ctk.CTkLabel(
-        parent, text="Esta opção salva uma preferência, sem controlar o volume do sistema.",
+        parent,
+        text="Brilho da interface",
+        font=("Arial", 16, "bold"),
+    ).pack(anchor="w", padx=20, pady=(20, 5))
+
+    brightness_slider = ctk.CTkSlider(
+        parent,
+        from_=0,
+        to=100,
+        number_of_steps=100,
+        command=lambda value: actions.update_profile_preferences(
+            brightness=int(value)
+        ),
+    )
+    brightness_slider.pack(fill="x", padx=20, pady=10)
+    brightness_slider.set(preferences.brightness)
+
+    ctk.CTkLabel(
+        parent,
+        text="Ajusta a aparência visual do launcher, sem alterar o brilho do monitor.",
         text_color=theme.MUTED,
     ).pack(anchor="w", padx=20, pady=5)

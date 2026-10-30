@@ -29,3 +29,55 @@ BANNER_SHADE_DARK = (11, 15, 26)
 CARD_WIDTH = 230
 CARD_HEIGHT = 420
 COVER_SIZE = (160, 220)
+
+def _adjust_hex_color(color, brightness, is_text=False):
+    """Adjust a hexadecimal color while preserving text readability."""
+    if not isinstance(color, str) or not color.startswith("#"):
+        return color
+
+    if len(color) != 7:
+        return color
+
+    try:
+        rgb = tuple(
+            int(color[index:index + 2], 16)
+            for index in (1, 3, 5)
+        )
+    except ValueError:
+        return color
+
+    factor = brightness / 100
+
+    if is_text:
+        # Lower brightness makes text lighter for better contrast.
+        adjusted = tuple(
+            round(value + (255 - value) * (1 - factor))
+            for value in rgb
+        )
+    else:
+        # Lower brightness darkens interface surfaces.
+        adjusted = tuple(
+            round(value * factor)
+            for value in rgb
+        )
+
+    return "#{:02X}{:02X}{:02X}".format(*adjusted)
+
+
+def adjust_color(color, brightness, option=None):
+    """Adjust a widget color without changing its original value."""
+    if color is None or color == "transparent":
+        return color
+
+    is_text = option == "text_color"
+
+    if isinstance(color, tuple):
+        return tuple(
+            _adjust_hex_color(item, brightness, is_text)
+            for item in color
+        )
+
+    if isinstance(color, str):
+        return _adjust_hex_color(color, brightness, is_text)
+
+    return color

@@ -114,17 +114,18 @@ class ProfileService:
         self._require(selected)
         db = Database()
         row = db.connection.execute(
-            "SELECT theme,music_volume FROM profile_preferences WHERE profile_id=?",
+            "SELECT theme,music_volume,brightness FROM profile_preferences WHERE profile_id=?",
             (selected,),
         ).fetchone()
         return ProfilePreferences(
-            self.list_profiles(), selected,
-            row["theme"] if row else "dark",
-            int(row["music_volume"]) if row else 50,
-        )
+        self.list_profiles(), selected,
+         row["theme"] if row else "dark",
+         int(row["music_volume"]) if row else 50,
+        int(row["brightness"]) if row else 100,
+)
 
     @scoped
-    def update_preferences(self, *, theme=None, music_volume=None, profile_id=None):
+    def update_preferences(self, *, theme=None, music_volume=None, brightness=None, profile_id=None):
         selected = self.resolved_id(profile_id)
         self._require(selected)
         if theme is not None and theme not in ("dark", "light", "system"):
@@ -132,7 +133,12 @@ class ProfileService:
         if music_volume is not None and (
             type(music_volume) is not int or not 0 <= music_volume <= 100
         ):
-            raise ValueError("O volume deve estar entre 0 e 100.")
+
+            if brightness is not None and (
+    type(brightness) is not int or not 0 <= brightness <= 100
+):
+             raise ValueError("O brilho deve estar entre 0 e 100.")
+            
         db = Database()
         with db.connection:
             db.connection.execute(
@@ -149,15 +155,23 @@ class ProfileService:
                     "UPDATE profile_preferences SET music_volume=? WHERE profile_id=?",
                     (music_volume, selected),
                 )
-            if theme is not None or music_volume is not None:
+
+                if brightness is not None:
+                  db.connection.execute(
+        "UPDATE profile_preferences SET brightness=? WHERE profile_id=?",
+        (brightness, selected),
+    )
+            if theme is not None or music_volume is not None or brightness is not None:
                 data = {}
                 if theme is not None:
                     data["theme"] = theme
                 if music_volume is not None:
                     data["music_volume"] = music_volume
                 self._queue_event(db.connection, selected, "preferences", None, data)
+                if brightness is not None:
+                 data["brightness"] = brightness
         return self.settings(selected)
-
+ 
     @scoped
     def _ensure_game(self, connection, profile_id, game_id):
         self._require(profile_id)

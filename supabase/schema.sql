@@ -14,8 +14,13 @@ create table if not exists public.launcher_game_stats (
 create table if not exists public.launcher_preferences (
   user_id uuid primary key references auth.users(id) on delete cascade,
   theme text not null default 'dark' check (theme in ('dark', 'light', 'system')),
-  music_volume integer not null default 50 check (music_volume between 0 and 100)
+  music_volume integer not null default 50 check (music_volume between 0 and 100),
+  brightness integer not null default 100 check (brightness between 0 and 100)
 );
+
+alter table public.launcher_preferences
+add column if not exists brightness integer not null default 100
+check (brightness between 0 and 100);
 
 create table if not exists public.launcher_event_receipts (
   user_id uuid not null references auth.users(id) on delete cascade,

@@ -35,6 +35,7 @@ from contracts.models import (
 )
 
 
+
 class LauncherService:
     def __init__(self):
         self.profiles = ProfileService()
@@ -68,8 +69,15 @@ class LauncherService:
                 raise PermissionError("Faça login para acessar esta conta online.")
         self.profiles.select(profile_id)
 
-    def update_profile_preferences(self, *, theme=None, music_volume=None, profile_id=None):
-        return self.profiles.update_preferences(theme=theme, music_volume=music_volume, profile_id=profile_id)
+    def update_profile_preferences(
+        self, *, theme=None, music_volume=None, brightness=None, profile_id=None
+    ):
+        return self.profiles.update_preferences(
+            theme=theme,
+            music_volume=music_volume,
+            brightness=brightness,
+            profile_id=profile_id,
+        )
 
     def active_profile_id(self):
         return self.profiles.active_id()

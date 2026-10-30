@@ -68,6 +68,8 @@ class LauncherController:
                 lambda: self.backend.list_games(CATALOG_PAGES[page]),
                 lambda games: self.view.show_catalog(page, games),
             )
+
+            
         elif page in PLATFORM_PAGES:
             self.view.show_loading()
             self._query(lambda: self.backend.platform(page), self.view.show_platform)
@@ -84,6 +86,26 @@ class LauncherController:
                 self.view.show_account(self.backend.online_status())
             else:
                 self.view.show_placeholder(page)
+
+    def update_profile_preferences(
+        self, *, theme=None, music_volume=None, brightness=None
+    ):
+        try:
+            preferences = self.backend.update_profile_preferences(
+                theme=theme,
+                music_volume=music_volume,
+                brightness=brightness,
+                profile_id=self.backend.active_profile_id(),
+            )
+
+            if theme is not None:
+                self.view.show_settings(preferences)
+
+            if brightness is not None:
+                self.view.apply_brightness(preferences.brightness)
+
+        except (LookupError, ValueError) as error:
+            self.view.show_error(str(error))
 
     def open_game(self, game_id):
         self.route = ("game", game_id)
@@ -391,16 +413,25 @@ class LauncherController:
         self.view.apply_theme(self.backend.profile_settings().theme)
         self._refresh()
 
-    def update_profile_preferences(self, *, theme=None, music_volume=None):
-        try:
-            preferences = self.backend.update_profile_preferences(
-                theme=theme, music_volume=music_volume,
-                profile_id=self.backend.active_profile_id(),
-            )
-            if theme is not None:
-                self.view.show_settings(preferences)
-        except (LookupError, ValueError) as error:
-            self.view.show_error(str(error))
+def update_profile_preferences(
+    self, *, theme=None, music_volume=None, brightness=None
+):
+    try:
+        preferences = self.backend.update_profile_preferences(
+            theme=theme,
+            music_volume=music_volume,
+            brightness=brightness,
+            profile_id=self.backend.active_profile_id(),
+        )
+
+        if theme is not None:
+            self.view.show_settings(preferences)
+
+        if brightness is not None:
+            self.view.apply_brightness(preferences.brightness)
+
+    except (LookupError, ValueError) as error:
+        self.view.show_error(str(error))
 
     def close(self):
         if not self._closed:

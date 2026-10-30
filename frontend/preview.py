@@ -125,8 +125,10 @@ class PreviewActions:
     def select_profile(self, profile_id):
         self._notice()
 
-    def update_profile_preferences(self, *, theme=None, music_volume=None):
-        self._notice()
+    def update_profile_preferences(
+    self, *, theme=None, music_volume=None, brightness=None
+):
+      self._notice()
 
     def online_login(self, email, password, remember=False):
         self._notice()
