@@ -14,6 +14,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
+
 from backend.database.database import Database, scoped
 from backend.online_defaults import PROJECT_URL, PUBLISHABLE_KEY
 from backend.profiles import ProfileService
@@ -173,11 +174,16 @@ class SupabaseClient:
             if len(page) < 500:
                 return result
             offset += 500
-
-    def snapshot(self):
-        return (
-            self._rows("launcher_game_stats", "game_id,favorite,play_time,last_played"),
-            self._rows("launcher_preferences", "theme,music_volume"),
+            def snapshot(self):
+              return (
+            self._rows(
+                "launcher_game_stats",
+                "game_id,favorite,play_time,last_played",
+            ),
+            self._rows(
+                "launcher_preferences",
+                "theme,music_volume,brightness",
+            ),
         )
 
     def logout(self):
@@ -452,23 +458,8 @@ class OnlineService:
                         (profile_id, game_id, int(bool(row.get("favorite"))),
                          max(0, int(row.get("play_time") or 0)), row.get("last_played")),
                     )
-                if preferences and not pending_preferences:
-                    pref = preferences[0]
-                    theme = pref.get("theme")
-                    volume = pref.get("music_volume")
-                    if theme in ("dark", "light", "system") and type(volume) is int and 0 <= volume <= 100:
-                        db.connection.execute(
-                            """UPDATE profile_preferences SET theme=?,music_volume=?
-                               WHERE profile_id=?""",
-                            (theme, volume, profile_id),
-                        )
-            self.last_error = None
-            return len(stats)
-
-    def import_local_profile(self, source_id="default", expected_profile_id=None):
-        with self._sync_lock:
-            return self._import_local_locked(source_id, expected_profile_id)
-
+   
+    
     @scoped
     def _import_local_locked(self, source_id, expected_profile_id):
         """Opt-in, once per account+source, preserves the source without moving it."""

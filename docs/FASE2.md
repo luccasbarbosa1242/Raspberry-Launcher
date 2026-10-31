@@ -1,6 +1,6 @@
 # Fase 2 — Perfis locais (T02)
 
-Implementação iniciada sobre `96a283d`, mantendo a instalação e o catálogo globais.
+O **T02** implementou perfis e preferências locais, mantendo a instalação e o catálogo globais. A Fase 2 foi ampliada posteriormente com **contas online, sincronização e Lembrar de mim**; consulte [Contas online](CONTAS_ONLINE.md). Todas as entregas fazem parte da branch principal `main` desde a consolidação das fases.
 
 ## Dados e migração
 
@@ -35,8 +35,7 @@ Só depois execute `python -m backend init` no runtime escolhido.
 
 ## Limites
 
-Os perfis são locais; não há login ou sincronização, saves isolados por
-usuário, controles efetivos de música ou volume, FPS, RGSX ou novo adaptador.
+Esta implementação **T02** é local; o login e a sincronização de favoritos, tempo de jogo, últimas execuções e preferências foram acrescentados na extensão de **contas online** da mesma Fase 2 (veja [Contas online](CONTAS_ONLINE.md)). Ainda não há sincronização de saves, instalações/ROMs, controles efetivos de música ou volume, FPS, RGSX ou novo adaptador.
 A pontuação de jogos mantida em arquivos externos ao SQLite continua
 global. Um processo iniciado para um perfil mantém seu histórico de tempo
 nesse perfil, mesmo quando a seleção da interface muda.
@@ -46,5 +45,4 @@ independente da paleta escura. A troca de tema afeta os widgets já abertos;
 a seleção de outro perfil também aplica seu tema imediatamente. Os contrastes
 de texto e status são validados por teste automatizado (mínimo 4,5:1).
 
-Verifique testes e comportamento gráfico no ambiente com Python, Tk e
-CustomTkinter instalados antes de mesclar esta branch.
+A `main` foi validada com **143 testes automatizados** (incluindo interface e PostgreSQL): [GitHub Actions](https://github.com/luccasbarbosa1242/Raspberry-Launcher/actions/runs/39707210299). Cadastro, confirmação por e-mail, login e Lembrar de mim também foram testados manualmente. A validação entre dois computadores físicos segue pendente.

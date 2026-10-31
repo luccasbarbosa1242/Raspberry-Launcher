@@ -13,7 +13,7 @@ Centralize jogos nativos e ROMs em uma única biblioteca.
 
 ### 📈 Desenvolvimento Geral
 
-> **Fase 1 — T00, T01, T03 e T05 • Cadastros integrados • Interface e Lógica Separadas**
+> **Fases 1 e 2 concluídas • Perfis e contas online disponíveis • Fase 3: Downloads, Emuladores e ROMs em preparação**
 
 <img src="https://img.shields.io/badge/Python-3.x-blue?style=for-the-badge" />
 <img src="https://img.shields.io/badge/CustomTkinter-UI-green?style=for-the-badge" />
@@ -30,7 +30,7 @@ Centralize jogos nativos e ROMs em uma única biblioteca.
 
 # 📖 Sobre o Projeto
 
-O **Launcher PI** é um launcher de jogos desenvolvido em **Python**, utilizando **CustomTkinter** para a interface gráfica e **SQLite** como banco de dados principal.
+O **Launcher PI** é um launcher de jogos desenvolvido em **Python**, utilizando **CustomTkinter** para a interface gráfica e **SQLite** como banco de dados local, com **Supabase Auth + PostgreSQL** para contas online e sincronização opcional de estatísticas.
 
 O projeto foi pensado para centralizar diferentes tipos de jogos em uma única biblioteca, permitindo que o usuário instale, organize e execute seus jogos através de uma interface moderna e intuitiva.
 
@@ -66,13 +66,13 @@ A ideia é que, futuramente, um novo jogo possa ser adicionado apenas cadastrand
 >
 > ## 🔴 PROTEJA OS DADOS ANTES DE MIGRAR
 >
-> A **Fase 1 (T00, T01, T03 e T05)** consolida os cadastros no SQLite e integra os formulários às ferramentas de terminal.
+> A **Fase 1 (T00, T01, T03 e T05)** consolidou os cadastros no SQLite. A **Fase 2** acrescentou perfis locais, preferências persistentes, autenticação e sincronização de contas online.
 >
 > O arquivo **games.py** já está fora da execução. JSONs permanecem para dados iniciais, importação/exportação e descritores de plugins.
 >
 > As migrações preservam os registros existentes; não recrie o banco vazio para atualizar. Jogos HTML/de navegador são arquivados e saem do catálogo ativo. Google Drive e `gdown` continuam disponíveis para downloads.
 >
-> Consulte a [entrega da Fase 1](docs/FASE1.md) e o [procedimento de recuperação](docs/RECUPERACAO.md) antes de alterar os dados.
+> Antes de alterar dados, consulte [Fase 1](docs/FASE1.md), [Fase 2](docs/FASE2.md), [Contas online](docs/CONTAS_ONLINE.md) e [Recuperação](docs/RECUPERACAO.md). A sincronização online **não** faz backup de ROMs, saves ou instalações.
 
 ---
 
@@ -84,7 +84,19 @@ A ideia é que, futuramente, um novo jogo possa ser adicionado apenas cadastrand
 
 # 🔴 Prioridade Máxima
 
-## Banco de Dados — Fase 1
+## Fase 3 — Downloads, Emuladores e ROMs (próxima etapa)
+
+* [x] Base de downloads, instalações, versões e plugins preservada
+* [x] Emuladores e pacotes cadastráveis pelo SQLite
+* [x] Testes automatizados existentes de download, instalação e desinstalação
+* [ ] Verificar pacotes reais por sistema operacional e arquitetura
+* [ ] Completar detecção, instalação e configuração automática dos emuladores
+* [ ] Validar a execução de ROMs ponta a ponta, adaptador por adaptador
+* [ ] Cobrir integridade de downloads, erros, retomadas e compatibilidade real
+
+---
+
+## Banco de Dados — Fase 1 (concluído)
 
 * [x] Estrutura SQLite criada
 * [x] Sistema de migrações
@@ -120,7 +132,7 @@ A ideia é que, futuramente, um novo jogo possa ser adicionado apenas cadastrand
 
 ---
 
-## Emuladores (65%)
+## Emuladores (65% — infraestrutura existente; integração da Fase 3 pendente)
 
 * [x] Arquitetura criada
 * [x] EmulatorManager
@@ -205,20 +217,23 @@ A ideia é que, futuramente, um novo jogo possa ser adicionado apenas cadastrand
 
 ## Configurações
 
-* [ ] Tema claro
-* [ ] Tema escuro
+* [x] Tema claro, escuro e opção de seguir o sistema
+* [x] Preferência de tema persistente por perfil
 * [ ] Música de fundo
-* [ ] Controle de volume
+* [x] Preferência de volume de música (ainda sem reprodução ou controle real do áudio)
 * [ ] Controle de brilho
 
 ---
 
 ## Usuários
 
-* [ ] Perfil de usuário
-* [ ] Estatísticas individuais
-* [ ] Histórico de jogos
-* [ ] Backup de configurações
+* [x] Perfis locais independentes e conta online opcional
+* [x] Favoritos, tempo jogado e histórico recente por perfil
+* [x] Estatísticas e preferências sincronizáveis por conta
+* [x] Cadastro, confirmação de e-mail e login pelo Supabase/Brevo
+* [x] **Lembrar de mim** com cofre seguro do sistema, sem salvar senha
+* [ ] Teste prático de sincronização entre dois computadores físicos
+* [ ] Backup completo dos arquivos e configurações na nuvem
 
 ---
 
@@ -235,7 +250,7 @@ A ideia é que, futuramente, um novo jogo possa ser adicionado apenas cadastrand
 
 * [ ] Sistema de conquistas
 * [ ] Backup em nuvem
-* [ ] Sincronização entre dispositivos
+* [x] Sincronização de estatísticas e preferências implementada (teste físico em dois PCs pendente)
 * [ ] Loja de temas
 * [ ] Sistema de mods
 * [ ] Multiplayer local assistido
@@ -288,6 +303,20 @@ Downloads por Google Drive e `gdown` continuam disponíveis; a retirada se refer
 
 ---
 
+## 👤 Perfis e Contas Online — Fase 2
+
+* Perfis locais com favoritos, tempo jogado, histórico recente e temas independentes
+* Supabase Auth, confirmação de e-mail pelo SMTP Brevo e login real verificados
+* Sincronização manual e automática de estatísticas/preferências, com fila local e reenvio idempotente
+* Importação opcional do histórico do perfil local padrão, sem apagar a origem
+* **Lembrar de mim** com token renovável no cofre do sistema; senha nunca armazenada
+* Instalações, emuladores, ROMs, saves e catálogos continuam locais
+* Testes simulados de múltiplos dispositivos aprovados; teste real entre dois PCs pendente
+
+Documentação: [Fase 2](docs/FASE2.md) e [Contas online](docs/CONTAS_ONLINE.md).
+
+---
+
 ## 🖼️ Assets
 
 * AssetManager
@@ -301,11 +330,11 @@ Downloads por Google Drive e `gdown` continuam disponíveis; a retirada se refer
 
 ---
 
-# 🆕 Atualização — Interface e Lógica Separadas
+# 🆕 Atualizações — Fases 1 e 2
 
-> **Fase 1: base recuperável • Cadastros consolidados • Formulários e CLI compartilhados**
+> **Fase 1: base e cadastros consolidados • Fase 2: perfis, contas e sincronização • Fase 3: preparação**
 
-## ✅ Entregas desta atualização
+## ✅ Entregas da Fase 1 (preservadas)
 
 * [x] **T00:** baseline, backup consistente e restauração em cópia temporária
 * [x] **T01:** cadastros consolidados no banco, com migrações versionadas e instalações locais separadas
@@ -325,6 +354,16 @@ Downloads por Google Drive e `gdown` continuam disponíveis; a retirada se refer
 * [x] Banco SQLite, capas, banners, pontuações e configurações fornecidos preservados
 * [x] Testes de arquitetura, backend, aplicação, downloads, interface e ferramentas administrativas
 
+## ✅ Entregas da Fase 2
+
+* [x] Migrações `012_local_profiles.sql` e `013_online_accounts.sql`, sem apagar dados existentes
+* [x] Favoritos, tempo jogado, histórico recente, preferências e temas por perfil
+* [x] Cadastro e login online com Supabase Auth, PostgreSQL/RLS e e-mail via Brevo
+* [x] Sincronização manual/periódica, fila offline, eventos idempotentes e importação local opcional
+* [x] Sessão persistente opcional com `keyring` e logout explícito
+* [x] 143 testes aprovados no CI da `main`, incluindo interface, PostgreSQL e restauração
+* [ ] Homologar sincronização entre dois computadores físicos
+
 ---
 
 ## 📂 Responsabilidade de Cada Camada
@@ -332,11 +371,12 @@ Downloads por Google Drive e `gdown` continuam disponíveis; a retirada se refer
 | Pasta / Arquivo | Responsabilidade |
 | --------------- | ----------------------- |
 | `frontend/` | Janelas, telas, cards, estilos, imagens renderizadas e estado dos widgets |
-| `backend/` | Regras do programa, SQLite, downloads, instalação, desinstalação, execução e emuladores |
+| `backend/` | Regras do programa, SQLite, perfis, contas online, sincronização, downloads, instalação, desinstalação, execução e emuladores |
 | `application/` | Coordenação das ações, navegação, tarefas em segundo plano e atualização da interface |
 | `contracts/` | Dados e interfaces públicas compartilhados pelas camadas |
 | `main.py` | Inicialização e conexão das implementações concretas |
 | `backend/tools/` | Ferramentas administrativas executadas pelo terminal |
+| `backend/online.py`, `backend/secure_session.py` | Autenticação online, sincronização e sessão protegida no cofre do sistema |
 | `ASSETS/`, `DATA/`, `USERDATA/` | Recursos e dados do projeto |
 
 A interface envia ações com identificadores e recebe dados prontos para exibição. Widgets não são enviados ao backend, e as telas não executam consultas SQL, downloads ou instalações.
@@ -355,62 +395,64 @@ A interface envia ações com identificadores e recebe dados prontos para exibi�
 
 ## ▶️ Execução por Camada
 
-Aplicativo completo, a partir do checkout deste ambiente:
+Na pasta do projeto, com Python 3.12 e as dependências instaladas.
+
+**Linux:**
 
 ```bash
-cd /workspace/Raspberry-Launcher
 python3 -m venv .venv
-.venv/bin/python -m pip install -r requirements.txt
-source /workspace/.launcher-cloud/env.sh
+source .venv/bin/activate
+python -m pip install -r requirements.txt
 python main.py
 ```
 
-O `env.sh` preparado na nuvem ativa o ambiente virtual e direciona os dados para `/workspace/.launcher-cloud/runtime`, preservando o banco fornecido no checkout. Em uma sessão sem tela gráfica, use `xvfb-run -a python main.py`. Em uma instalação local com tela, ative seu ambiente virtual e execute `python main.py`; para escolher outro diretório de dados, defina `RASPBERRY_LAUNCHER_HOME` fora do checkout.
+**Windows (PowerShell):**
 
-Prévia da interface, com dados demonstrativos e sem carregar o backend:
-
-```bash
-cd /workspace/Raspberry-Launcher
-source /workspace/.launcher-cloud/env.sh
-xvfb-run -a python -m frontend.preview
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python main.py
 ```
 
-Backend pelo terminal e cadastros compartilhados:
+Se o PowerShell bloquear a ativação, ajuste a política somente para a sessão atual. Evite misturar o Python do sistema com as dependências do ambiente virtual. Para usar dados separados do checkout, defina `RASPBERRY_LAUNCHER_HOME` para um diretório próprio; **não recrie nem sobrescreva o banco existente**.
+
+Contas online utilizam por padrão a URL HTTPS e a chave pública em `backend/online_defaults.py`. Para usar somente perfis locais, defina `RASPBERRY_ONLINE_DISABLED=1`. A opção **Lembrar de mim** requer um cofre seguro disponível no sistema operacional; nenhuma senha de usuário, chave SMTP ou chave administrativa deve ser armazenada no repositório.
+
+Prévia independente e ferramentas administrativas:
 
 ```bash
-cd /workspace/Raspberry-Launcher
-source /workspace/.launcher-cloud/env.sh
+python -m frontend.preview
 python -m backend --help
 python -m backend list
-python -m backend catalog list game
 python -m backend catalog --help
 ```
 
-Os formulários ficam no grupo **Cadastros** da barra lateral. Cadastrar um emulador ou pacote não implementa seu adaptador nem garante que ele possa executar ROMs. As ferramentas administrativas continuam como módulos, por exemplo `python -m backend.tools.add_game`; exemplos de cadastro e edição estão em [Fase 1](docs/FASE1.md).
+Os formulários ficam no grupo **Cadastros** da barra lateral. Cadastrar um emulador ou pacote não implementa seu adaptador e não garante a execução de ROMs; veja [Fase 1](docs/FASE1.md).
 
-Validação em Linux com tela virtual:
+Validação local no Linux com tela virtual:
 
 ```bash
-cd /workspace/Raspberry-Launcher
-source /workspace/.launcher-cloud/env.sh
 xvfb-run -a python -m unittest discover -s tests -v
 python -m compileall -q backend frontend application contracts tests main.py
 ruff check .
 ```
 
-O `PYTHONPYCACHEPREFIX` ativado pelo `env.sh` mantém caches fora dos arquivos `.pyc` rastreados. Antes de migrar ou editar dados importantes, crie e ensaie um ponto de recuperação conforme [Recuperação](docs/RECUPERACAO.md).
+O CI também verifica a segurança do PostgreSQL 16 e realiza ensaios de recuperação. Antes de migrar dados importantes, consulte [Recuperação](docs/RECUPERACAO.md).
 
 ---
 
 ## 🧪 Validação da Atualização
 
-* [x] Testes de backend, migrações, recuperação, cadastros e interface executados em Linux; resultados atuais em [Validação](docs/VALIDACAO.md)
-* [x] Compilação dos módulos Python e verificação estática aprovadas
-* [x] Histórico da reestruturação: 27 arquivos de dados e recursos comparados byte a byte com o ZIP original; esse registro não substitui os testes atuais da Fase 1
+* [x] **143 testes automatizados** aprovados na `main` ([GitHub Actions](https://github.com/luccasbarbosa1242/Raspberry-Launcher/actions/runs/39707210299))
+* [x] Compilação, Ruff, dependências, segurança/RLS no PostgreSQL 16 e recuperação aprovados
+* [x] Cadastro, confirmação por e-mail via Brevo e login real verificados; **Lembrar de mim** testado no Windows
+* [x] Histórico da reestruturação: 27 arquivos de dados e recursos comparados byte a byte com o ZIP original
+* [ ] Teste de sincronização em dois PCs físicos e validação ponta a ponta dos emuladores/ROMs da Fase 3
 
-Os testes de download utilizaram arquivos locais e transporte HTTP controlado. A disponibilidade de todos os links externos do catálogo não foi validada, e não houve execução em Windows ou de uma ROM real no PCSX2.
+Testes automatizados de sincronização utilizam um servidor simulado determinístico. Os testes de download usam arquivos locais e HTTP controlado; nem todos os links externos ou plataformas foram validados.
 
-Detalhes: [Arquitetura](docs/ARQUITETURA.md), [Análise e mudanças](docs/ANALISE_E_MUDANCAS.md) e [Validação](docs/VALIDACAO.md).
+Detalhes: [Arquitetura](docs/ARQUITETURA.md), [Análise e mudanças](docs/ANALISE_E_MUDANCAS.md), [Fase 2](docs/FASE2.md) e [Contas online](docs/CONTAS_ONLINE.md).
 
 ---
 
@@ -809,7 +851,7 @@ collections
 game_collections
 ```
 
-Os cadastros de pacotes e as instalações locais ficam separados em `emulator_packages`, `emulator_installations`, `game_installations` e `game_version_installations`. Estruturas para perfis e fontes externas estão preparadas, sem implementar esses recursos nesta fase.
+Os cadastros de pacotes e as instalações locais ficam separados em `emulator_packages`, `emulator_installations`, `game_installations` e `game_version_installations`. Perfis locais, contas online e sincronização pessoal foram implementados na Fase 2. A integração de **catálogo externo RGSX** continua planejada para a Fase 4.
 
 ---
 
@@ -934,6 +976,9 @@ Jogo Instalado
 | GitHub          | Hospedagem              |
 | GitHub Releases | Distribuição            |
 | Google Drive    | Distribuição temporária |
+| Supabase Auth + PostgreSQL | Contas online e sincronização pessoal |
+| Brevo SMTP | Confirmação de e-mail do projeto hospedado |
+| `keyring` | Sessão opcional no cofre do sistema |
 
 ---
 
@@ -943,7 +988,7 @@ Jogo Instalado
 | -------------- | --------- |
 | Launcher Base  | ✅ 100%    |
 | Biblioteca     | 🚧 90%    |
-| Banco de Dados | ✅ Cadastros consolidados na Fase 1 |
+| Banco de Dados | ✅ Cadastros da Fase 1 e perfis/migrações da Fase 2 |
 | Assets         | 🚧 90%    |
 | Downloads      | ✅ 90%     |
 | Jogos HTML/navegador | ✅ Retirados; histórico arquivado |
@@ -953,7 +998,11 @@ Jogo Instalado
 | Interface      | 🚧 80%    |
 | Separação UI / Backend | ✅ 100% |
 | CLI e Prévia de UI | ✅ 100% |
-| Testes desta atualização | Resultados em [Validação](docs/VALIDACAO.md) |
+| Perfis e preferências — Fase 2 | ✅ Implementados |
+| Contas online — Fase 2 | ✅ Cadastro, e-mail e login testados |
+| Sincronização — Fase 2 | ✅ Testes automatizados; dois PCs físicos pendentes |
+| Fase 3 — Emuladores/ROMs | ⏳ Próxima etapa; integração completa pendente |
+| Testes da `main` | ✅ 143 aprovados ([CI](https://github.com/luccasbarbosa1242/Raspberry-Launcher/actions/runs/39707210299)) |
 
 ---
 
@@ -964,7 +1013,7 @@ Launcher Base         ██████████ 100%
 
 Biblioteca            █████████░  90%
 
-Banco de Dados        cadastros consolidados (Fase 1)
+Banco de Dados        cadastros e perfis persistentes (Fases 1 e 2)
 
 Assets                █████████░  90%
 
@@ -983,6 +1032,10 @@ Interface             ████████░░  80%
 Separação UI/Backend  ██████████ 100%
 
 CLI / Prévia de UI    ██████████ 100%
+
+Perfis e contas online entregues (Fase 2)
+Sincronização          implementada; teste entre 2 PCs pendente
+Fase 3                próxima: downloads, emuladores e ROMs
 ```
 
 ---
@@ -1057,19 +1110,27 @@ CLI / Prévia de UI    ██████████ 100%
 
 ---
 
+### Perfis e Contas Online — Fase 2
+
+* [x] Perfis locais, favoritos, estatísticas e temas por usuário
+* [x] Supabase Auth, confirmação de e-mail via Brevo e login real
+* [x] Sincronização pessoal, fila offline e importação opcional de dados locais
+* [x] **Lembrar de mim** seguro, renovação de sessão e logout explícito
+* [x] 143 testes automatizados aprovados
+* [ ] Homologação de sincronização em dois computadores físicos
+
+---
+
 ## 🚧 Em Desenvolvimento
 
-### Banco de Dados — Fase 1
+### Downloads e Compatibilidade — Fase 3
 
-* [x] Migrações sem apagar banco
-* [x] Cadastro de jogos
-* [x] Atualização de jogos
-* [x] Remoção de jogos
-* [x] Cadastro de assets
-* [x] Sistema de versões
-* [x] Plataformas no banco
-* [x] Emuladores e pacotes no banco
-* [x] `games.py` fora da execução
+* [x] Estrutura de versões, pacotes e instalações locais separadas
+* [x] Downloads e instalação/desinstalação de jogos nativos existentes
+* [ ] Validar integridade, retomada e recuperação de erros de download
+* [ ] Finalizar pacotes de emuladores por SO e arquitetura
+* [ ] Validar execução real de ROMs por adaptador
+* [ ] Testar detecção, configuração e plataformas sem suporte
 
 ---
 
@@ -1135,9 +1196,9 @@ CLI / Prévia de UI    ██████████ 100%
 
 ### Interface
 
-* [ ] Sistema de temas
-* [ ] Tema escuro
-* [ ] Tema claro
+* [x] Seleção do tema por perfil
+* [x] Tema escuro
+* [x] Tema claro
 * [ ] Animações
 * [ ] Melhor feedback visual
 * [ ] Melhorias de performance
@@ -1146,7 +1207,7 @@ CLI / Prévia de UI    ██████████ 100%
 
 ### Configurações
 
-* [ ] Tema
+* [x] Tema persistente por perfil
 * [ ] Idioma
 * [ ] Pasta padrão
 * [ ] Backup
@@ -1167,11 +1228,11 @@ CLI / Prévia de UI    ██████████ 100%
 
 ### Futuro
 
-* [ ] Perfil de usuário
+* [x] Perfis locais e conta online
 * [ ] Conquistas
-* [ ] Estatísticas
-* [ ] Backup em nuvem
-* [ ] Sincronização entre dispositivos
+* [x] Estatísticas pessoais
+* [ ] Backup em nuvem de ROMs, saves, instalações e outros arquivos
+* [x] Sincronização de estatísticas e preferências implementada (teste físico em dois PCs pendente)
 * [ ] API pública
 * [ ] Marketplace de plugins
 * [ ] Marketplace de temas
@@ -1182,7 +1243,7 @@ CLI / Prévia de UI    ██████████ 100%
 
 ## Fase 1 — Base, Cadastros e Jogos Suportados
 
-A fase atual reúne **T00, T01, T03 e T05** sobre a arquitetura modular já existente.
+A Fase 1 foi concluída com **T00, T01, T03 e T05** sobre a arquitetura modular já existente.
 
 Principais entregas:
 
@@ -1197,21 +1258,21 @@ Escopo, migrações e evidências: [Fase 1](docs/FASE1.md).
 
 ---
 
-## Fase 2 — Perfis e Configurações (Planejada)
+## ✅ Fase 2 — Perfis, Configurações e Contas Online (Concluída)
 
-Seleção de perfis e preferências persistentes são etapas futuras. A Fase 1 prepara apenas as estruturas e contratos necessários, sem implementar perfis completos.
+Perfis locais, preferências, favoritos e tempo jogado por usuário; autenticação Supabase com confirmação por Brevo; sincronização pessoal com fila local; importação opcional; e **Lembrar de mim** seguro. Cadastro e login foram testados na prática e 143 testes passaram no CI da `main`. **Pendente:** sincronização entre dois computadores físicos. Consulte [Fase 2](docs/FASE2.md) e [Contas online](docs/CONTAS_ONLINE.md).
 
 ---
 
-## Fase 3 — Downloads, Emuladores e ROMs (Planejada)
+## 🚧 Fase 3 — Downloads, Emuladores e ROMs (Próxima etapa)
 
-Ampliar a instalação e execução por sistema operacional, arquitetura e adaptador, validando uma plataforma por vez. Os fluxos nativos e de ROMs já existentes são preservados na Fase 1.
+Aprimorar e validar downloads, pacotes reais, instalação, configuração e execução de emuladores por sistema e arquitetura, com testes ponta a ponta de ROMs por adaptador. A existência de um cadastro não significa que o emulador já seja compatível.
 
 ---
 
 ## Fase 4 — Integração RGSX (Planejada)
 
-Catálogo externo, sincronização e ligação com downloads/ROMs ficam para a etapa própria. Nenhuma integração RGSX é implementada na Fase 1.
+A integração e sincronização do **catálogo externo RGSX** permanecem planejadas para a Fase 4; a sincronização **de contas e estatísticas pessoais** já faz parte da Fase 2.
 
 ---
 
@@ -1677,7 +1738,7 @@ O projeto foi planejado para que praticamente todo o conteúdo seja controlado p
 
 ## ✅ Fase 1 — Base, Cadastros e Jogos Suportados
 
-A entrega atual abrange **T00, T01, T03 e T05**:
+A entrega concluída abrange **T00, T01, T03 e T05**:
 
 * recuperação consistente e restauração ensaiada;
 * migrações seguras e cadastros consolidados no banco;
@@ -1689,21 +1750,21 @@ A ausência de `games.py` na execução já estava resolvida e foi preservada. C
 
 ---
 
-## ⏳ Fase 2 — Perfis e Configurações Persistentes
+## ✅ Fase 2 — Perfis, Configurações e Contas Online
 
-Perfis locais, estado pessoal e preferências serão implementados em uma etapa posterior. A Fase 1 prepara o modelo e os contratos.
+Perfis locais, preferências persistentes e autenticação Supabase/Brevo concluídos. A sincronização de favoritos, tempo e tema e o **Lembrar de mim** estão implementados. O teste entre dois computadores físicos permanece pendente. Consulte [Fase 2](docs/FASE2.md) e [Contas online](docs/CONTAS_ONLINE.md).
 
 ---
 
-## ⏳ Fase 3 — Downloads, Emuladores e ROMs
+## 🚧 Fase 3 — Downloads, Emuladores e ROMs (Próxima etapa)
 
-Completar o fluxo de instalação e execução por SO, arquitetura e adaptador, sem tratar todo emulador cadastrado como automaticamente compatível.
+Completar os fluxos de download, integridade, instalação, configuração e execução por SO, arquitetura e adaptador. Testar cada plataforma real antes de considerá-la suportada.
 
 ---
 
 ## 🚀 Fase 4 — Integração RGSX
 
-Consultar e sincronizar um catálogo externo; conectar downloads e ROMs apenas nas plataformas suportadas. Biblioteca ampliada, estatísticas, versões, temas, música, conquistas e controles do sistema continuam nas fases futuras do plano.
+Consultar e sincronizar o catálogo externo RGSX, conectando downloads/ROMs apenas nas plataformas suportadas. Perfis, estatísticas pessoais e temas básicos já foram entregues na Fase 2; música efetiva, conquistas, biblioteca ampliada e controles do sistema seguem planejados.
 
 ---
 

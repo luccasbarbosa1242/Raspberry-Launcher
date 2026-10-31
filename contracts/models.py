@@ -110,6 +110,7 @@ class ProfilePreferences:
     active_profile_id: str
     theme: str
     music_volume: int
+    brightness: int = 100
 
 
 @dataclass(frozen=True)
