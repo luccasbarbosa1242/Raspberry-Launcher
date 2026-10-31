@@ -1,83 +1,56 @@
-"""Visual tokens with CustomTkinter light/dark color pairs.
+"""RaspberryLC visual tokens (light, dark) — no business logic here."""
+BG = ("#F6EFFB", "#13051D")
+PAGE = ("#FBF7FE", "#170720")
+CARD = ("#FFFFFF", "#26112F")
+CARD_ALT = ("#F5E8FB", "#341542")
+CARD_SOFT = ("#FFF9FF", "#220E2D")
+BORDER = ("#E0BEEB", "#8B429E")
+SIDEBAR = ("#F3E8F7", "#170720")
+FOOTER = ("#EFE2F7", "#1B0B25")
+POPUP = ("#FFFFFF", "#2B1637")
+HOVER = ("#F1D9F8", "#462054")
+MUTED = ("#6A5A74", "#CFB6DB")
+TEXT = ("#211026", "#FFFFFF")
+SUBTEXT = ("#665574", "#E3CCE8")
+PINK = ("#E82A8C", "#EF2A8F")
+PINK_HOVER = ("#CF1B77", "#D81E7C")
+PURPLE = ("#9340E4", "#953DE7")
+PURPLE_HOVER = ("#7E2CD2", "#A550F1")
+ERROR = ("#B42318", "#FF9D9D")
+DANGER = ("#A72552", "#962547")
+DANGER_HOVER = ("#8E1A43", "#AA315A")
+STATUS_ROM = ("#6D3BB6", "#C58BFF")
+STATUS_INSTALLED = ("#1F8B4C", "#50E58E")
+STATUS_MISSING = ("#8355D2", "#C58BFF")
+EMULATOR_ACTION = PURPLE
+EMULATOR_HOVER = PURPLE_HOVER
+IMAGE_FALLBACK = "#54306A"
+BANNER_SHADE_LIGHT = (248, 245, 252)
+BANNER_SHADE_DARK = (19, 5, 29)
+CARD_WIDTH = 244
+CARD_HEIGHT = 258
+COVER_SIZE = (230, 110)
+SIDEBAR_WIDTH = 248
+FONT = "Segoe UI"
 
-Every tuple is ordered (light, dark). Keep opaque colors in this module instead
-of painting permanently dark backgrounds in individual widget constructors.
-"""
-
-BG = ("#EFF3F8", "#0b0f1a")
-PAGE = ("#F6F8FC", "#0d111c")
-CARD = ("#FFFFFF", "#181c2b")
-BORDER = ("#D6DFEA", "#2A3247")
-SIDEBAR = ("#E7EDF5", "#141726")
-FOOTER = ("#DCE5F0", "#1b2033")
-POPUP = ("#FFFFFF", "#131620")
-HOVER = ("#CBD9EA", "#2b3150")
-MUTED = ("#4A5B71", "#8a90aa")
-TEXT = ("#182338", "#d7dcec")
-ERROR = ("#B42318", "#ffaaaa")
-DANGER = ("#B42318", "#7a2929")
-DANGER_HOVER = ("#98241C", "#8f3333")
-STATUS_ROM = ("#6536A5", "#9b7cff")
-STATUS_INSTALLED = ("#176438", "#5bc77b")
-STATUS_MISSING = ("#805200", "#d6a84f")
-EMULATOR_ACTION = ("#622CBF", "#7C3AED")
-EMULATOR_HOVER = ("#5324A0", "#8B5CF6")
-IMAGE_FALLBACK = "#A7B4C7"
-BANNER_SHADE_LIGHT = (246, 248, 252)
-BANNER_SHADE_DARK = (11, 15, 26)
-
-CARD_WIDTH = 230
-CARD_HEIGHT = 420
-COVER_SIZE = (160, 220)
 
 def _adjust_hex_color(color, brightness, is_text=False):
-    """Adjust a hexadecimal color while preserving text readability."""
-    if not isinstance(color, str) or not color.startswith("#"):
+    if not isinstance(color, str) or len(color) != 7 or not color.startswith("#"):
         return color
-
-    if len(color) != 7:
-        return color
-
     try:
-        rgb = tuple(
-            int(color[index:index + 2], 16)
-            for index in (1, 3, 5)
-        )
+        rgb = tuple(int(color[n:n + 2], 16) for n in (1, 3, 5))
     except ValueError:
         return color
-
-    factor = brightness / 100
-
-    if is_text:
-        # Lower brightness makes text lighter for better contrast.
-        adjusted = tuple(
-            round(value + (255 - value) * (1 - factor))
-            for value in rgb
-        )
-    else:
-        # Lower brightness darkens interface surfaces.
-        adjusted = tuple(
-            round(value * factor)
-            for value in rgb
-        )
-
-    return "#{:02X}{:02X}{:02X}".format(*adjusted)
+    k = max(0, min(100, brightness)) / 100
+    rgb = (tuple(round(v + (255 - v) * (1 - k)) for v in rgb)
+           if is_text else tuple(round(v * k) for v in rgb))
+    return "#{:02X}{:02X}{:02X}".format(*rgb)
 
 
 def adjust_color(color, brightness, option=None):
-    """Adjust a widget color without changing its original value."""
+    """Keep the existing brightness behavior without changing its public API."""
     if color is None or color == "transparent":
         return color
-
-    is_text = option == "text_color"
-
     if isinstance(color, tuple):
-        return tuple(
-            _adjust_hex_color(item, brightness, is_text)
-            for item in color
-        )
-
-    if isinstance(color, str):
-        return _adjust_hex_color(color, brightness, is_text)
-
-    return color
+        return tuple(_adjust_hex_color(c, brightness, option == "text_color") for c in color)
+    return _adjust_hex_color(color, brightness, option == "text_color")
