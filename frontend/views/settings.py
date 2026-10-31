@@ -1,6 +1,6 @@
 """User preferences and cloud state, without moving business logic into the view."""
 import customtkinter as ctk
-from frontend import theme
+from frontend import theme, visual_style as style_catalog
 from frontend.ui import button, choice, entry, muted, page_header, panel, text
 
 
@@ -50,46 +50,95 @@ def render_settings(parent, actions=None, preferences=None, online=None,
             muted(account, "Nenhuma conta online conectada.", size=12).pack(anchor="w", padx=14, pady=(14, 8))
             button(card, "Entrar ou criar conta", lambda: actions.navigate("account"), width=210, height=40).pack(anchor="w", padx=16, pady=(0, 14))
 
-    # Visual design skins are independent from the backend dark/light/system mode.
+    # Visual skins are selected independently of dark/light/system, and stored
+    # locally by the launcher view (not in DATA/library.db).
     skins = panel(body, color=theme.CARD_SOFT, radius=20)
     skins.pack(fill="x", padx=4, pady=(0, 12))
-    text(skins, "Temas do launcher", size=20, bold=True).pack(anchor="w", padx=18, pady=(16, 2))
-    muted(skins, "Escolha o estilo visual. A opção Escuro/Claro/Sistema continua independente.",
-          size=12).pack(anchor="w", padx=18, pady=(0, 12))
+    heading = ctk.CTkFrame(skins, fg_color="transparent")
+    heading.pack(fill="x", padx=18, pady=(16, 2))
+    text(heading, "Temas do launcher", size=20, bold=True).pack(side="left")
+    active_name = style_catalog.STYLES.get(visual_style, style_catalog.STYLES["raspberry_neon"])[0]
+    active = ctk.CTkLabel(heading, text=f"✓  {active_name}", font=(theme.FONT, 11, "bold"),
+                          fg_color=theme.CARD_ALT, text_color=theme.TEXT,
+                          corner_radius=10, padx=12, height=25)
+    active.pack(side="right", padx=(7, 0))
+    muted(skins, "Escolha uma combinação de cores para todo o launcher. Mudanças são aplicadas na hora e ficam salvas por perfil.",
+          size=12, wraplength=850, justify="left").pack(anchor="w", padx=18, pady=(2, 12))
 
     tiles = ctk.CTkFrame(skins, fg_color="transparent")
-    tiles.pack(fill="x", padx=14, pady=(0, 14))
-    tiles.grid_columnconfigure((0, 1), weight=1, uniform="visualthemes")
+    tiles.pack(fill="x", padx=12, pady=(0, 7))
+    tile_widgets = []
 
-    for column, (key, caption, subtitle, colors) in enumerate((
-        ("raspberry_neon", "Raspberry Neon", "Roxo e magenta · design atual",
-         ("#1B0B25", "#EF2A8F", "#953DE7")),
-        ("figma_preview", "Figma (prévia)", "Azul e ciano · ainda não validado com o protótipo",
-         ("#0B1628", "#719BFF", "#39B6D2")),
-    )):
-        active = key == visual_style
-        tile = panel(tiles, color=theme.CARD_ALT if active else theme.CARD,
-                     border=True, radius=16)
-        tile.grid(row=0, column=column, sticky="nsew", padx=5)
-        strip = ctk.CTkFrame(tile, fg_color=colors[0], corner_radius=12, height=46)
-        strip.pack(fill="x", padx=12, pady=(12, 7))
-        strip.pack_propagate(False)
-        for sample in colors[1:]:
-            ctk.CTkFrame(strip, width=62, height=16, fg_color=sample,
-                         corner_radius=8).pack(side="left", padx=(12, 0), pady=15)
-        text(tile, ("✓  " if active else "") + caption,
-             size=15, bold=True).pack(anchor="w", padx=12, pady=(0, 2))
-        muted(tile, subtitle, size=11, wraplength=280, justify="left").pack(
-            anchor="w", padx=12, pady=(0, 9))
+    for key, (caption, subtitle) in style_catalog.STYLES.items():
+        palette = theme.STYLE_PALETTES[key]
+        is_active = key == visual_style
+        tile = panel(tiles, color=theme.CARD_ALT if is_active else theme.CARD,
+                     border=True, radius=15,
+                     border_color=theme.PINK if is_active else theme.BORDER)
+
+        # Miniature, code-drawn visual preview instead of opaque screenshot assets:
+        # these actual palette samples remain accurate in Light and Dark modes.
+        sample_bg = palette["PAGE"][1]
+        sample_sidebar = palette["SIDEBAR"][1]
+        sample_card = palette["CARD_ALT"][1]
+        sample_primary = palette["PINK"][1]
+        sample_secondary = palette["PURPLE"][1]
+
+        preview = ctk.CTkFrame(tile, fg_color=sample_bg, height=66, corner_radius=10)
+        preview.pack(fill="x", padx=10, pady=(10, 8))
+        preview.pack_propagate(False)
+        mini_sidebar = ctk.CTkFrame(preview, fg_color=sample_sidebar, corner_radius=7, width=35)
+        mini_sidebar.pack(side="left", fill="y", padx=(5, 5), pady=5)
+        mini_sidebar.pack_propagate(False)
+        ctk.CTkFrame(mini_sidebar, fg_color=sample_primary, corner_radius=4, height=8).pack(
+            fill="x", padx=5, pady=(9, 5))
+        ctk.CTkFrame(mini_sidebar, fg_color=sample_secondary, corner_radius=4, height=5).pack(
+            fill="x", padx=7)
+        mini_main = ctk.CTkFrame(preview, fg_color="transparent")
+        mini_main.pack(side="left", fill="both", expand=True, padx=(0, 7), pady=6)
+        ctk.CTkFrame(mini_main, fg_color=sample_primary, corner_radius=4, height=8).pack(
+            anchor="w", fill="x", pady=(3, 7))
+        panel_row = ctk.CTkFrame(mini_main, fg_color="transparent")
+        panel_row.pack(fill="both", expand=True)
+        for i, col in enumerate((sample_card, sample_secondary, sample_card)):
+            panel_row.grid_columnconfigure(i, weight=1, uniform="mini")
+            ctk.CTkFrame(panel_row, fg_color=col, corner_radius=5).grid(
+                row=0, column=i, sticky="nsew", padx=2)
+        panel_row.grid_rowconfigure(0, weight=1)
+
+        title_line = ctk.CTkFrame(tile, fg_color="transparent")
+        title_line.pack(fill="x", padx=11)
+        text(title_line, caption, size=14, bold=True, anchor="w").pack(side="left")
+        if is_active:
+            text(title_line, "✓", size=16, bold=True, color=theme.PINK).pack(side="right")
+        muted(tile, subtitle, size=11, wraplength=255, anchor="w", justify="left").pack(
+            fill="x", padx=11, pady=(3, 8))
         callback = (lambda style=key: on_visual_style_change(style)) if on_visual_style_change else None
-        button(tile, "Selecionado" if active else "Aplicar tema", callback,
-               variant="secondary" if active else "outline", height=35,
-               state="disabled" if active or on_visual_style_change is None else "normal").pack(
-                   fill="x", padx=12, pady=(0, 12))
+        button(tile, "✓  Em uso" if is_active else "Aplicar tema", callback,
+               variant="secondary" if is_active else "outline", height=34,
+               state="disabled" if is_active or on_visual_style_change is None else "normal").pack(
+            fill="x", padx=10, pady=(0, 10))
+        tile_widgets.append(tile)
 
-    muted(skins, "O tema Figma é uma prévia independente. Para reproduzir fielmente o protótipo, "
-          "ainda será necessário importar as telas e seus componentes do arquivo original.",
-          size=11, wraplength=800, justify="left").pack(anchor="w", padx=18, pady=(0, 14))
+    def layout_tiles(_event=None):
+        available = tiles.winfo_width()
+        columns = 3 if available >= 780 else 2 if available >= 500 else 1
+        if getattr(tiles, "_theme_columns", None) == columns:
+            return
+        tiles._theme_columns = columns
+        for i in range(3):
+            tiles.grid_columnconfigure(i, weight=1 if i < columns else 0,
+                                       uniform="themechoices" if i < columns else "")
+        for index, tile in enumerate(tile_widgets):
+            tile.grid(row=index // columns, column=index % columns,
+                      sticky="nsew", padx=5, pady=5)
+
+    tiles.bind("<Configure>", layout_tiles)
+    # Apply the first layout before the native window has a measured width.
+    layout_tiles()
+
+    muted(skins, "Figma (prévia) continua provisório: não representa ainda o protótipo original. Os demais temas são paletas autorais do RaspberryLC.",
+          size=11, wraplength=850, justify="left").pack(anchor="w", padx=18, pady=(3, 16))
 
     profiles = panel(body, color=theme.CARD_SOFT, radius=20)
     profiles.pack(fill="x", padx=4, pady=(0, 12))

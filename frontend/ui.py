@@ -51,9 +51,11 @@ def font(size=14, bold=False):
 
 
 def panel(parent, *, color=None, border=True, radius=18, **kwargs):
-    return ctk.CTkFrame(parent, fg_color=color or theme.CARD,
-                        border_width=1 if border else 0,
-                        border_color=theme.BORDER, corner_radius=radius, **kwargs)
+    options = dict(fg_color=color or theme.CARD,
+                   border_width=1 if border else 0,
+                   border_color=theme.BORDER, corner_radius=radius)
+    options.update(kwargs)
+    return ctk.CTkFrame(parent, **options)
 
 
 def text(parent, value, *, size=14, bold=False, color=None, **kwargs):
@@ -74,6 +76,12 @@ def button(parent, label, command=None, *, variant="primary", width=126, height=
         "ghost": ("transparent", theme.HOVER, theme.TEXT),
     }
     fg, hover, txt = colors[variant]
+    if variant == "primary":
+        txt = theme.BUTTON_PRIMARY_TEXT
+    elif variant == "secondary":
+        txt = theme.BUTTON_SECONDARY_TEXT
+    elif variant == "danger":
+        txt = ("#FFFFFF", "#FFFFFF")
     opts = dict(text=label, command=command, fg_color=fg, hover_color=hover,
                 text_color=txt, width=width, height=height, corner_radius=12,
                 border_width=1 if variant == "outline" else 0,
@@ -97,9 +105,16 @@ def choice(parent, values, *, command=None, width=165, **kwargs):
                              text_color=theme.TEXT, font=font(12), **kwargs)
 
 
-def badge(parent, label, *, color=None, text_color="#FFFFFF", icon=None):
+def badge(parent, label, *, color=None, text_color=None, icon=None):
     value = f"{icon}  {label}" if icon else label
-    return ctk.CTkLabel(parent, text=value, fg_color=color or theme.PURPLE,
+    fill = color or theme.PURPLE
+    if text_color is None:
+        if theme.get_visual_style() == "raspberry_neon":
+            text_color = "#FFFFFF"  # preserve the original approved visual
+        else:
+            colors = fill if isinstance(fill, (list, tuple)) else (fill, fill)
+            text_color = tuple(theme._on_color(c) for c in colors)
+    return ctk.CTkLabel(parent, text=value, fg_color=fill,
                         text_color=text_color, corner_radius=12,
                         font=font(11, True), height=28, padx=12)
 

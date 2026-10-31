@@ -67,7 +67,143 @@ FIGMA_PREVIEW = {
     "BANNER_SHADE_DARK": (13, 24, 43),
 }
 
-STYLE_PALETTES = {"raspberry_neon": RASPBERRY_NEON, "figma_preview": FIGMA_PREVIEW}
+
+# Eight curated palettes.  The legacy token names PINK/PURPLE act as
+# PRIMARY/SECONDARY in the existing frontend and work for every palette.
+# Values stay as CustomTkinter (light, dark) pairs, including semantic states.
+
+def _hex_rgb(hex_color):
+    return tuple(int(hex_color[i:i + 2], 16) for i in (1, 3, 5))
+
+
+def _blend(c1, c2, weight):
+    """Return the weighted mix of two opaque colors (presentation only)."""
+    a, b = _hex_rgb(c1), _hex_rgb(c2)
+    values = tuple(round(x * (1 - weight) + y * weight) for x, y in zip(a, b))
+    return "#{:02X}{:02X}{:02X}".format(*values)
+
+
+def _relative_luminance(color):
+    def channel(value):
+        x = value / 255
+        return x / 12.92 if x <= .04045 else ((x + .055) / 1.055) ** 2.4
+    r, g, b = (channel(x) for x in _hex_rgb(color))
+    return .2126 * r + .7152 * g + .0722 * b
+
+
+def _on_color(background):
+    """Choose text with the higher WCAG contrast against a solid color."""
+    luminance = _relative_luminance(background)
+    white = 1.05 / (luminance + .05)
+    dark = (luminance + .05) / .056
+    return "#FFFFFF" if white >= dark else "#0F1824"
+
+
+def _palette(*, dark, light, primary, secondary, muted_dark, image_fallback):
+    """Build a cohesive light/dark style from intentional design colors.
+
+    dark: BG, PAGE, CARD, ALT, SOFT, SIDEBAR, FOOTER, BORDER.
+    light: BG, PAGE, ALT, BORDER.
+    primary/secondary: light, dark accent values.
+    """
+    db, dp, dc, da, ds, dside, dfoot, dborder = dark
+    lb, lp, la, lborder = light
+    p_light, p_dark = primary
+    s_light, s_dark = secondary
+    white = "#FFFFFF"
+    base = {
+        "BG": (lb, db),
+        "PAGE": (lp, dp),
+        "CARD": (white, dc),
+        "CARD_ALT": (la, da),
+        "CARD_SOFT": (_blend(la, white, .68), ds),
+        "BORDER": (lborder, dborder),
+        "SIDEBAR": (_blend(lb, la, .40), dside),
+        "FOOTER": (_blend(lb, la, .66), dfoot),
+        "POPUP": (white, _blend(dc, da, .34)),
+        "HOVER": (_blend(la, lborder, .38), _blend(da, dborder, .30)),
+        "MUTED": ("#5A6678", muted_dark),
+        "TEXT": ("#182132", "#F7F9FE"),
+        "SUBTEXT": ("#47586C", _blend(muted_dark, white, .26)),
+        "PINK": (p_light, p_dark),
+        "PINK_HOVER": (_blend(p_light, "#121C2B", .20), _blend(p_dark, white, .13)),
+        "PURPLE": (s_light, s_dark),
+        "PURPLE_HOVER": (_blend(s_light, "#121C2B", .20), _blend(s_dark, white, .14)),
+        "BUTTON_PRIMARY_TEXT": (_on_color(p_light), _on_color(p_dark)),
+        "BUTTON_SECONDARY_TEXT": (_on_color(s_light), _on_color(s_dark)),
+        "ERROR": ("#B42318", "#FFA6A6"),
+        "DANGER": ("#AE304F", "#AE3A58"),
+        "DANGER_HOVER": ("#95223F", "#C84A67"),
+        "STATUS_ROM": (s_light, s_dark),
+        "STATUS_INSTALLED": ("#168348", "#52E69C"),
+        "STATUS_MISSING": (s_light, s_dark),
+        "IMAGE_FALLBACK": image_fallback,
+        "BANNER_SHADE_LIGHT": _hex_rgb(lp),
+        "BANNER_SHADE_DARK": _hex_rgb(dp),
+    }
+    return base
+
+
+ADDITIONAL_PALETTES = {
+    # Azul profundo + azul elétrico + ciano, com superfícies azul-ardósia.
+    "sapphire": _palette(
+        dark=("#070F20", "#0A1628", "#15253B", "#1D344D", "#0E1D31", "#0A1424", "#0D192C", "#345674"),
+        light=("#EAF3FF", "#F8FBFF", "#E6F0FF", "#C1D4EA"),
+        primary=("#2864D5", "#468CFF"), secondary=("#117B9E", "#3BCAE5"),
+        muted_dark="#A9BED9", image_fallback="#2A4164"),
+
+    # Verde esmeralda + menta; identidade botânica, mas com contraste de software.
+    "emerald": _palette(
+        dark=("#071915", "#0B211A", "#15352B", "#1A4737", "#102B23", "#091B17", "#0D241D", "#3A745E"),
+        light=("#EBF9F1", "#F8FFF9", "#E3F5EA", "#B8E2CE"),
+        primary=("#168650", "#2CD695"), secondary=("#167F77", "#48D6BC"),
+        muted_dark="#ACD5C4", image_fallback="#234B3B"),
+
+    # Vermelho rubi + bordô; luxo escuro com controles coral/vermelho.
+    "ruby": _palette(
+        dark=("#1A0810", "#200B14", "#351621", "#49212E", "#2B111B", "#1B0A12", "#24101A", "#784256"),
+        light=("#FFF1F4", "#FFFAFB", "#FFE9EF", "#EEC5D0"),
+        primary=("#C62B4A", "#FA536F"), secondary=("#B95462", "#F39A8D"),
+        muted_dark="#E0B9C8", image_fallback="#58303E"),
+
+    # Laranja coral + dourado quente, inspirado em pôr do sol.
+    "sunset": _palette(
+        dark=("#1B0F0B", "#241410", "#3A221B", "#4C2C21", "#2E1B15", "#21130F", "#2B1A14", "#83523C"),
+        light=("#FFF6ED", "#FFFBF7", "#FFF0DC", "#EFD4B3"),
+        primary=("#B85717", "#FF9950"), secondary=("#8F6423", "#F7C46D"),
+        muted_dark="#DEBCA8", image_fallback="#65402C"),
+
+    # Ouro suave + bronze + preto; alternativa sofisticada, menos saturada.
+    "imperial_gold": _palette(
+        dark=("#151310", "#1B1915", "#2B261E", "#393125", "#231F19", "#171510", "#211C15", "#766348"),
+        light=("#F9F6ED", "#FFFDF9", "#F6EFDE", "#DFD0AF"),
+        primary=("#936A17", "#E5B957"), secondary=("#897038", "#D4AF6B"),
+        muted_dark="#D8C7A7", image_fallback="#514735"),
+
+    # Sakura: rosa pêssego + lavanda, com fundo ameixa delicado.
+    "sakura": _palette(
+        dark=("#1D0F20", "#27132B", "#3B223F", "#502B50", "#321A35", "#201124", "#2A152E", "#895B84"),
+        light=("#FFF1F8", "#FFFAFE", "#FFE4F1", "#E6C2DC"),
+        primary=("#BE3A80", "#FF88BA"), secondary=("#8B58BE", "#C8A1FC"),
+        muted_dark="#DDC0DD", image_fallback="#674366"),
+
+    # Galáxia: violeta/índigo + azul espacial, alternativa fria ao Raspberry.
+    "galaxy": _palette(
+        dark=("#0F0C25", "#15112D", "#252144", "#342D5A", "#1C1738", "#100D25", "#17132F", "#59548D"),
+        light=("#F1EEFF", "#FBFAFF", "#ECE8FF", "#D0C8EA"),
+        primary=("#6746C1", "#A18BFF"), secondary=("#376BB8", "#7DB6FF"),
+        muted_dark="#C0BCE1", image_fallback="#39345D"),
+
+    # Grayscale moderno com gelo/azul-ardósia nos controles.
+    "graphite": _palette(
+        dark=("#0D1014", "#13181E", "#252D35", "#303A43", "#1C232B", "#11161C", "#1B2128", "#57636E"),
+        light=("#F0F3F6", "#FFFFFF", "#E7ECF1", "#C9D0D8"),
+        primary=("#415E77", "#93B9D6"), secondary=("#526979", "#B8C6D5"),
+        muted_dark="#B4C0CD", image_fallback="#3D4752"),
+}
+
+STYLE_PALETTES = {"raspberry_neon": RASPBERRY_NEON, "figma_preview": FIGMA_PREVIEW, **ADDITIONAL_PALETTES}
+
 _VISUAL_STYLE = "raspberry_neon"
 
 CARD_WIDTH = 244
@@ -86,6 +222,8 @@ def set_visual_style(style: str):
     globals().update(STYLE_PALETTES[style])
     globals()["EMULATOR_ACTION"] = globals()["PURPLE"]
     globals()["EMULATOR_HOVER"] = globals()["PURPLE_HOVER"]
+    globals()["BUTTON_PRIMARY_TEXT"] = STYLE_PALETTES[style].get("BUTTON_PRIMARY_TEXT", globals()["TEXT"])
+    globals()["BUTTON_SECONDARY_TEXT"] = STYLE_PALETTES[style].get("BUTTON_SECONDARY_TEXT", globals()["TEXT"])
 
 
 def get_visual_style() -> str:

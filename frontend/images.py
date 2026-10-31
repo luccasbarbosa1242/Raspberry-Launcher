@@ -29,7 +29,7 @@ def load_card_art(path, size=(230, 110)):
     backdrop = ImageOps.fit(source, size, method=Image.Resampling.LANCZOS,
                             centering=(0.5, 0.30))
     backdrop = backdrop.filter(ImageFilter.GaussianBlur(radius=12))
-    wash = (9, 23, 44, 110) if theme.get_visual_style() == "figma_preview" else (16, 7, 25, 110)
+    wash = (*theme._hex_rgb(theme.PAGE[1]), 110)
     backdrop.alpha_composite(Image.new("RGBA", size, wash))
 
     inset = (max(1, size[0] - 12), max(1, size[1] - 8))
@@ -88,25 +88,25 @@ def _draw_gradient(size, top, bottom):
 def _draw_devices(canvas, logo, *, light=False):
     draw = ImageDraw.Draw(canvas)
     width, height = canvas.size
-    alt = theme.get_visual_style() == "figma_preview"
-    magenta = ((113, 155, 255, 255) if not light else (66, 117, 215, 255)) if alt else ((239, 42, 143, 255) if not light else (229, 68, 170, 255))
-    outline = ((118, 210, 241, 255) if not light else (123, 170, 232, 255)) if alt else ((255, 182, 236, 255) if not light else (194, 131, 226, 255))
-    screen = ((22, 37, 70, 255) if not light else (246, 250, 255, 255)) if alt else ((43, 15, 66, 255) if not light else (251, 241, 255, 255))
+    mode = 0 if light else 1
+    magenta = (*theme._hex_rgb(theme.PINK[mode]), 255)
+    outline = (*theme._hex_rgb(theme.PURPLE[mode]), 255)
+    screen = (*theme._hex_rgb(theme.PAGE[mode]), 255)
     base_glow = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
     glow_draw = ImageDraw.Draw(base_glow)
-    glow_draw.ellipse((width * 0.16, height * 0.65, width * 0.85, height * 0.92), fill=(195, 55, 220, 80))
-    glow_draw.ellipse((width * 0.05, height * 0.72, width * 0.40, height * 0.92), fill=(239, 42, 143, 70))
-    glow_draw.ellipse((width * 0.67, height * 0.70, width * 0.95, height * 0.92), fill=(239, 42, 143, 55))
+    glow_draw.ellipse((width * 0.16, height * 0.65, width * 0.85, height * 0.92), fill=(*theme._hex_rgb(theme.PURPLE[mode]), 64))
+    glow_draw.ellipse((width * 0.05, height * 0.72, width * 0.40, height * 0.92), fill=(*theme._hex_rgb(theme.PINK[mode]), 66))
+    glow_draw.ellipse((width * 0.67, height * 0.70, width * 0.95, height * 0.92), fill=(*theme._hex_rgb(theme.PINK[mode]), 48))
     base_glow = base_glow.filter(ImageFilter.GaussianBlur(18))
     canvas.alpha_composite(base_glow)
 
     # cloud
     cloud_box = (width * 0.38, height * 0.02, width * 0.66, height * 0.24)
-    draw.rounded_rectangle(cloud_box, radius=32, fill=(85, 26, 113, 215) if not light else (250, 243, 253, 255), outline=outline, width=4)
-    draw.text((width * 0.47, height * 0.08), "⟳", fill=(255, 240, 255, 255) if not light else (168, 72, 192, 255), font=None)
+    draw.rounded_rectangle(cloud_box, radius=32, fill=(*theme._hex_rgb(theme.CARD_ALT[mode]), 225), outline=outline, width=4)
+    draw.text((width * 0.47, height * 0.08), "⟳", fill=(*theme._hex_rgb(theme.TEXT[mode]), 255), font=None)
 
     # connector arcs
-    dash_color = (255, 162, 240, 180) if not light else (170, 124, 213, 180)
+    dash_color = (*theme._hex_rgb(theme.PURPLE[mode]), 180)
     for start, end in [((width * 0.25, height * 0.50), (width * 0.44, height * 0.22)),
                        ((width * 0.77, height * 0.52), (width * 0.60, height * 0.22))]:
         draw.line([start, end], fill=dash_color, width=4)
@@ -122,14 +122,14 @@ def _draw_devices(canvas, logo, *, light=False):
     # laptop
     lap_outer = (width * 0.07, height * 0.45, width * 0.36, height * 0.86)
     lap_screen = (width * 0.11, height * 0.49, width * 0.32, height * 0.73)
-    draw.rounded_rectangle(lap_outer, radius=18, fill=(88, 34, 120, 230) if not light else (230, 214, 245, 255), outline=outline, width=3)
+    draw.rounded_rectangle(lap_outer, radius=18, fill=(*theme._hex_rgb(theme.CARD_ALT[mode]), 240), outline=outline, width=3)
     draw.rounded_rectangle(lap_screen, radius=16, fill=screen)
     draw.rounded_rectangle((width * 0.05, height * 0.82, width * 0.40, height * 0.88), radius=18, fill=magenta)
 
     # phone
     phone = (width * 0.73, height * 0.45, width * 0.88, height * 0.88)
     phone_screen = (width * 0.76, height * 0.49, width * 0.85, height * 0.82)
-    draw.rounded_rectangle(phone, radius=24, fill=(88, 34, 120, 235) if not light else (239, 226, 248, 255), outline=outline, width=3)
+    draw.rounded_rectangle(phone, radius=24, fill=(*theme._hex_rgb(theme.CARD_ALT[mode]), 240), outline=outline, width=3)
     draw.rounded_rectangle(phone_screen, radius=16, fill=screen)
     draw.rounded_rectangle((width * 0.79, height * 0.47, width * 0.83, height * 0.48), radius=6, fill=outline)
 
@@ -144,12 +144,12 @@ def _draw_devices(canvas, logo, *, light=False):
 
 def load_account_art(size=(460, 300)):
     logo = _load_runtime_logo((140, 140))
-    if theme.get_visual_style() == "figma_preview":
-        dark = _draw_gradient(size, (24, 45, 80, 255), (12, 21, 38, 255))
-        light = _draw_gradient(size, (248, 252, 255, 255), (222, 236, 251, 255))
-    else:
-        dark = _draw_gradient(size, (43, 10, 59, 255), (19, 5, 29, 255))
-        light = _draw_gradient(size, (254, 248, 255, 255), (239, 216, 247, 255))
+    dark = _draw_gradient(size,
+                          (*theme._hex_rgb(theme.CARD_ALT[1]), 255),
+                          (*theme._hex_rgb(theme.BG[1]), 255))
+    light = _draw_gradient(size,
+                           (*theme._hex_rgb(theme.PAGE[0]), 255),
+                           (*theme._hex_rgb(theme.CARD_ALT[0]), 255))
     _draw_devices(dark, logo, light=False)
     _draw_devices(light, logo, light=True)
     return ctk.CTkImage(light_image=light, dark_image=dark, size=size)
@@ -166,7 +166,7 @@ def load_feature_art(path, size):
     background = ImageOps.fit(source, (width, height), method=Image.Resampling.LANCZOS,
                               centering=(0.5, 0.34)).filter(ImageFilter.GaussianBlur(14))
     background = background.convert('RGBA')
-    shade = (12, 28, 52, 78) if theme.get_visual_style() == "figma_preview" else (20, 7, 37, 78)
+    shade = (*theme._hex_rgb(theme.PAGE[1]), 78)
     background.alpha_composite(Image.new('RGBA', (width, height), shade))
 
     # Foreground artwork is entirely shown for portrait boxes, while
@@ -185,7 +185,7 @@ def load_feature_art(path, size):
     d = ImageDraw.Draw(overlay, 'RGBA')
     for x in range(width):
         a = int(30 * (1-x/max(1,width-1)) + 15)
-        overlay_color = (13, 27, 51) if theme.get_visual_style() == "figma_preview" else (29, 10, 48)
+        overlay_color = theme._hex_rgb(theme.BG[1])
         d.line((x,0,x,height), fill=(*overlay_color, a))
     background.alpha_composite(overlay)
     mask = Image.new('L', (width, height), 0)

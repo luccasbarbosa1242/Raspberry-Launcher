@@ -19,7 +19,8 @@ def primary_button(parent, game, actions, bindings, **kwargs):
     opts = dict(kwargs)
     opts.setdefault("fg_color", theme.PINK if game.primary_action == GameAction.PLAY else theme.PURPLE)
     opts.setdefault("hover_color", theme.PINK_HOVER if game.primary_action == GameAction.PLAY else theme.PURPLE_HOVER)
-    opts.setdefault("text_color", theme.TEXT)
+    opts.setdefault("text_color", theme.BUTTON_PRIMARY_TEXT if game.primary_action == GameAction.PLAY
+                    else theme.BUTTON_SECONDARY_TEXT)
     opts.setdefault("corner_radius", 11)
     opts.setdefault("font", font(12, True))
     btn = ctk.CTkButton(parent, text=labels[game.primary_action],

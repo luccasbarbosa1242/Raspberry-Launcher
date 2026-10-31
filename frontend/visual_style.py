@@ -14,6 +14,14 @@ PROVISIONAL_FIGMA_STYLE = "figma_preview"
 STYLES = {
     DEFAULT_STYLE: ("Raspberry Neon", "Design roxo/magenta aprovado"),
     PROVISIONAL_FIGMA_STYLE: ("Figma (prévia)", "Estilo temporário: protótipo ainda não lido"),
+    "sapphire": ("Azul Safira", "Azul elétrico + ciano • moderno"),
+    "emerald": ("Verde Esmeralda", "Verde + menta • natural"),
+    "ruby": ("Vermelho Rubi", "Vermelho + bordô • intenso"),
+    "sunset": ("Pôr do Sol", "Coral + âmbar • acolhedor"),
+    "imperial_gold": ("Dourado Imperial", "Ouro + bronze • elegante"),
+    "sakura": ("Rosa Sakura", "Rosa + lavanda • delicado"),
+    "galaxy": ("Galáxia", "Índigo + azul • espacial"),
+    "graphite": ("Grafite", "Cinza + prata • minimalista"),
 }
 
 
