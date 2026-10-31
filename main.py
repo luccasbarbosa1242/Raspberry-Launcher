@@ -22,9 +22,18 @@ def main():
     controller.navigate("account" if backend.online_enabled() else "home")
     if backend.online_enabled():
         controller.restore_online_session()
+    from frontend.audio import BackgroundMusic
+
+    music = BackgroundMusic(
+        PathResolver.assets() / "music" / "background.mp3"
+    )
+    music.start()
+    window.set_music(music)
+
     try:
         window.run()
     finally:
+        music.stop()
         controller.close()
 
 

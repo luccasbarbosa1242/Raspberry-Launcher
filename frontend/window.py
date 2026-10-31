@@ -17,6 +17,8 @@ from frontend import theme
 class LauncherWindow:
     def __init__(self, actions: Actions, resources: UiResources):
         self.actions = actions
+        self.music = None
+        self.mute_button = None
         ctk.set_appearance_mode(resources.theme)
         ctk.set_default_color_theme("green")
         self.root = ctk.CTk()
@@ -31,7 +33,12 @@ class LauncherWindow:
         self._brightness = 100
         self.search_view = None
         self.catalog_form = None
-        self.sidebar = create_sidebar(self.root, actions, resources)
+        self.sidebar, self.mute_button = create_sidebar(
+    self.root,
+    actions,
+    resources,
+    on_toggle_music=self.toggle_music,
+)
 
         main = ctk.CTkFrame(
             self.root,
@@ -48,6 +55,20 @@ class LauncherWindow:
         )
         self.page = ctk.CTkFrame(main, fg_color="transparent")
         self.page.pack(fill="both", expand=True)
+
+    def set_music(self, music):
+        self.music = music
+
+    def toggle_music(self):
+        if self.music is None:
+            return
+
+        muted = self.music.toggle_mute()
+
+        if self.mute_button is not None:
+            self.mute_button.configure(
+                text="🔊 Desmutar música" if muted else "🔇 Mutar música"
+            )
 
     def _clear(self):
         self.bindings.clear()
@@ -246,7 +267,15 @@ class LauncherWindow:
         if self._poll_id is not None:
             self.root.after_cancel(self._poll_id)
 
-        self.actions.close()
+        try:
+            self.actions.close()
+        finally:
+            # Cancela os eventos pendentes do CustomTkinter.
+            for callback in self.root.tk.call("after", "info"):
+                self.root.after_cancel(callback)
+
+            # Fecha a janela do launcher.
+            self.root.destroy()
 
         # Cancel CustomTkinter drawing/scaling callbacks before destroying.
         for callback in self.root.tk.call("after", "info"):

@@ -42,7 +42,12 @@ GROUPS = (
 )
 
 
-def create_sidebar(parent, actions: Actions, resources: UiResources):
+def create_sidebar(
+    parent,
+    actions: Actions,
+    resources: UiResources,
+    on_toggle_music=None,
+):
     sidebar = ctk.CTkFrame(parent, width=240, fg_color=theme.SIDEBAR, corner_radius=0)
     sidebar.pack(side="left", fill="y")
     sidebar.pack_propagate(False)
@@ -60,6 +65,18 @@ def create_sidebar(parent, actions: Actions, resources: UiResources):
     text = ctk.CTkFrame(brand, fg_color="transparent")
     text.pack(side="left")
     ctk.CTkLabel(text, text="RASPBERRYLC", font=("Arial", 13, "bold")).pack(anchor="w")
+    mute_button = ctk.CTkButton(
+        footer,
+        text="🔇 Mutar música",
+        fg_color="transparent",
+        hover_color=theme.HOVER,
+        text_color=theme.TEXT,
+        anchor="w",
+        command=on_toggle_music,
+    )
+    mute_button.pack(fill="x", padx=10, pady=5)
+
+    
     ctk.CTkLabel(text, text="v1.0.0", text_color=theme.MUTED, font=("Arial", 11)).pack(anchor="w")
     ctk.CTkButton(
         footer,
@@ -79,13 +96,30 @@ def create_sidebar(parent, actions: Actions, resources: UiResources):
         anchor="w",
         command=lambda: actions.navigate("settings"),
     ).pack(fill="x", padx=10, pady=5)
-    content = ctk.CTkScrollableFrame(sidebar, fg_color="transparent")
+    content = ctk.CTkScrollableFrame(
+        sidebar,
+        fg_color="transparent"
+    )
+    content.pack(fill="both", expand=True)
+
+    for label, page in (
+        ("Biblioteca", "biblioteca"),
+        ("Jogos", "jogos")
+    ):
+        navigation_button(
+            content, label, page, actions
+        ).pack(fill="x", padx=5, pady=5)
+
+    for title, links in GROUPS:
+        create_group(content, title, links, actions)
+
+    return sidebar, mute_button
     content.pack(fill="both", expand=True)
     for label, page in (("Biblioteca", "biblioteca"), ("Jogos", "jogos")):
         navigation_button(content, label, page, actions).pack(fill="x", padx=5, pady=5)
     for title, links in GROUPS:
         create_group(content, title, links, actions)
-    return sidebar
+        return sidebar, mute_button
 
 
 def navigation_button(parent, text, page, actions):

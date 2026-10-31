@@ -413,29 +413,35 @@ class LauncherController:
         self.view.apply_theme(self.backend.profile_settings().theme)
         self._refresh()
 
-def update_profile_preferences(
-    self, *, theme=None, music_volume=None, brightness=None
-):
-    try:
-        preferences = self.backend.update_profile_preferences(
-            theme=theme,
-            music_volume=music_volume,
-            brightness=brightness,
-            profile_id=self.backend.active_profile_id(),
-        )
+    def update_profile_preferences(
+        self, *, theme=None, music_volume=None, brightness=None
+    ):
+        try:
+            preferences = self.backend.update_profile_preferences(
+                theme=theme,
+                music_volume=music_volume,
+                brightness=brightness,
+                profile_id=self.backend.active_profile_id(),
+            )
 
-        if theme is not None:
-            self.view.show_settings(preferences)
+            if theme is not None:
+                self.view.show_settings(preferences)
 
-        if brightness is not None:
-            self.view.apply_brightness(preferences.brightness)
+            if brightness is not None:
+                self.view.apply_brightness(preferences.brightness)
 
-    except (LookupError, ValueError) as error:
-        self.view.show_error(str(error))
+        except (LookupError, ValueError) as error:
+            self.view.show_error(str(error))
 
     def close(self):
-        if not self._closed:
-            self._closed = True
-            # Pending worker closures must not retain a destroyed Tk interpreter.
-            self.view = None
-            self.runner.close()
+        if self._closed:
+            return
+
+        self._closed = True
+        self._generation += 1
+
+        # Libera a referência à interface gráfica.
+        self.view = None
+
+        # Encerra as tarefas em segundo plano.
+        self.runner.close()
