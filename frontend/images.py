@@ -29,7 +29,8 @@ def load_card_art(path, size=(230, 110)):
     backdrop = ImageOps.fit(source, size, method=Image.Resampling.LANCZOS,
                             centering=(0.5, 0.30))
     backdrop = backdrop.filter(ImageFilter.GaussianBlur(radius=12))
-    backdrop.alpha_composite(Image.new("RGBA", size, (16, 7, 25, 110)))
+    wash = (9, 23, 44, 110) if theme.get_visual_style() == "figma_preview" else (16, 7, 25, 110)
+    backdrop.alpha_composite(Image.new("RGBA", size, wash))
 
     inset = (max(1, size[0] - 12), max(1, size[1] - 8))
     art = ImageOps.contain(source, inset, method=Image.Resampling.LANCZOS)
@@ -87,9 +88,10 @@ def _draw_gradient(size, top, bottom):
 def _draw_devices(canvas, logo, *, light=False):
     draw = ImageDraw.Draw(canvas)
     width, height = canvas.size
-    magenta = (239, 42, 143, 255) if not light else (229, 68, 170, 255)
-    outline = (255, 182, 236, 255) if not light else (194, 131, 226, 255)
-    screen = (43, 15, 66, 255) if not light else (251, 241, 255, 255)
+    alt = theme.get_visual_style() == "figma_preview"
+    magenta = ((113, 155, 255, 255) if not light else (66, 117, 215, 255)) if alt else ((239, 42, 143, 255) if not light else (229, 68, 170, 255))
+    outline = ((118, 210, 241, 255) if not light else (123, 170, 232, 255)) if alt else ((255, 182, 236, 255) if not light else (194, 131, 226, 255))
+    screen = ((22, 37, 70, 255) if not light else (246, 250, 255, 255)) if alt else ((43, 15, 66, 255) if not light else (251, 241, 255, 255))
     base_glow = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
     glow_draw = ImageDraw.Draw(base_glow)
     glow_draw.ellipse((width * 0.16, height * 0.65, width * 0.85, height * 0.92), fill=(195, 55, 220, 80))
@@ -142,8 +144,12 @@ def _draw_devices(canvas, logo, *, light=False):
 
 def load_account_art(size=(460, 300)):
     logo = _load_runtime_logo((140, 140))
-    dark = _draw_gradient(size, (43, 10, 59, 255), (19, 5, 29, 255))
-    light = _draw_gradient(size, (254, 248, 255, 255), (239, 216, 247, 255))
+    if theme.get_visual_style() == "figma_preview":
+        dark = _draw_gradient(size, (24, 45, 80, 255), (12, 21, 38, 255))
+        light = _draw_gradient(size, (248, 252, 255, 255), (222, 236, 251, 255))
+    else:
+        dark = _draw_gradient(size, (43, 10, 59, 255), (19, 5, 29, 255))
+        light = _draw_gradient(size, (254, 248, 255, 255), (239, 216, 247, 255))
     _draw_devices(dark, logo, light=False)
     _draw_devices(light, logo, light=True)
     return ctk.CTkImage(light_image=light, dark_image=dark, size=size)
@@ -160,7 +166,8 @@ def load_feature_art(path, size):
     background = ImageOps.fit(source, (width, height), method=Image.Resampling.LANCZOS,
                               centering=(0.5, 0.34)).filter(ImageFilter.GaussianBlur(14))
     background = background.convert('RGBA')
-    background.alpha_composite(Image.new('RGBA', (width, height), (20, 7, 37, 78)))
+    shade = (12, 28, 52, 78) if theme.get_visual_style() == "figma_preview" else (20, 7, 37, 78)
+    background.alpha_composite(Image.new('RGBA', (width, height), shade))
 
     # Foreground artwork is entirely shown for portrait boxes, while
     # landscape media acts as an uninterrupted panoramic cover.
@@ -178,7 +185,8 @@ def load_feature_art(path, size):
     d = ImageDraw.Draw(overlay, 'RGBA')
     for x in range(width):
         a = int(30 * (1-x/max(1,width-1)) + 15)
-        d.line((x,0,x,height), fill=(29, 10, 48, a))
+        overlay_color = (13, 27, 51) if theme.get_visual_style() == "figma_preview" else (29, 10, 48)
+        d.line((x,0,x,height), fill=(*overlay_color, a))
     background.alpha_composite(overlay)
     mask = Image.new('L', (width, height), 0)
     ImageDraw.Draw(mask).rounded_rectangle((0,0,width-1,height-1),radius=14,fill=255)

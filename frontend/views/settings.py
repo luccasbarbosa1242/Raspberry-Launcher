@@ -4,7 +4,8 @@ from frontend import theme
 from frontend.ui import button, choice, entry, muted, page_header, panel, text
 
 
-def render_settings(parent, actions=None, preferences=None, online=None):
+def render_settings(parent, actions=None, preferences=None, online=None,
+                    *, visual_style="raspberry_neon", on_visual_style_change=None):
     page_header(parent, "Configurações", "Personalize o Raspberry Launcher do seu jeito", "⚙")
     body = ctk.CTkScrollableFrame(parent, fg_color="transparent")
     body.pack(fill="both", expand=True, padx=13, pady=(0, 10))
@@ -49,6 +50,47 @@ def render_settings(parent, actions=None, preferences=None, online=None):
             muted(account, "Nenhuma conta online conectada.", size=12).pack(anchor="w", padx=14, pady=(14, 8))
             button(card, "Entrar ou criar conta", lambda: actions.navigate("account"), width=210, height=40).pack(anchor="w", padx=16, pady=(0, 14))
 
+    # Visual design skins are independent from the backend dark/light/system mode.
+    skins = panel(body, color=theme.CARD_SOFT, radius=20)
+    skins.pack(fill="x", padx=4, pady=(0, 12))
+    text(skins, "Temas do launcher", size=20, bold=True).pack(anchor="w", padx=18, pady=(16, 2))
+    muted(skins, "Escolha o estilo visual. A opção Escuro/Claro/Sistema continua independente.",
+          size=12).pack(anchor="w", padx=18, pady=(0, 12))
+
+    tiles = ctk.CTkFrame(skins, fg_color="transparent")
+    tiles.pack(fill="x", padx=14, pady=(0, 14))
+    tiles.grid_columnconfigure((0, 1), weight=1, uniform="visualthemes")
+
+    for column, (key, caption, subtitle, colors) in enumerate((
+        ("raspberry_neon", "Raspberry Neon", "Roxo e magenta · design atual",
+         ("#1B0B25", "#EF2A8F", "#953DE7")),
+        ("figma_preview", "Figma (prévia)", "Azul e ciano · ainda não validado com o protótipo",
+         ("#0B1628", "#719BFF", "#39B6D2")),
+    )):
+        active = key == visual_style
+        tile = panel(tiles, color=theme.CARD_ALT if active else theme.CARD,
+                     border=True, radius=16)
+        tile.grid(row=0, column=column, sticky="nsew", padx=5)
+        strip = ctk.CTkFrame(tile, fg_color=colors[0], corner_radius=12, height=46)
+        strip.pack(fill="x", padx=12, pady=(12, 7))
+        strip.pack_propagate(False)
+        for sample in colors[1:]:
+            ctk.CTkFrame(strip, width=62, height=16, fg_color=sample,
+                         corner_radius=8).pack(side="left", padx=(12, 0), pady=15)
+        text(tile, ("✓  " if active else "") + caption,
+             size=15, bold=True).pack(anchor="w", padx=12, pady=(0, 2))
+        muted(tile, subtitle, size=11, wraplength=280, justify="left").pack(
+            anchor="w", padx=12, pady=(0, 9))
+        callback = (lambda style=key: on_visual_style_change(style)) if on_visual_style_change else None
+        button(tile, "Selecionado" if active else "Aplicar tema", callback,
+               variant="secondary" if active else "outline", height=35,
+               state="disabled" if active or on_visual_style_change is None else "normal").pack(
+                   fill="x", padx=12, pady=(0, 12))
+
+    muted(skins, "O tema Figma é uma prévia independente. Para reproduzir fielmente o protótipo, "
+          "ainda será necessário importar as telas e seus componentes do arquivo original.",
+          size=11, wraplength=800, justify="left").pack(anchor="w", padx=18, pady=(0, 14))
+
     profiles = panel(body, color=theme.CARD_SOFT, radius=20)
     profiles.pack(fill="x", padx=4, pady=(0, 12))
     text(profiles, "Perfil ativo", size=20, bold=True).pack(anchor="w", padx=18, pady=(16, 2))
@@ -79,7 +121,7 @@ def render_settings(parent, actions=None, preferences=None, online=None):
 
     theme_panel = panel(lower, color=theme.CARD_SOFT, radius=20)
     theme_panel.pack(side="left", fill="both", expand=True, padx=(3, 6))
-    text(theme_panel, "Tema", size=20, bold=True).pack(anchor="w", padx=18, pady=(16, 2))
+    text(theme_panel, "Modo de aparência", size=20, bold=True).pack(anchor="w", padx=18, pady=(16, 2))
     muted(theme_panel, "Defina a aparência do launcher.", size=12).pack(anchor="w", padx=18, pady=(0, 12))
     options = ctk.CTkFrame(theme_panel, fg_color="transparent")
     options.pack(fill="x", padx=14, pady=(0, 10))

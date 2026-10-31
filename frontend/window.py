@@ -12,12 +12,17 @@ from frontend.views.platform import render_platform
 from frontend.views.registry import CatalogForm, render_registry
 from frontend.views.settings import render_settings
 from frontend.views.account import render_account
-from frontend import theme
+from frontend import theme, visual_style
 
 
 class LauncherWindow:
     def __init__(self, actions: Actions, resources: UiResources):
         self.actions=actions
+        self._resources = resources
+        self._visual_profile_id = None
+        self._last_preferences = None
+        self._last_online = None
+        theme.set_visual_style(visual_style.load_style())
         self.music=None
         self.mute_button=None
         ctk.set_appearance_mode(resources.theme)
@@ -37,14 +42,40 @@ class LauncherWindow:
         self.catalog_form=None
         self._last_content_route="biblioteca"
         self._last_search_term=""
-        self.sidebar,self.mute_button=create_sidebar(self.root,actions,resources,
-                                                      on_toggle_music=self.toggle_music)
-        main=ctk.CTkFrame(self.root,fg_color=theme.PAGE,corner_radius=0)
-        main.pack(side="right",fill="both",expand=True)
-        # Keep notice above content and reserve height only for real errors.
-        self.notice=ctk.CTkLabel(main,text="",text_color=theme.ERROR,wraplength=700)
-        self.page=ctk.CTkFrame(main,fg_color="transparent")
-        self.page.pack(fill="both",expand=True)
+        self._build_shell()
+
+    def _build_shell(self):
+        """Construct only presentation widgets; do not recreate the controller."""
+        self.sidebar, self.mute_button = create_sidebar(
+            self.root, self.actions, self._resources,
+            on_toggle_music=self.toggle_music,
+        )
+        self.main = ctk.CTkFrame(self.root, fg_color=theme.PAGE, corner_radius=0)
+        self.main.pack(side="right", fill="both", expand=True)
+        self.notice = ctk.CTkLabel(
+            self.main, text="", text_color=theme.ERROR, wraplength=700,
+        )
+        self.page = ctk.CTkFrame(self.main, fg_color="transparent")
+        self.page.pack(fill="both", expand=True)
+
+    def _rebuild_visual_shell(self):
+        """Recreate UI surfaces with the new palette, retaining actions and music."""
+        self.bindings.clear()
+        self.search_view = None
+        self.catalog_form = None
+        self.sidebar.destroy()
+        self.main.destroy()
+        self.root.configure(fg_color=theme.BG)
+        self._build_shell()
+
+    def _select_visual_style(self, style_id):
+        """Save design style locally, outside the backend profile preferences."""
+        if style_id == theme.get_visual_style():
+            return
+        visual_style.save_style(style_id, self._visual_profile_id)
+        theme.set_visual_style(style_id)
+        self._rebuild_visual_shell()
+        self.show_settings(self._last_preferences, self._last_online)
 
     def _activate(self, page):
         self.sidebar.set_active(page)
@@ -142,10 +173,23 @@ class LauncherWindow:
 
     def show_settings(self,preferences=None,online=None):
         if preferences is not None:
+            self._last_preferences = preferences
+            self._last_online = online
+            profile = preferences.active_profile_id
+            if profile != self._visual_profile_id:
+                self._visual_profile_id = profile
+                stored = visual_style.load_style(profile)
+                if stored != theme.get_visual_style():
+                    theme.set_visual_style(stored)
+                    self._rebuild_visual_shell()
             self.apply_theme(preferences.theme)
         self._clear()
         self._activate("settings")
-        render_settings(self.page,self.actions,preferences,online)
+        render_settings(
+            self.page, self.actions, preferences, online,
+            visual_style=theme.get_visual_style(),
+            on_visual_style_change=self._select_visual_style,
+        )
         if preferences is not None:
             self.apply_brightness(preferences.brightness)
 
