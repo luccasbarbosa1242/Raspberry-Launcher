@@ -1,239 +1,332 @@
-from pathlib import Path
-"""Main RaspberryLC desktop window. All data and operations remain controller-owned."""
+
+"""Desktop view. Construct explicitly; importing this module opens no window."""
+
 import customtkinter as ctk
+
 from contracts.models import UiResources
 from contracts.ports import Actions
 from frontend.bindings import WidgetBindings
-from frontend.components import create_sidebar
-from frontend.ui import muted, page_header, text, set_brand_logo
+from frontend.components import create_sidebar, heading
 from frontend.views.catalog import SearchView, render_catalog
 from frontend.views.details import render_details
 from frontend.views.platform import render_platform
 from frontend.views.registry import CatalogForm, render_registry
 from frontend.views.settings import render_settings
 from frontend.views.account import render_account
-from frontend import theme, visual_style
+from frontend import theme
 
 
 class LauncherWindow:
     def __init__(self, actions: Actions, resources: UiResources):
-        self.actions=actions
+        self.actions = actions
         self._resources = resources
-        self._visual_profile_id = None
-        self._last_preferences = None
-        self._last_online = None
-        theme.set_visual_style(visual_style.load_style())
-        self.music=None
-        self.mute_button=None
+
+        self.music = None
+        self.mute_button = None
+        self.volume_label = None
+
         ctk.set_appearance_mode(resources.theme)
-        ctk.set_default_color_theme("blue")
-        self.root=ctk.CTk()
+        ctk.set_default_color_theme("green")
+
+        self.root = ctk.CTk()
         self.root.configure(fg_color=theme.BG)
-        self.root.title("RaspberryLC — Launcher de Jogos")
-        self.root.geometry("1450x870")
-        self.root.minsize(900,600)
-        self.root.protocol("WM_DELETE_WINDOW",self.close)
-        set_brand_logo(Path(resources.icons_dir) / "logo.png")
-        self.bindings=WidgetBindings()
-        self._poll_id=None
-        self._closed=False
-        self._brightness=100
-        self.search_view=None
-        self.catalog_form=None
-        self._last_content_route="biblioteca"
-        self._last_search_term=""
-        self._build_shell()
+        self.root.title("RaspberryLC")
+        self.root.geometry("1100x700")
+        self.root.minsize(900, 600)
+        self.root.protocol("WM_DELETE_WINDOW", self.close)
 
-    def _build_shell(self):
-        """Construct only presentation widgets; do not recreate the controller."""
-        self.sidebar, self.mute_button = create_sidebar(
-            self.root, self.actions, self._resources,
-            on_toggle_music=self.toggle_music,
-        )
-        self.main = ctk.CTkFrame(self.root, fg_color=theme.PAGE, corner_radius=0)
-        self.main.pack(side="right", fill="both", expand=True)
-        self.notice = ctk.CTkLabel(
-            self.main, text="", text_color=theme.ERROR, wraplength=700,
-        )
-        self.page = ctk.CTkFrame(self.main, fg_color="transparent")
-        self.page.pack(fill="both", expand=True)
+        self.bindings = WidgetBindings()
+        self._poll_id = None
+        self._closed = False
+        self._brightness = 100
 
-    def _rebuild_visual_shell(self):
-        """Recreate UI surfaces with the new palette, retaining actions and music."""
-        self.bindings.clear()
         self.search_view = None
         self.catalog_form = None
-        self.sidebar.destroy()
-        self.main.destroy()
-        self.root.configure(fg_color=theme.BG)
-        self._build_shell()
 
-    def _select_visual_style(self, style_id):
-        """Save design style locally, outside the backend profile preferences."""
-        if style_id == theme.get_visual_style():
-            return
-        visual_style.save_style(style_id, self._visual_profile_id)
-        theme.set_visual_style(style_id)
-        self._rebuild_visual_shell()
-        self.show_settings(self._last_preferences, self._last_online)
+        self.sidebar, self.mute_button, self.volume_label = create_sidebar(
+            self.root,
+            self.actions,
+            self._resources,
+            on_toggle_music=self.toggle_music,
+            on_volume_change=self.set_music_volume,
+        )
 
-    def _activate(self, page):
-        self.sidebar.set_active(page)
+        main = ctk.CTkFrame(
+            self.root,
+            fg_color=theme.PAGE,
+            corner_radius=0,
+        )
+        main.pack(side="right", fill="both", expand=True)
 
-    def set_music(self,music):
-        self.music=music
+        self.notice = ctk.CTkLabel(
+            main,
+            text="",
+            text_color=theme.ERROR,
+            wraplength=720,
+        )
+
+        self.page = ctk.CTkFrame(
+            main,
+            fg_color="transparent",
+        )
+        self.page.pack(fill="both", expand=True)
+
+    def set_music(self, music):
+        self.music = music
 
     def toggle_music(self):
         if self.music is None:
             return
-        muted_now=self.music.toggle_mute()
+
+        muted_now = self.music.toggle_mute()
+
         if self.mute_button is not None:
-            self.mute_button.configure(text="♫  Desmutar música" if muted_now else "♫  Mutar música")
+            self.mute_button.configure(
+                text=(
+                    "♫  Desmutar música"
+                    if muted_now
+                    else "♫  Mutar música"
+                )
+            )
+
+    def set_music_volume(self, value):
+        if self.music is None:
+            return
+
+        volume = self.music.set_volume(value)
+
+        if self.volume_label is not None:
+            self.volume_label.configure(
+                text=f"Volume: {volume}%"
+            )
 
     def _clear(self):
-        if self.search_view is not None:
-            try:
-                self._last_search_term = self.search_view.entry.get()
-            except Exception:
-                pass
         self.bindings.clear()
-        self.search_view=None
-        self.catalog_form=None
+        self.search_view = None
+        self.catalog_form = None
+
         self.notice.pack_forget()
         self.notice.configure(text="")
+
         for widget in self.page.winfo_children():
             widget.destroy()
 
     def show_loading(self):
         self._clear()
-        page_header(self.page,"RaspberryLC","Carregando biblioteca...","◌")
-        muted(self.page,"Preparando seus jogos",size=15).pack(pady=25)
 
-    def show_catalog(self,page,games):
+        ctk.CTkLabel(
+            self.page,
+            text="Carregando...",
+            font=("Arial", 22),
+        ).pack(pady=40)
+
+    def show_catalog(self, page, games):
         self._clear()
-        self._activate(page)
-        self._last_content_route=page
-        render_catalog(self.page,page,games,self.actions,self.bindings)
+
+        render_catalog(
+            self.page,
+            page,
+            games,
+            self.actions,
+            self.bindings,
+        )
 
     def show_search(self):
         self._clear()
-        self._activate("search")
-        self._last_content_route="search"
-        self.search_view=SearchView(self.page,self.actions,self.bindings)
 
-    def show_search_results(self,games):
+        self.search_view = SearchView(
+            self.page,
+            self.actions,
+            self.bindings,
+        )
+
+    def show_search_results(self, games):
         if self.search_view is not None:
             self.search_view.set_results(games)
 
-    def _go_back_from_details(self, origin):
-        """Return to the real origin without modifying controller internals."""
-        self.actions.navigate(origin)
-        if origin == "search" and self.search_view is not None and self._last_search_term:
-            self.search_view.entry.insert(0, self._last_search_term)
-            self.actions.search(self._last_search_term)
-
-    def show_game(self,details):
-        origin = self._last_content_route
+    def show_game(self, details):
         self._clear()
-        self._activate(origin if origin != "search" else "search")
-        render_details(self.page,details,self.actions,self.bindings,
-                       on_back=lambda source=origin: self._go_back_from_details(source))
 
-    def show_platform(self,platform):
+        render_details(
+            self.page,
+            details,
+            self.actions,
+            self.bindings,
+        )
+
+    def show_platform(self, platform):
         self._clear()
-        self._activate(platform.id)
-        self._last_content_route=platform.id
-        render_platform(self.page,platform,self.actions,self.bindings)
 
-    def apply_theme(self,selected):
+        render_platform(
+            self.page,
+            platform,
+            self.actions,
+            self.bindings,
+        )
+
+    def apply_theme(self, selected):
         ctk.set_appearance_mode(selected)
 
-    def apply_brightness(self,brightness):
-        """Keep preexisting brightness behavior, always adjusting original colors."""
-        self._brightness=max(0,min(100,int(brightness)))
-        keys=("fg_color","bg_color","text_color","hover_color","border_color",
-              "button_color","button_hover_color","progress_color",
-              "scrollbar_button_color","scrollbar_button_hover_color")
-        def update(parent):
-            for widget in parent.winfo_children():
-                saved=getattr(widget,"_brightness_original_colors",None)
-                if saved is None:
-                    saved=widget._brightness_original_colors={}
-                for option in keys:
-                    try:
-                        if option not in saved:
-                            saved[option]=widget.cget(option)
-                        adjusted=theme.adjust_color(saved[option],self._brightness,option)
-                        if adjusted is not None:
-                            widget.configure(**{option:adjusted})
-                    except (ValueError,TypeError,AttributeError):
-                        pass
-                update(widget)
-        update(self.root)
+    def apply_brightness(self, brightness):
+        """Atualiza o brilho visual sem acumular alterações nas cores."""
 
-    def show_settings(self,preferences=None,online=None):
-        if preferences is not None:
-            self._last_preferences = preferences
-            self._last_online = online
-            profile = preferences.active_profile_id
-            if profile != self._visual_profile_id:
-                self._visual_profile_id = profile
-                stored = visual_style.load_style(profile)
-                if stored != theme.get_visual_style():
-                    theme.set_visual_style(stored)
-                    self._rebuild_visual_shell()
-            self.apply_theme(preferences.theme)
-        self._clear()
-        self._activate("settings")
-        render_settings(
-            self.page, self.actions, preferences, online,
-            visual_style=theme.get_visual_style(),
-            on_visual_style_change=self._select_visual_style,
+        self._brightness = max(
+            0,
+            min(100, int(brightness)),
         )
+
+        color_options = (
+            "fg_color",
+            "bg_color",
+            "text_color",
+            "hover_color",
+            "border_color",
+            "button_color",
+            "button_hover_color",
+            "progress_color",
+            "scrollbar_button_color",
+            "scrollbar_button_hover_color",
+        )
+
+        def update_widgets(parent):
+            for widget in parent.winfo_children():
+
+                if not hasattr(
+                    widget,
+                    "_brightness_original_colors",
+                ):
+                    widget._brightness_original_colors = {}
+
+                for option in color_options:
+                    try:
+                        if option not in widget._brightness_original_colors:
+                            widget._brightness_original_colors[option] = (
+                                widget.cget(option)
+                            )
+
+                        original = (
+                            widget._brightness_original_colors[option]
+                        )
+
+                        adjusted = theme.adjust_color(
+                            original,
+                            self._brightness,
+                            option,
+                        )
+
+                        if adjusted is not None:
+                            widget.configure(
+                                **{option: adjusted}
+                            )
+
+                    except (
+                        ValueError,
+                        TypeError,
+                        AttributeError,
+                    ):
+                        pass
+
+                update_widgets(widget)
+
+        update_widgets(self.root)
+
+    def show_settings(self, preferences=None, online=None):
+        if preferences is not None:
+            self.apply_theme(preferences.theme)
+
+        self._clear()
+
+        render_settings(
+            self.page,
+            self.actions,
+            preferences,
+            online,
+        )
+
         if preferences is not None:
             self.apply_brightness(preferences.brightness)
 
-    def show_account(self,status):
+    def show_account(self, status):
         self._clear()
-        self._activate("account")
-        render_account(self.page,self.actions,status)
 
-    def show_registry(self,kind,entries):
+        render_account(
+            self.page,
+            self.actions,
+            status,
+        )
+
+    def show_registry(self, kind, entries):
         self._clear()
-        self._activate("registry:"+kind)
-        self._last_content_route="registry:"+kind
-        render_registry(self.page,kind,entries,self.actions)
 
-    def show_catalog_form(self,kind,values,choices,record_id=None):
+        render_registry(
+            self.page,
+            kind,
+            entries,
+            self.actions,
+        )
+
+    def show_catalog_form(
+        self,
+        kind,
+        values,
+        choices,
+        record_id=None,
+    ):
         self._clear()
-        self._activate("registry:"+kind)
-        self.catalog_form=CatalogForm(self.page,kind,values,choices,self.actions,record_id)
 
-    def show_placeholder(self,page):
+        self.catalog_form = CatalogForm(
+            self.page,
+            kind,
+            values,
+            choices,
+            self.actions,
+            record_id,
+        )
+
+    def show_placeholder(self, page):
         self._clear()
-        self._activate(page)
-        labels={"finalized":"Finalizados","genre":"Gênero","year":"Ano"}
-        page_header(self.page,labels.get(page,page),"Uma área em desenvolvimento","✦")
-        muted(self.page,"Esta seção ainda não foi implementada.",size=14).pack(padx=20,pady=20)
 
-    def show_error(self,message):
+        title = {
+            "finalized": "Finalizados",
+            "genre": "Gênero",
+            "year": "Ano",
+        }.get(page, page)
+
+        heading(self.page, title)
+
+        ctk.CTkLabel(
+            self.page,
+            text="Esta seção ainda não foi implementada.",
+            text_color=theme.MUTED,
+        ).pack(padx=20, pady=20)
+
+    def show_error(self, message):
         if self.catalog_form is not None:
             self.catalog_form.set_saving(False)
-        self.notice.configure(text=message)
-        self.notice.pack(side="bottom",fill="x",padx=20,pady=10)
 
-    def set_operation(self,status):
+        self.notice.configure(text=message)
+
+        self.notice.pack(
+            side="bottom",
+            fill="x",
+            padx=20,
+            pady=10,
+        )
+
+    def set_operation(self, status):
         self.bindings.set_operation(status)
 
-    def set_scores(self,scores):
+    def set_scores(self, scores):
         self.bindings.set_scores(scores)
 
-    def start_polling(self,callback):
+    def start_polling(self, callback):
         def tick():
             if self._closed:
                 return
+
             callback()
-            self._poll_id=self.root.after(50,tick)
+            self._poll_id = self.root.after(50, tick)
+
         tick()
 
     def run(self):
@@ -242,15 +335,25 @@ class LauncherWindow:
     def close(self):
         if self._closed:
             return
-        self._closed=True
+
+        self._closed = True
+
         if self._poll_id is not None:
             self.root.after_cancel(self._poll_id)
+
         try:
             self.actions.close()
+
         finally:
-            for callback in self.root.tk.call("after","info"):
-                try:
-                    self.root.after_cancel(callback)
-                except Exception:
-                    pass
-            self.root.destroy()
+            try:
+                for callback in self.root.tk.call(
+                    "after",
+                    "info",
+                ):
+                    try:
+                        self.root.after_cancel(callback)
+                    except Exception:
+                        pass
+
+            finally:
+                self.root.destroy()
